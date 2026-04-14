@@ -1,19 +1,11 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   standalone: false,
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
-export class App {
-  ngOnInit() {
-      throw new Error('Method not implemented.');
-  }
-
-  constructor(private http: HttpClient) {}
-
-  protected readonly title = signal('Client');
+export class AppComponent {
+  title = 'Client';
 }
-
