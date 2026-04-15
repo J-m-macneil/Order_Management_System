@@ -1,6 +1,6 @@
-@Server_HostAddress = http://localhost:5031
+@Order_Management_System.Server_HostAddress = http://localhost:5031
 
-GET {{Server_HostAddress}}/weatherforecast/
+GET {{Order_Management_System.Server_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

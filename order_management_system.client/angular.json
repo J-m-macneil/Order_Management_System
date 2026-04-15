@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "Client": {
+    "order_management_system.client": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -34,7 +34,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/material-theme.scss", "src/styles.css"]
+            "styles": [
+              "src/styles.css"
+            ]
           },
           "configurations": {
             "production": {
@@ -64,10 +66,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Client:build:production"
+              "buildTarget": "order_management_system.client:build:production"
             },
             "development": {
-              "buildTarget": "Client:build:development"
+              "buildTarget": "order_management_system.client:build:development"
             }
           },
           "defaultConfiguration": "development",

@@ -1,26 +1,20 @@
-using Infrastructure.DependencyInjection;
-using Application;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Services
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Add services to the container.
 
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
-// Pipeline
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
