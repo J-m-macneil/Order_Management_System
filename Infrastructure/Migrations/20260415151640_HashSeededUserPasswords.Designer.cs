@@ -4,6 +4,7 @@ using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415151640_HashSeededUserPasswords")]
+    partial class HashSeededUserPasswords
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,7 +195,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Head of Business Systems",
                             LastLoginAt = new DateTime(2026, 3, 21, 8, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Bennett",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 1,
                             Username = "sbennett"
                         },
@@ -208,7 +211,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "IT Systems Administrator",
                             LastLoginAt = new DateTime(2026, 4, 10, 3, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Carter",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 1,
                             Username = "jcarter"
                         },
@@ -224,7 +227,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Account Manager",
                             LastLoginAt = new DateTime(2026, 4, 2, 7, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Hughes",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 2,
                             Username = "ohughes"
                         },
@@ -240,7 +243,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Internal Sales Executive",
                             LastLoginAt = new DateTime(2026, 4, 3, 7, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Foster",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 2,
                             Username = "dfoster"
                         },
@@ -256,7 +259,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Sales Coordinator",
                             LastLoginAt = new DateTime(2026, 3, 18, 8, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Patel",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 2,
                             Username = "mpatel"
                         },
@@ -272,7 +275,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Regional Sales Representative",
                             LastLoginAt = new DateTime(2026, 3, 20, 3, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Green",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 2,
                             Username = "tgreen"
                         },
@@ -288,7 +291,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Operations Planner",
                             LastLoginAt = new DateTime(2026, 3, 24, 8, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Morgan",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 3,
                             Username = "rmorgan"
                         },
@@ -304,7 +307,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Logistics Coordinator",
                             LastLoginAt = new DateTime(2026, 3, 23, 5, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Turner",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 3,
                             Username = "bturner"
                         },
@@ -320,7 +323,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Order Processing Specialist",
                             LastLoginAt = new DateTime(2026, 4, 9, 8, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Scott",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 3,
                             Username = "escott"
                         },
@@ -336,7 +339,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Warehouse & Dispatch Coordinator",
                             LastLoginAt = new DateTime(2026, 4, 8, 7, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Price",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 3,
                             Username = "nprice"
                         },
@@ -352,7 +355,7 @@ namespace Infrastructure.Migrations
                             JobTitle = "Customer Fulfilment Analyst",
                             LastLoginAt = new DateTime(2026, 4, 3, 4, 15, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Evans",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 3,
                             Username = "cevans"
                         },
@@ -367,7 +370,7 @@ namespace Infrastructure.Migrations
                             IsActive = false,
                             JobTitle = "Former Account Manager",
                             LastName = "Jenkins",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 2,
                             Username = "ljenkins"
                         },
@@ -382,7 +385,7 @@ namespace Infrastructure.Migrations
                             IsActive = false,
                             JobTitle = "Former Logistics Coordinator",
                             LastName = "Collins",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 3,
                             Username = "mcollins"
                         },
@@ -397,7 +400,7 @@ namespace Infrastructure.Migrations
                             IsActive = false,
                             JobTitle = "Former Systems Analyst",
                             LastName = "Ward",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                            PasswordHash = "Password123!",
                             RoleId = 1,
                             Username = "sward"
                         });

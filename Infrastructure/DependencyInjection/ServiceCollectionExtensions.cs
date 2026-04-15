@@ -18,6 +18,9 @@ public static class ServiceCollectionExtensions
                 configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IPasswordService, PasswordService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
