@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="Application/Application.csproj" Id="1c127635-93f2-4a4d-b848-39aff38896ba" />
+  <Project Path="Domain/Domain.csproj" Id="26fe62e7-612a-4e9b-bc66-970f39a5a1db" />
+  <Project Path="Infrastructure/Infrastructure.csproj" Id="df258e72-0a12-46c9-9840-7d4c8ed74fc3" />
+  <Project Path="order_management_system.client/order_management_system.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Order_Management_System.Server/Server.csproj" />
+</Solution>
