@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "order_management_system.client": {
+    "Client": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -66,10 +66,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "order_management_system.client:build:production"
+              "buildTarget": "Client:build:production"
             },
             "development": {
-              "buildTarget": "order_management_system.client:build:development"
+              "buildTarget": "Client:build:development"
             }
           },
           "defaultConfiguration": "development",

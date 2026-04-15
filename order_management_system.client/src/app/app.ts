@@ -14,6 +14,6 @@ export class App {
 
   constructor(private http: HttpClient) {}
 
-  protected readonly title = signal('order_management_system.client');
+  protected readonly title = signal('Client');
 }
 

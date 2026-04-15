@@ -1,24 +1,24 @@
-﻿using Application.Interfaces;
-using Infrastructure.Persistence.Context;
+using Application.Interfaces;
 using Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.DependencyInjection;
-
-public static class ServiceCollectionExtensions
+namespace Infrastructure.DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static class ServiceCollectionExtensions
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection")));
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        {
+            services.AddScoped<IProductService, ProductService>();
 
-        services.AddScoped<IProductService, ProductService>();
+            return services;
+        }
+    }
 
-        return services;
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddApplication(this IServiceCollection services)
+        {
+            return services;
+        }
     }
 }
