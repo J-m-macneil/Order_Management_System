@@ -14,6 +14,13 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CustomersComponent } from './features/customers/customers.component';
 import { ProductsComponent } from './features/products/products.component';
 import { OrdersComponent } from './features/orders/orders.component';
+import { AdminComponent } from './features/admin/admin.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [
@@ -24,15 +31,22 @@ import { OrdersComponent } from './features/orders/orders.component';
     DashboardComponent,
     CustomersComponent,
     ProductsComponent,
-    OrdersComponent
+    OrdersComponent,
+    AdminComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    ReactiveFormsModule,
     MatToolbarModule,
-    MatListModule
+    MatListModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
   ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [AppComponent],
