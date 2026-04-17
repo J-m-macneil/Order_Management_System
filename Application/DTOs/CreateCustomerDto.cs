@@ -10,8 +10,8 @@ public class CreateCustomerDto
     public string MainContactEmail { get; set; } = string.Empty;
     public string MainContactPhone { get; set; } = string.Empty;
 
-    public int? BillingAddressId { get; set; }
-    public int? DefaultDeliveryAddressId { get; set; }
+    public int BillingAddressId { get; set; }
+    public int DefaultDeliveryAddressId { get; set; }
     public int PricingTierId { get; set; }
 
     public int PaymentTermsDays { get; set; }

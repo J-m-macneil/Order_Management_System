@@ -542,10 +542,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(x => x.IsPrimary)
                 .IsRequired();
 
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
             entity.HasOne(x => x.Customer)
                 .WithMany(x => x.Addresses)
                 .HasForeignKey(x => x.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
         });
     }
 }

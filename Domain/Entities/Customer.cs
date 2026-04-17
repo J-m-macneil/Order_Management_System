@@ -19,7 +19,7 @@ public class Customer
     public Address? DefaultDeliveryAddress { get; set; }
 
     public int PricingTierId { get; set; }
-    public PricingTier? PricingTier { get; set; }
+    public PricingTier PricingTier { get; set; } = null!;
 
     public int PaymentTermsDays { get; set; }
     public decimal CreditLimit { get; set; }

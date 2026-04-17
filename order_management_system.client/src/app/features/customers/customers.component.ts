@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CustomersService, Customer } from './customers.service';
+import { CustomersService } from './customers.service';
+import { Customer } from '../models/customer.model';
 
 @Component({
   selector: 'app-customers',

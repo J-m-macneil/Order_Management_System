@@ -74,3 +74,115 @@
     <a routerLink="/customers">Cancel</a>
   </div>
 </form>
+
+<div *ngIf="isEditMode" class="addresses-section">
+  <div class="section-header">
+    <h2>Customer Addresses</h2>
+    <p class="section-subtitle">Manage billing, head office, and delivery sites for this customer.</p>
+  </div>
+
+  <div class="addresses-list-card">
+    <h3>Existing Addresses</h3>
+
+    <table *ngIf="addresses.length > 0" class="customers-table">
+      <thead>
+        <tr>
+          <th>Site</th>
+          <th>Type</th>
+          <th>Line 1</th>
+          <th>City</th>
+          <th>Postcode</th>
+          <th>Primary</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let address of addresses">
+          <td>{{ address.siteName }}</td>
+          <td>{{ address.addressType }}</td>
+          <td>{{ address.line1 }}</td>
+          <td>{{ address.city }}</td>
+          <td>{{ address.postcode }}</td>
+          <td>{{ address.isPrimary ? 'Yes' : 'No' }}</td>
+          <td>
+            <button type="button" (click)="deleteAddress(address.addressId)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="addresses.length === 0" class="empty-state">
+      No addresses found for this customer yet.
+    </div>
+  </div>
+
+  <div class="address-form-card">
+    <h3>Add New Address</h3>
+
+    <form [formGroup]="addressForm" (ngSubmit)="createAddress()" class="customer-form">
+      <label>
+        Address Type
+        <input type="text" formControlName="addressType" />
+      </label>
+
+      <label>
+        Site Name
+        <input type="text" formControlName="siteName" />
+      </label>
+
+      <label>
+        Line 1
+        <input type="text" formControlName="line1" />
+      </label>
+
+      <label>
+        Line 2
+        <input type="text" formControlName="line2" />
+      </label>
+
+      <label>
+        City
+        <input type="text" formControlName="city" />
+      </label>
+
+      <label>
+        County
+        <input type="text" formControlName="county" />
+      </label>
+
+      <label>
+        Postcode
+        <input type="text" formControlName="postcode" />
+      </label>
+
+      <label>
+        Country
+        <input type="text" formControlName="country" />
+      </label>
+
+      <label>
+        Contact Name
+        <input type="text" formControlName="contactName" />
+      </label>
+
+      <label>
+        Contact Phone
+        <input type="text" formControlName="contactPhone" />
+      </label>
+
+      <label>
+        Delivery Instructions
+        <input type="text" formControlName="deliveryInstructions" />
+      </label>
+
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="isPrimary" />
+        Primary address
+      </label>
+
+      <div class="actions">
+        <button type="submit">Add Address</button>
+      </div>
+    </form>
+  </div>
+</div>

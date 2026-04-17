@@ -3,9 +3,7 @@ using Application.Interfaces;
 using Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.Text;
-using System.Threading.Tasks;
 
 public static class Program
 {
@@ -13,10 +11,15 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Services
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+            });
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("Frontend", policy =>
@@ -30,7 +33,6 @@ public static class Program
 
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
-
 
         var jwtSection = builder.Configuration.GetSection("Jwt");
 
@@ -51,13 +53,10 @@ public static class Program
                 {
                     ValidateIssuer = true,
                     ValidIssuer = issuer,
-
                     ValidateAudience = true,
                     ValidAudience = audience,
-
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
@@ -75,23 +74,11 @@ public static class Program
                 policy.RequireRole("Operations", "Admin"));
         });
 
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("Frontend", policy =>
-            {
-                policy
-                    .WithOrigins("https://localhost:53923")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-            });
-        });
-
         var app = builder.Build();
 
         app.UseDefaultFiles();
         app.MapStaticAssets();
 
-        // Pipeline
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -105,7 +92,6 @@ public static class Program
         app.UseAuthorization();
 
         app.MapControllers();
-
         app.MapFallbackToFile("/index.html");
 
         using (var scope = app.Services.CreateScope())
