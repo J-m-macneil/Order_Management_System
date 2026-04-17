@@ -1,0 +1,76 @@
+<div class="page-header">
+  <h1>{{ isEditMode ? 'Edit Customer' : 'Create Customer' }}</h1>
+</div>
+
+<div *ngIf="isLoading">Loading...</div>
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="customer-form">
+  <label>
+    Account Number
+    <input type="text" formControlName="accountNumber" />
+  </label>
+
+  <label>
+    Company Name
+    <input type="text" formControlName="companyName" />
+  </label>
+
+  <label>
+    Industry Type
+    <input type="text" formControlName="industryType" />
+  </label>
+
+  <label>
+    Main Contact Name
+    <input type="text" formControlName="mainContactName" />
+  </label>
+
+  <label>
+    Main Contact Email
+    <input type="email" formControlName="mainContactEmail" />
+  </label>
+
+  <label>
+    Main Contact Phone
+    <input type="text" formControlName="mainContactPhone" />
+  </label>
+
+  <label>
+    Billing Address Id
+    <input type="number" formControlName="billingAddressId" />
+  </label>
+
+  <label>
+    Default Delivery Address Id
+    <input type="number" formControlName="defaultDeliveryAddressId" />
+  </label>
+
+  <label>
+    Pricing Tier Id
+    <input type="number" formControlName="pricingTierId" />
+  </label>
+
+  <label>
+    Payment Terms Days
+    <input type="number" formControlName="paymentTermsDays" />
+  </label>
+
+  <label>
+    Credit Limit
+    <input type="number" step="0.01" formControlName="creditLimit" />
+  </label>
+
+  <label class="checkbox-label">
+    <input type="checkbox" formControlName="isActive" />
+    Active
+  </label>
+
+  <div class="actions">
+    <button type="submit" [disabled]="isLoading">
+      {{ isEditMode ? 'Update Customer' : 'Create Customer' }}
+    </button>
+
+    <a routerLink="/customers">Cancel</a>
+  </div>
+</form>

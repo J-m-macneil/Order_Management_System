@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IDataSeeder, DataSeeder>();
 
         return services;
     }

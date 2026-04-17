@@ -1,0 +1,33 @@
+.customer-form {
+  display: grid;
+  gap: 16px;
+  max-width: 600px;
+  background: white;
+  padding: 24px;
+}
+
+  .customer-form label {
+    display: grid;
+    gap: 8px;
+  }
+
+  .customer-form input {
+    padding: 10px;
+  }
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.error-message {
+  color: #c62828;
+  margin-bottom: 16px;
+}

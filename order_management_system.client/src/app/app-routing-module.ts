@@ -10,6 +10,7 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AdminComponent } from './features/admin/admin.component';
 import { LoginComponent } from './features/auth/login/login.component';
+import { CustomerFormComponent } from './features/customers/customer-form/customer-form.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -20,6 +21,9 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'customers', component: CustomersComponent, canActivate: [AuthGuard] },
+      { path: 'customers', component: CustomersComponent, canActivate: [AuthGuard] },
+      { path: 'customers/new', component: CustomerFormComponent, canActivate: [AuthGuard] },
+      { path: 'customers/edit/:id', component: CustomerFormComponent, canActivate: [AuthGuard] },
       { path: 'products', component: ProductsComponent, canActivate: [AuthGuard] },
       { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
       { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] }

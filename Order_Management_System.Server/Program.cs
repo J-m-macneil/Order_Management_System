@@ -1,10 +1,11 @@
-using System;
-using System.Text;
-using System.Threading.Tasks;
 using Application;
+using Application.Interfaces;
 using Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 public static class Program
 {
@@ -106,6 +107,12 @@ public static class Program
         app.MapControllers();
 
         app.MapFallbackToFile("/index.html");
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
+            await seeder.SeedAsync();
+        }
 
         await app.RunAsync();
     }

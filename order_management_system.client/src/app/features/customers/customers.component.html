@@ -1,2 +1,43 @@
-<h1>Customers</h1>
-<p>Customer management page.</p>
+<div class="page-header">
+  <h1>Customers</h1>
+  <a routerLink="/customers/new" class="create-link">Create Customer</a>
+</div>
+
+<div *ngIf="isLoading">Loading customers...</div>
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+<table *ngIf="!isLoading && customers.length > 0" class="customers-table">
+  <thead>
+    <tr>
+      <th>Account Number</th>
+      <th>Company Name</th>
+      <th>Industry</th>
+      <th>Main Contact</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Payment Terms</th>
+      <th>Credit Limit</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let customer of customers">
+      <td>{{ customer.accountNumber }}</td>
+      <td>{{ customer.companyName }}</td>
+      <td>{{ customer.industryType }}</td>
+      <td>{{ customer.mainContactName }}</td>
+      <td>{{ customer.mainContactEmail }}</td>
+      <td>{{ customer.mainContactPhone }}</td>
+      <td>{{ customer.paymentTermsDays }}</td>
+      <td>{{ customer.creditLimit | number:'1.2-2' }}</td>
+      <td class="actions">
+        <a [routerLink]="['/customers/edit', customer.customerId]">Edit</a>
+        <button type="button" (click)="deleteCustomer(customer.customerId)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div *ngIf="!isLoading && customers.length === 0">
+  No customers found.
+</div>

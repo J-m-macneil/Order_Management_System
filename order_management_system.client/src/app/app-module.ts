@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing-module';
 import { AppComponent } from './app';
@@ -21,6 +22,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { CustomerFormComponent } from './features/customers/customer-form/customer-form.component';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -30,6 +33,7 @@ import { MatButtonModule } from '@angular/material/button';
     SidebarComponent,
     DashboardComponent,
     CustomersComponent,
+    CustomerFormComponent,
     ProductsComponent,
     OrdersComponent,
     AdminComponent,
@@ -48,7 +52,14 @@ import { MatButtonModule } from '@angular/material/button';
     MatInputModule,
     MatButtonModule
   ],
-  providers: [provideBrowserGlobalErrorListeners()],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule { }

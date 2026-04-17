@@ -8,6 +8,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<PricingTier> PricingTiers => Set<PricingTier>();
+    public DbSet<Address> Addresses => Set<Address>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -353,5 +356,196 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Department { DepartmentId = 4, Name = "Customer Service" },
             new Department { DepartmentId = 5, Name = "Finance" }
         );
+
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.ToTable("Customers");
+
+            entity.HasKey(x => x.CustomerId);
+
+            entity.Property(x => x.AccountNumber)
+                .IsRequired()
+                .HasMaxLength(30);
+
+            entity.HasIndex(x => x.AccountNumber)
+                .IsUnique();
+
+            entity.Property(x => x.CompanyName)
+                .IsRequired()
+                .HasMaxLength(160);
+
+            entity.Property(x => x.IndustryType)
+                .IsRequired()
+                .HasMaxLength(80);
+
+            entity.Property(x => x.MainContactName)
+                .IsRequired()
+                .HasMaxLength(120);
+
+            entity.Property(x => x.MainContactEmail)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(x => x.MainContactPhone)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(x => x.PaymentTermsDays)
+                .IsRequired();
+
+            entity.Property(x => x.CreditLimit)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
+            entity.HasOne(x => x.BillingAddress)
+                .WithMany()
+                .HasForeignKey(x => x.BillingAddressId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.DefaultDeliveryAddress)
+                .WithMany()
+                .HasForeignKey(x => x.DefaultDeliveryAddressId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.PricingTier)
+                .WithMany(x => x.Customers)
+                .HasForeignKey(x => x.PricingTierId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+        modelBuilder.Entity<PricingTier>(entity =>
+        {
+            entity.ToTable("PricingTiers");
+
+            entity.HasKey(x => x.PricingTierId);
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasIndex(x => x.Name)
+                .IsUnique();
+
+            entity.Property(x => x.DiscountPercent)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(x => x.PriorityProcessing)
+                .IsRequired();
+
+            entity.Property(x => x.Description)
+                .HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<PricingTier>().HasData(
+            new PricingTier
+            {
+                PricingTierId = 1,
+                Name = "Standard",
+                DiscountPercent = 0.00m,
+                PriorityProcessing = false,
+                Description = "Default commercial terms and standard processing."
+            },
+            new PricingTier
+            {
+                PricingTierId = 2,
+                Name = "Silver",
+                DiscountPercent = 3.00m,
+                PriorityProcessing = false,
+                Description = "Low discount for steady-volume accounts."
+            },
+            new PricingTier
+            {
+                PricingTierId = 3,
+                Name = "Gold",
+                DiscountPercent = 7.50m,
+                PriorityProcessing = true,
+                Description = "Higher discount and faster handling for key accounts."
+            },
+            new PricingTier
+            {
+                PricingTierId = 4,
+                Name = "Strategic",
+                DiscountPercent = 12.00m,
+                PriorityProcessing = true,
+                Description = "Priority customers with strong commercial terms."
+            },
+            new PricingTier
+            {
+                PricingTierId = 5,
+                Name = "Contract",
+                DiscountPercent = 15.00m,
+                PriorityProcessing = true,
+                Description = "Customer-specific contract pricing by product."
+            }
+        );
+
+        modelBuilder.Entity<Address>(entity =>
+        {
+            entity.ToTable("Addresses");
+
+            entity.HasKey(x => x.AddressId);
+
+            entity.Property(x => x.AddressType)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(x => x.SiteName)
+                .IsRequired()
+                .HasMaxLength(120);
+
+            entity.Property(x => x.Line1)
+                .IsRequired()
+                .HasMaxLength(120);
+
+            entity.Property(x => x.Line2)
+                .HasMaxLength(120);
+
+            entity.Property(x => x.City)
+                .IsRequired()
+                .HasMaxLength(80);
+
+            entity.Property(x => x.County)
+                .HasMaxLength(80);
+
+            entity.Property(x => x.Postcode)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.Property(x => x.Country)
+                .IsRequired()
+                .HasMaxLength(80);
+
+            entity.Property(x => x.ContactName)
+                .HasMaxLength(120);
+
+            entity.Property(x => x.ContactPhone)
+                .HasMaxLength(50);
+
+            entity.Property(x => x.DeliveryInstructions)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.IsPrimary)
+                .IsRequired();
+
+            entity.HasOne(x => x.Customer)
+                .WithMany(x => x.Addresses)
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 }
