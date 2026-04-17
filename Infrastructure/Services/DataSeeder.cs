@@ -60,7 +60,66 @@ public class DataSeeder : IDataSeeder
         await _dbContext.SaveChangesAsync();
 
         // =========================
-        // 2. Create Addresses
+        // 2. Create Customers
+        // =========================
+
+        var contacts = new List<CustomerContact>
+        {
+            new CustomerContact
+            {
+                CustomerId = 1,
+                Name = "Oliver Evans",
+                JobTitle = "Purchasing Manager",
+                Email = "oliver.evans1@northwestsurface.co.uk",
+                Phone = "07465341213",
+                IsPrimary = true,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CustomerContact
+            {
+                CustomerId = 1,
+                Name = "Luke Taylor",
+                JobTitle = "Procurement Lead",
+                Email = "luke.taylor1@northwestsurface.co.uk",
+                Phone = "07331191390",
+                IsPrimary = false,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+
+            new CustomerContact
+            {
+                CustomerId = 2,
+                Name = "Mia Wilson",
+                JobTitle = "Purchasing Manager",
+                Email = "mia.wilson2@merseywatersolut.co.uk",
+                Phone = "07506448196",
+                IsPrimary = true,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CustomerContact
+            {
+                CustomerId = 2,
+                Name = "Jack Thomas",
+                JobTitle = "Procurement Lead",
+                Email = "jack.thomas2@merseywatersolut.co.uk",
+                Phone = "07414797776",
+                IsPrimary = false,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+
+            // 👉 Add more from your dataset the same way
+        };
+
+        await _dbContext.CustomerContacts.AddRangeAsync(contacts);
+        await _dbContext.SaveChangesAsync();
+
+
+        // =========================
+        // 3. Create Addresses
         // =========================
         var addresses = new List<Address>
         {
@@ -159,7 +218,7 @@ public class DataSeeder : IDataSeeder
         await _dbContext.SaveChangesAsync();
 
         // =========================
-        // 3. Set Default Addresses
+        // 4. Set Default Addresses
         // =========================
         var customer1Addresses = await _dbContext.Addresses
             .Where(x => x.CustomerId == customer1.CustomerId)

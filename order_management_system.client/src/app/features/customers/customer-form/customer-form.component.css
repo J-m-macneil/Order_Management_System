@@ -118,3 +118,22 @@
   grid-column: 1 / -1;
   margin-top: 0.5rem;
 }
+
+.contacts-section {
+  margin-top: 2rem;
+}
+
+.contacts-list-card,
+.contact-form-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+  .contacts-list-card h3,
+  .contact-form-card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }

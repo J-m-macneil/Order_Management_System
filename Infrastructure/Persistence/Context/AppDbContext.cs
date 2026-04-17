@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<PricingTier> PricingTiers => Set<PricingTier>();
     public DbSet<Address> Addresses => Set<Address>();
+    public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -555,6 +556,46 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             entity.HasOne(x => x.Customer)
                 .WithMany(x => x.Addresses)
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<CustomerContact>(entity =>
+        {
+            entity.ToTable("CustomerContacts");
+
+            entity.HasKey(x => x.CustomerContactId);
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(120);
+
+            entity.Property(x => x.JobTitle)
+                .HasMaxLength(120);
+
+            entity.Property(x => x.Email)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(x => x.Phone)
+                .HasMaxLength(50);
+
+            entity.Property(x => x.IsPrimary)
+                .IsRequired();
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2");
+
+            entity.HasOne(x => x.Customer)
+                .WithMany(x => x.Contacts)
                 .HasForeignKey(x => x.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();

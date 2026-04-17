@@ -6,7 +6,8 @@ import { Address, CreateAddressRequest } from '../../models/address.model';
 import { CreateCustomerRequest } from '../../models/create-customer.model';
 import { Customer } from '../../models/customer.model';
 import { UpdateCustomerRequest } from '../../models/update-customer.model';
-
+import { CustomerContact } from '../../models/customer-contact.model';
+import { CreateCustomerContactRequest } from '../../models/customer-contact.model';
 import { CustomersService } from '../customers.service';
 
 @Component({
@@ -24,6 +25,9 @@ export class CustomerFormComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   addresses: Address[] = [];
+
+  contactForm!: FormGroup;
+  contacts: CustomerContact[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +68,14 @@ export class CustomerFormComponent implements OnInit {
       isPrimary: [false]
     });
 
+    this.contactForm = this.fb.group({
+      name: ['', Validators.required],
+      jobTitle: [''],
+      email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      isPrimary: [false]
+    });
+
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : null;
 
@@ -96,6 +108,7 @@ export class CustomerFormComponent implements OnInit {
         });
 
         this.getCustomerAddresses(id);
+        this.getCustomerContacts(id);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -140,6 +153,81 @@ export class CustomerFormComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load addresses', err);
         this.errorMessage = 'Failed to load addresses.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getCustomerContacts(id: number): void {
+    this.customersService.getContacts(id).subscribe({
+      next: (data) => {
+        this.contacts = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load contacts', err);
+        this.errorMessage = 'Failed to load contacts.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  createContact(): void {
+    if (!this.customerId) {
+      return;
+    }
+
+    if (this.contactForm.invalid) {
+      this.contactForm.markAllAsTouched();
+      return;
+    }
+
+    const request: CreateCustomerContactRequest = {
+      name: this.contactForm.value.name,
+      jobTitle: this.contactForm.value.jobTitle,
+      email: this.contactForm.value.email,
+      phone: this.contactForm.value.phone,
+      isPrimary: this.contactForm.value.isPrimary
+    };
+
+    this.customersService.createContact(this.customerId, request).subscribe({
+      next: () => {
+        this.contactForm.reset({
+          name: '',
+          jobTitle: '',
+          email: '',
+          phone: '',
+          isPrimary: false
+        });
+
+        this.getCustomerContacts(this.customerId!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to create contact', err);
+        this.errorMessage = 'Failed to create contact.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  deleteContact(contactId: number): void {
+    if (!this.customerId) {
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this contact?')) {
+      return;
+    }
+
+    this.customersService.deleteContact(this.customerId, contactId).subscribe({
+      next: () => {
+        this.getCustomerContacts(this.customerId!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to delete contact', err);
+        this.errorMessage = 'Failed to delete contact.';
         this.cdr.detectChanges();
       }
     });

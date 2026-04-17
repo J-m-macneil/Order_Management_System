@@ -5,6 +5,7 @@ import { CreateCustomerRequest } from '../models/create-customer.model';
 import { Customer } from '../models/customer.model';
 import { UpdateCustomerRequest } from '../models/update-customer.model';
 import { Address, CreateAddressRequest, UpdateAddressRequest } from '../models/address.model';
+import { CreateCustomerContactRequest, CustomerContact, UpdateCustomerContactRequest } from '../models/customer-contact.model';
 
 @Injectable({
   providedIn: 'root'
@@ -48,5 +49,21 @@ export class CustomersService {
 
   deleteAddress(customerId: number, addressId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${customerId}/addresses/${addressId}`);
+  }
+
+  getContacts(customerId: number): Observable<CustomerContact[]> {
+    return this.http.get<CustomerContact[]>(`${this.baseUrl}/${customerId}/contacts`);
+  }
+
+  createContact(customerId: number, request: CreateCustomerContactRequest): Observable<CustomerContact> {
+    return this.http.post<CustomerContact>(`${this.baseUrl}/${customerId}/contacts`, request);
+  }
+
+  updateContact(customerId: number, contactId: number, request: UpdateCustomerContactRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${customerId}/contacts/${contactId}`, request);
+  }
+
+  deleteContact(customerId: number, contactId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${customerId}/contacts/${contactId}`);
   }
 }

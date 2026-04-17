@@ -184,5 +184,80 @@
         <button type="submit">Add Address</button>
       </div>
     </form>
+
+    <div *ngIf="isEditMode" class="contacts-section">
+      <div class="section-header">
+        <h2>Customer Contacts</h2>
+        <p class="section-subtitle">Manage the customer’s key contacts.</p>
+      </div>
+
+      <div class="contacts-list-card">
+        <h3>Existing Contacts</h3>
+
+        <table *ngIf="contacts.length > 0" class="customers-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Job Title</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Primary</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let contact of contacts">
+              <td>{{ contact.name }}</td>
+              <td>{{ contact.jobTitle }}</td>
+              <td>{{ contact.email }}</td>
+              <td>{{ contact.phone }}</td>
+              <td>{{ contact.isPrimary ? 'Yes' : 'No' }}</td>
+              <td>
+                <button type="button" (click)="deleteContact(contact.customerContactId)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="contacts.length === 0" class="empty-state">
+          No contacts found for this customer yet.
+        </div>
+      </div>
+
+      <div class="contact-form-card">
+        <h3>Add New Contact</h3>
+
+        <form [formGroup]="contactForm" (ngSubmit)="createContact()" class="customer-form">
+          <label>
+            Name
+            <input type="text" formControlName="name" />
+          </label>
+
+          <label>
+            Job Title
+            <input type="text" formControlName="jobTitle" />
+          </label>
+
+          <label>
+            Email
+            <input type="email" formControlName="email" />
+          </label>
+
+          <label>
+            Phone
+            <input type="text" formControlName="phone" />
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="isPrimary" />
+            Primary contact
+          </label>
+
+          <div class="actions">
+            <button type="submit">Add Contact</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
