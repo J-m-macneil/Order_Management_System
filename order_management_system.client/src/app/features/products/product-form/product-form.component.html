@@ -1,0 +1,104 @@
+<div class="page-header">
+  <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
+</div>
+
+<div *ngIf="isLoading">Loading...</div>
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="product-form">
+
+  <div class="form-grid">
+
+    <label>
+      SKU
+      <input type="text" formControlName="sku" />
+    </label>
+
+    <label>
+      Product Name
+      <input type="text" formControlName="productName" />
+    </label>
+
+    <label class="full-width">
+      Description
+      <textarea formControlName="description"></textarea>
+    </label>
+
+    <label>
+      Category
+      <select formControlName="productCategoryId">
+        <option *ngFor="let category of productCategories" [value]="category.productCategoryId">
+          {{ category.name }}
+        </option>
+      </select>
+    </label>
+
+    <label>
+      Unit Of Measure
+      <select formControlName="unitOfMeasureId">
+        <option *ngFor="let unit of unitsOfMeasure" [value]="unit.unitOfMeasureId">
+          {{ unit.name }} ({{ unit.code }})
+        </option>
+      </select>
+    </label>
+
+    <label>
+      Pack Size
+      <input type="text" formControlName="packSize" />
+    </label>
+
+    <label>
+      Base Price
+      <input type="number" formControlName="basePrice" />
+    </label>
+
+    <label>
+      Currency
+      <input type="text" formControlName="currency" />
+    </label>
+
+    <label>
+      Hazard Class
+      <select formControlName="hazardClassId">
+        <option *ngFor="let hazard of hazardClasses" [value]="hazard.hazardClassId">
+          {{ hazard.name }}
+        </option>
+      </select>
+    </label>
+
+    <label>
+      UN Number
+      <input type="text" formControlName="unNumber" />
+    </label>
+
+    <label class="full-width">
+      Storage Requirement
+      <input type="text" formControlName="storageRequirement" />
+    </label>
+
+    <label class="checkbox-label">
+      <input type="checkbox" formControlName="requiresSds" />
+      Requires SDS
+    </label>
+
+    <label class="checkbox-label">
+      <input type="checkbox" formControlName="isRestricted" />
+      Restricted
+    </label>
+
+    <label class="checkbox-label">
+      <input type="checkbox" formControlName="isActive" />
+      Active
+    </label>
+
+  </div>
+
+  <div class="actions">
+    <button type="submit">
+      {{ isEditMode ? 'Update Product' : 'Create Product' }}
+    </button>
+
+    <a routerLink="/products">Cancel</a>
+  </div>
+
+</form>

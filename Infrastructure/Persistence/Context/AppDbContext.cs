@@ -12,6 +12,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<PricingTier> PricingTiers => Set<PricingTier>();
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<UnitOfMeasure> UnitsOfMeasure => Set<UnitOfMeasure>();
+    public DbSet<HazardClass> HazardClasses => Set<HazardClass>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -600,5 +604,202 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
         });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.ToTable("Products");
+
+            entity.HasKey(x => x.ProductId);
+
+            entity.Property(x => x.SKU)
+                .IsRequired()
+                .HasMaxLength(40);
+
+            entity.HasIndex(x => x.SKU)
+                .IsUnique();
+
+            entity.Property(x => x.ProductName)
+                .IsRequired()
+                .HasMaxLength(160);
+
+            entity.Property(x => x.Description)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.PackSize)
+                .IsRequired()
+                .HasMaxLength(40);
+
+            entity.Property(x => x.BasePrice)
+                .HasColumnType("decimal(10,2)")
+                .IsRequired();
+
+            entity.Property(x => x.Currency)
+                .IsRequired()
+                .HasMaxLength(3)
+                .IsFixedLength();
+
+            entity.Property(x => x.UNNumber)
+                .HasMaxLength(20);
+
+            entity.Property(x => x.StorageRequirement)
+                .HasMaxLength(120);
+
+            entity.Property(x => x.RequiresSds)
+                .IsRequired();
+
+            entity.Property(x => x.IsRestricted)
+                .IsRequired();
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2");
+
+            entity.HasOne(x => x.ProductCategory)
+                .WithMany(x => x.Products)
+                .HasForeignKey(x => x.ProductCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.UnitOfMeasure)
+                .WithMany(x => x.Products)
+                .HasForeignKey(x => x.UnitOfMeasureId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.HazardClass)
+                .WithMany(x => x.Products)
+                .HasForeignKey(x => x.HazardClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ProductCategory>(entity =>
+        {
+            entity.ToTable("ProductCategories");
+
+            entity.HasKey(x => x.ProductCategoryId);
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(80);
+
+            entity.HasIndex(x => x.Name)
+                .IsUnique();
+
+            entity.Property(x => x.Description)
+                .HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<ProductCategory>().HasData(
+            new ProductCategory
+            {
+                ProductCategoryId = 1,
+                Name = "Solvents",
+                Description = "Solvent-based products used in cleaning, coatings and laboratory operations."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 2,
+                Name = "Acids",
+                Description = "Acidic products used in treatment, descaling and process control."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 3,
+                Name = "Alkalis",
+                Description = "Alkaline products used for cleaning, pH control and industrial operations."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 4,
+                Name = "Water Treatment",
+                Description = "Products used in wastewater, potable water and process water treatment."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 5,
+                Name = "Cleaning Chemicals",
+                Description = "General industrial and specialist cleaning solutions."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 6,
+                Name = "Laboratory Reagents",
+                Description = "Reagents and calibration liquids for lab environments."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 7,
+                Name = "Food-Safe",
+                Description = "Products suitable for food and beverage environments."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 8,
+                Name = "Consumables",
+                Description = "Supporting consumables and handling items."
+            },
+            new ProductCategory
+            {
+                ProductCategoryId = 9,
+                Name = "Industrial Additives",
+                Description = "Additives, agents and specialist blends."
+            }
+        );
+
+        modelBuilder.Entity<UnitOfMeasure>(entity =>
+        {
+            entity.ToTable("UnitsOfMeasure");
+
+            entity.HasKey(x => x.UnitOfMeasureId);
+
+            entity.Property(x => x.Code)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.HasIndex(x => x.Code)
+                .IsUnique();
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(80);
+        });
+
+        modelBuilder.Entity<UnitOfMeasure>().HasData(
+            new UnitOfMeasure { UnitOfMeasureId = 1, Code = "L", Name = "Litre" },
+            new UnitOfMeasure { UnitOfMeasureId = 2, Code = "KG", Name = "Kilogram" },
+            new UnitOfMeasure { UnitOfMeasureId = 3, Code = "DRUM", Name = "Drum" },
+            new UnitOfMeasure { UnitOfMeasureId = 4, Code = "PACK", Name = "Pack" },
+            new UnitOfMeasure { UnitOfMeasureId = 5, Code = "BOTTLE", Name = "Bottle" },
+            new UnitOfMeasure { UnitOfMeasureId = 6, Code = "IBC", Name = "IBC" },
+            new UnitOfMeasure { UnitOfMeasureId = 7, Code = "BAG", Name = "Bag" }
+        );
+
+        modelBuilder.Entity<HazardClass>(entity =>
+        {
+            entity.ToTable("HazardClasses");
+
+            entity.HasKey(x => x.HazardClassId);
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(80);
+
+            entity.HasIndex(x => x.Name)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<HazardClass>().HasData(
+            new HazardClass { HazardClassId = 1, Name = "Non-Hazardous" },
+            new HazardClass { HazardClassId = 2, Name = "Flammable" },
+            new HazardClass { HazardClassId = 3, Name = "Corrosive" },
+            new HazardClass { HazardClassId = 4, Name = "Toxic" },
+            new HazardClass { HazardClassId = 5, Name = "Oxidising" },
+            new HazardClass { HazardClassId = 6, Name = "Irritant" },
+            new HazardClass { HazardClassId = 7, Name = "Environmental Hazard" }
+        );
     }
 }

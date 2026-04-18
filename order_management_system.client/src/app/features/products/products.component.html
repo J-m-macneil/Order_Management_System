@@ -1,2 +1,30 @@
-<h1>Products</h1>
-<p>Product management page.</p>
+<div class="page-header">
+  <h1>Products</h1>
+  <a routerLink="/products/create">Create Product</a>
+</div>
+
+<table *ngIf="products.length > 0" class="customers-table">
+  <thead>
+    <tr>
+      <th>SKU</th>
+      <th>Name</th>
+      <th>Pack</th>
+      <th>Price</th>
+      <th>Restricted</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of products">
+      <td>{{ p.sku }}</td>
+      <td>{{ p.productName }}</td>
+      <td>{{ p.packSize }}</td>
+      <td>{{ p.basePrice | currency:'GBP' }}</td>
+      <td>{{ p.isRestricted ? 'Yes' : 'No' }}</td>
+      <td>
+        <a [routerLink]="['/products/edit', p.productId]">Edit</a>
+        <button (click)="deleteProduct(p.productId)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

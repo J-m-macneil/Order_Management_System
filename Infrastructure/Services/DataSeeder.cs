@@ -16,58 +16,57 @@ public class DataSeeder : IDataSeeder
 
     public async Task SeedAsync()
     {
-        if (await _dbContext.Customers.AnyAsync())
+        // =========================
+        // 1. Customers
+        // =========================
+        if (!await _dbContext.Customers.AnyAsync())
         {
-            return;
+            var customer1 = new Customer
+            {
+                AccountNumber = "CUST-2026-0001",
+                CompanyName = "NorthWest Surface Treatments Ltd",
+                IndustryType = "Manufacturing",
+                MainContactName = "Sophie Murray",
+                MainContactEmail = "purchasing1@northwestsurfacetr.co.uk",
+                MainContactPhone = "07732719211",
+                PricingTierId = 1,
+                PaymentTermsDays = 45,
+                CreditLimit = 40000.00m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var customer2 = new Customer
+            {
+                AccountNumber = "CUST-2026-0002",
+                CompanyName = "Mersey Water Solutions",
+                IndustryType = "Water Treatment",
+                MainContactName = "Hannah Clark",
+                MainContactEmail = "purchasing2@merseywatersolutio.co.uk",
+                MainContactPhone = "07384027113",
+                PricingTierId = 1,
+                PaymentTermsDays = 30,
+                CreditLimit = 15000.00m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _dbContext.Customers.AddRangeAsync(customer1, customer2);
+            await _dbContext.SaveChangesAsync();
         }
 
+        var customers = await _dbContext.Customers.ToListAsync();
+
         // =========================
-        // 1. Create Customers
+        // 2. Contacts
         // =========================
-        var customer1 = new Customer
+        if (!await _dbContext.CustomerContacts.AnyAsync())
         {
-            AccountNumber = "CUST-2026-0001",
-            CompanyName = "NorthWest Surface Treatments Ltd",
-            IndustryType = "Manufacturing",
-            MainContactName = "Sophie Murray",
-            MainContactEmail = "purchasing1@northwestsurfacetr.co.uk",
-            MainContactPhone = "07732719211",
-            PricingTierId = 1,
-            PaymentTermsDays = 45,
-            CreditLimit = 40000.00m,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            DeletedAt = null
-        };
-
-        var customer2 = new Customer
-        {
-            AccountNumber = "CUST-2026-0002",
-            CompanyName = "Mersey Water Solutions",
-            IndustryType = "Water Treatment",
-            MainContactName = "Hannah Clark",
-            MainContactEmail = "purchasing2@merseywatersolutio.co.uk",
-            MainContactPhone = "07384027113",
-            PricingTierId = 1,
-            PaymentTermsDays = 30,
-            CreditLimit = 15000.00m,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            DeletedAt = null
-        };
-
-        await _dbContext.Customers.AddRangeAsync(customer1, customer2);
-        await _dbContext.SaveChangesAsync();
-
-        // =========================
-        // 2. Create Customers
-        // =========================
-
-        var contacts = new List<CustomerContact>
+            var contacts = new List<CustomerContact>
         {
             new CustomerContact
             {
-                CustomerId = 1,
+                CustomerId = customers[0].CustomerId,
                 Name = "Oliver Evans",
                 JobTitle = "Purchasing Manager",
                 Email = "oliver.evans1@northwestsurface.co.uk",
@@ -78,7 +77,7 @@ public class DataSeeder : IDataSeeder
             },
             new CustomerContact
             {
-                CustomerId = 1,
+                CustomerId = customers[0].CustomerId,
                 Name = "Luke Taylor",
                 JobTitle = "Procurement Lead",
                 Email = "luke.taylor1@northwestsurface.co.uk",
@@ -87,10 +86,9 @@ public class DataSeeder : IDataSeeder
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
-
             new CustomerContact
             {
-                CustomerId = 2,
+                CustomerId = customers[1].CustomerId,
                 Name = "Mia Wilson",
                 JobTitle = "Purchasing Manager",
                 Email = "mia.wilson2@merseywatersolut.co.uk",
@@ -98,141 +96,121 @@ public class DataSeeder : IDataSeeder
                 IsPrimary = true,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
-            },
-            new CustomerContact
-            {
-                CustomerId = 2,
-                Name = "Jack Thomas",
-                JobTitle = "Procurement Lead",
-                Email = "jack.thomas2@merseywatersolut.co.uk",
-                Phone = "07414797776",
-                IsPrimary = false,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
             }
-
-            // 👉 Add more from your dataset the same way
         };
 
-        await _dbContext.CustomerContacts.AddRangeAsync(contacts);
-        await _dbContext.SaveChangesAsync();
-
+            await _dbContext.CustomerContacts.AddRangeAsync(contacts);
+            await _dbContext.SaveChangesAsync();
+        }
 
         // =========================
-        // 3. Create Addresses
+        // 3. Addresses
         // =========================
-        var addresses = new List<Address>
+        if (!await _dbContext.Addresses.AnyAsync())
         {
-            // Customer 1
+            var addresses = new List<Address>
+        {
             new Address
             {
-                CustomerId = customer1.CustomerId,
+                CustomerId = customers[0].CustomerId,
                 AddressType = "Billing",
-                SiteName = "NorthWest Surface Treatments Ltd Accounts",
+                SiteName = "Accounts",
                 Line1 = "11 Commerce House",
-                Line2 = "Industrial Estate",
                 City = "Liverpool",
-                County = "Merseyside",
                 Postcode = "L2 101AA",
                 Country = "United Kingdom",
-                ContactName = "Accounts Payable",
-                ContactPhone = "07746412689",
                 IsPrimary = true,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             },
             new Address
             {
-                CustomerId = customer1.CustomerId,
-                AddressType = "HeadOffice",
-                SiteName = "NorthWest Surface Treatments Ltd Head Office",
-                Line1 = "101 Liverpool Business Park",
-                City = "Liverpool",
-                County = "Merseyside",
-                Postcode = "M2 201BB",
-                Country = "United Kingdom",
-                ContactName = "Main Reception",
-                ContactPhone = "07128492780",
-                IsPrimary = false,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            },
-            new Address
-            {
-                CustomerId = customer1.CustomerId,
+                CustomerId = customers[0].CustomerId,
                 AddressType = "DeliverySite",
                 SiteName = "Site A",
                 Line1 = "201 Distribution Road",
-                Line2 = "Plant / Works",
                 City = "Manchester",
-                County = "Greater Manchester",
                 Postcode = "W2 301CC",
                 Country = "United Kingdom",
-                ContactName = "Site Supervisor A",
-                ContactPhone = "07702632297",
-                DeliveryInstructions = "ADR driver PPE required on arrival.",
-                IsPrimary = true,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            },
-
-            // Customer 2
-            new Address
-            {
-                CustomerId = customer2.CustomerId,
-                AddressType = "Billing",
-                SiteName = "Mersey Water Solutions Accounts",
-                Line1 = "12 Commerce House",
-                Line2 = "Industrial Estate",
-                City = "Manchester",
-                County = "Greater Manchester",
-                Postcode = "L3 102AA",
-                Country = "United Kingdom",
-                ContactName = "Accounts Payable",
-                ContactPhone = "07919795579",
-                IsPrimary = true,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            },
-            new Address
-            {
-                CustomerId = customer2.CustomerId,
-                AddressType = "DeliverySite",
-                SiteName = "Site A",
-                Line1 = "202 Distribution Road",
-                Line2 = "Plant / Works",
-                City = "Leeds",
-                County = "Lancashire",
-                Postcode = "W3 302CC",
-                Country = "United Kingdom",
-                ContactName = "Site Supervisor A",
-                ContactPhone = "07209747451",
-                DeliveryInstructions = "Deliver to goods-in between 07:30 and 15:00.",
                 IsPrimary = true,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             }
         };
 
-        await _dbContext.Addresses.AddRangeAsync(addresses);
-        await _dbContext.SaveChangesAsync();
+            await _dbContext.Addresses.AddRangeAsync(addresses);
+            await _dbContext.SaveChangesAsync();
+        }
 
         // =========================
-        // 4. Set Default Addresses
+        // 4. Products ✅ NEW
         // =========================
-        var customer1Addresses = await _dbContext.Addresses
-            .Where(x => x.CustomerId == customer1.CustomerId)
-            .ToListAsync();
+        if (!await _dbContext.Products.AnyAsync())
+        {
+            var products = new List<Product>
+        {
+            new Product
+            {
+                SKU = "ACET-25",
+                ProductName = "Acetone 25L Drum",
+                Description = "Acetone 25L Drum supplied for industrial and commercial use.",
+                ProductCategoryId = 1,
+                UnitOfMeasureId = 3,
+                PackSize = "25L",
+                BasePrice = 85.00m,
+                Currency = "GBP",
+                HazardClassId = 2,
+                UNNumber = "UN1090",
+                StorageRequirement = "Flammable store",
+                RequiresSds = true,
+                IsRestricted = false,
+                IsActive = true,
+                CreatedAt = new DateTime(2024, 2, 7)
+            },
+            new Product
+            {
+                SKU = "IPA-20",
+                ProductName = "Isopropyl Alcohol 99.9% 20L",
+                Description = "Isopropyl Alcohol 20L supplied for industrial use.",
+                ProductCategoryId = 1,
+                UnitOfMeasureId = 3,
+                PackSize = "20L",
+                BasePrice = 92.50m,
+                Currency = "GBP",
+                HazardClassId = 2,
+                UNNumber = "UN1219",
+                StorageRequirement = "Flammable store",
+                RequiresSds = true,
+                IsRestricted = false,
+                IsActive = true,
+                CreatedAt = new DateTime(2024, 2, 13)
+            }
+        };
 
-        var customer2Addresses = await _dbContext.Addresses
-            .Where(x => x.CustomerId == customer2.CustomerId)
-            .ToListAsync();
+            await _dbContext.Products.AddRangeAsync(products);
+            await _dbContext.SaveChangesAsync();
+        }
 
-        customer1.BillingAddressId = customer1Addresses.First(x => x.AddressType == "Billing").AddressId;
-        customer1.DefaultDeliveryAddressId = customer1Addresses.First(x => x.IsPrimary && x.AddressType == "DeliverySite").AddressId;
+        // =========================
+        // 5. Set Default Addresses
+        // =========================
+        var updatedCustomers = await _dbContext.Customers.ToListAsync();
 
-        customer2.BillingAddressId = customer2Addresses.First(x => x.AddressType == "Billing").AddressId;
-        customer2.DefaultDeliveryAddressId = customer2Addresses.First(x => x.IsPrimary && x.AddressType == "DeliverySite").AddressId;
+        foreach (var customer in updatedCustomers)
+        {
+            var custAddresses = await _dbContext.Addresses
+                .Where(x => x.CustomerId == customer.CustomerId)
+                .ToListAsync();
+
+            var billing = custAddresses.FirstOrDefault(x => x.AddressType == "Billing");
+            var delivery = custAddresses.FirstOrDefault(x => x.AddressType == "DeliverySite" && x.IsPrimary);
+
+            if (billing != null)
+                customer.BillingAddressId = billing.AddressId;
+
+            if (delivery != null)
+                customer.DefaultDeliveryAddressId = delivery.AddressId;
+        }
 
         await _dbContext.SaveChangesAsync();
     }

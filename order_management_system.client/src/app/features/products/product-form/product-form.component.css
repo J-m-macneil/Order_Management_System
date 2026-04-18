@@ -1,0 +1,70 @@
+.product-form {
+  max-width: 900px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+  .form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-weight: 500;
+  }
+
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font: inherit;
+    background: #fff;
+  }
+
+  .form-grid textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.checkbox-label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+  .checkbox-label input {
+    width: auto;
+    margin: 0;
+  }
+
+.actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+  .actions button,
+  .actions a {
+    padding: 0.65rem 1rem;
+  }
+
+.page-header {
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  margin-bottom: 1rem;
+  color: #b00020;
+}
