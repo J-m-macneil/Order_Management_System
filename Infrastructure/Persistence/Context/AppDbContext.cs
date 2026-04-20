@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<UnitOfMeasure> UnitsOfMeasure => Set<UnitOfMeasure>();
     public DbSet<HazardClass> HazardClasses => Set<HazardClass>();
+    public DbSet<SafetyDataSheet> SafetyDataSheets => Set<SafetyDataSheet>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -801,5 +802,51 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new HazardClass { HazardClassId = 6, Name = "Irritant" },
             new HazardClass { HazardClassId = 7, Name = "Environmental Hazard" }
         );
+
+        modelBuilder.Entity<SafetyDataSheet>(entity =>
+        {
+            entity.ToTable("SafetyDataSheets");
+
+            entity.HasKey(x => x.SafetyDataSheetId);
+
+            entity.Property(x => x.FileName)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(x => x.FilePath)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(x => x.Version)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.Property(x => x.EffectiveDate)
+                .HasColumnType("date")
+                .IsRequired();
+
+            entity.Property(x => x.UploadedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
+            entity.HasOne(x => x.Product)
+                .WithMany(x => x.SafetyDataSheets)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.UploadedByUser)
+                .WithMany(x => x.UploadedSafetyDataSheets)
+                .HasForeignKey(x => x.UploadedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+        });
     }
 }

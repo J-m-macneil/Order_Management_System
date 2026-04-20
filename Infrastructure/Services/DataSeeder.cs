@@ -192,7 +192,43 @@ public class DataSeeder : IDataSeeder
         }
 
         // =========================
-        // 5. Set Default Addresses
+        // 5. Safety Data Sheets ✅ NEW
+        // =========================
+
+        if (!await _dbContext.SafetyDataSheets.AnyAsync())
+        {
+            var items = new List<SafetyDataSheet>
+            {
+                new SafetyDataSheet
+                {
+                    ProductId = 1,
+                    FileName = "acet_25_sds_v2.pdf",
+                    FilePath = "/sds/acet_25_sds_v2.pdf",
+                    Version = "V2",
+                    EffectiveDate = new DateTime(2025, 11, 19),
+                    UploadedAt = new DateTime(2026, 2, 12, 10, 0, 0),
+                    UploadedByUserId = 8,
+                    IsActive = true
+                },
+                new SafetyDataSheet
+                {
+                    ProductId = 2,
+                    FileName = "ipa_20_sds_v2.pdf",
+                    FilePath = "/sds/ipa_20_sds_v2.pdf",
+                    Version = "V2",
+                    EffectiveDate = new DateTime(2025, 7, 8),
+                    UploadedAt = new DateTime(2026, 2, 11, 10, 0, 0),
+                    UploadedByUserId = 1,
+                    IsActive = true
+                }
+            };
+
+            await _dbContext.SafetyDataSheets.AddRangeAsync(items);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // =========================
+        // 6. Set Default Addresses
         // =========================
         var updatedCustomers = await _dbContext.Customers.ToListAsync();
 

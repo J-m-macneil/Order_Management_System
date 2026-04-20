@@ -8,6 +8,7 @@ import { UnitOfMeasure } from '../../models/unit-of-measure.model';
 import { HazardClass } from '../../models/hazard-class.model';
 
 import { ProductsService } from '../products.service';
+import { SafetyDataSheet, CreateSafetyDataSheetRequest } from '../../models/safety-data-sheet-model';
 
 @Component({
   selector: 'app-product-form',
@@ -26,6 +27,9 @@ export class ProductFormComponent implements OnInit {
   productCategories: ProductCategory[] = [];
   unitsOfMeasure: UnitOfMeasure[] = [];
   hazardClasses: HazardClass[] = [];
+
+  sdsForm!: FormGroup;
+  safetyDataSheets: SafetyDataSheet[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -53,6 +57,15 @@ export class ProductFormComponent implements OnInit {
       isActive: [true]
     });
 
+    this.sdsForm = this.fb.group({
+      fileName: ['', Validators.required],
+      filePath: ['', Validators.required],
+      version: ['', Validators.required],
+      effectiveDate: ['', Validators.required],
+      uploadedAt: ['', Validators.required],
+      uploadedByUserId: [1, Validators.required]
+    });
+
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : null;
 
@@ -62,6 +75,7 @@ export class ProductFormComponent implements OnInit {
       this.isEditMode = true;
       this.productId = id;
       this.loadProduct(id);
+      this.loadSafetyDataSheets(id);
     }
   }
 
@@ -130,6 +144,83 @@ export class ProductFormComponent implements OnInit {
         console.error('Failed to load product', err);
         this.errorMessage = 'Failed to load product.';
         this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadSafetyDataSheets(productId: number): void {
+    this.productsService.getSafetyDataSheets(productId).subscribe({
+      next: (data) => {
+        this.safetyDataSheets = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load SDS records', err);
+        this.errorMessage = 'Failed to load SDS records.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  createSafetyDataSheet(): void {
+    if (!this.productId) {
+      return;
+    }
+
+    if (this.sdsForm.invalid) {
+      this.sdsForm.markAllAsTouched();
+      return;
+    }
+
+    const request: CreateSafetyDataSheetRequest = {
+      fileName: this.sdsForm.value.fileName,
+      filePath: this.sdsForm.value.filePath,
+      version: this.sdsForm.value.version,
+      effectiveDate: this.sdsForm.value.effectiveDate,
+      uploadedAt: this.sdsForm.value.uploadedAt,
+      uploadedByUserId: this.sdsForm.value.uploadedByUserId
+    };
+
+    this.productsService.createSafetyDataSheet(this.productId, request).subscribe({
+      next: () => {
+        this.sdsForm.reset({
+          fileName: '',
+          filePath: '',
+          version: '',
+          effectiveDate: '',
+          uploadedAt: '',
+          uploadedByUserId: 1
+        });
+
+        this.loadSafetyDataSheets(this.productId!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to create SDS', err);
+        this.errorMessage = 'Failed to create SDS.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  deleteSafetyDataSheet(sdsId: number): void {
+    if (!this.productId) {
+      return;
+    }
+
+    if (!confirm('Delete this SDS record?')) {
+      return;
+    }
+
+    this.productsService.deleteSafetyDataSheet(this.productId, sdsId).subscribe({
+      next: () => {
+        this.loadSafetyDataSheets(this.productId!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to delete SDS', err);
+        this.errorMessage = 'Failed to delete SDS.';
         this.cdr.detectChanges();
       }
     });

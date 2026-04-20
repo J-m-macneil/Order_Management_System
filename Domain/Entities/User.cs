@@ -22,4 +22,5 @@ public class User
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+    public ICollection<SafetyDataSheet> UploadedSafetyDataSheets { get; set; } = new List<SafetyDataSheet>();
 }

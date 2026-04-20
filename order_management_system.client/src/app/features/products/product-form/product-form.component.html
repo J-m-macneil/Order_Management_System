@@ -101,4 +101,86 @@
     <a routerLink="/products">Cancel</a>
   </div>
 
+  <div *ngIf="isEditMode" class="sds-section">
+    <div class="section-header">
+      <h2>Safety Data Sheets</h2>
+      <p class="section-subtitle">Manage SDS records linked to this product.</p>
+    </div>
+
+    <div class="sds-list-card">
+      <h3>Existing SDS Records</h3>
+
+      <table *ngIf="safetyDataSheets.length > 0" class="customers-table">
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Version</th>
+            <th>Effective Date</th>
+            <th>Uploaded At</th>
+            <th>Uploaded By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sds of safetyDataSheets">
+            <td>{{ sds.fileName }}</td>
+            <td>{{ sds.version }}</td>
+            <td>{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
+            <td>{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ sds.uploadedByUserId }}</td>
+            <td>
+              <button type="button" (click)="deleteSafetyDataSheet(sds.safetyDataSheetId)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="safetyDataSheets.length === 0" class="empty-state">
+        No SDS records found for this product.
+      </div>
+    </div>
+
+    <div class="sds-form-card">
+      <h3>Add SDS Record</h3>
+
+      <form [formGroup]="sdsForm" (ngSubmit)="createSafetyDataSheet()" class="product-form">
+        <div class="form-grid">
+          <label>
+            File Name
+            <input type="text" formControlName="fileName" />
+          </label>
+
+          <label>
+            File Path
+            <input type="text" formControlName="filePath" />
+          </label>
+
+          <label>
+            Version
+            <input type="text" formControlName="version" />
+          </label>
+
+          <label>
+            Effective Date
+            <input type="date" formControlName="effectiveDate" />
+          </label>
+
+          <label>
+            Uploaded At
+            <input type="datetime-local" formControlName="uploadedAt" />
+          </label>
+
+          <label>
+            Uploaded By User Id
+            <input type="number" formControlName="uploadedByUserId" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Add SDS</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </form>

@@ -30,4 +30,5 @@ public class Product
     public DateTime CreatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+    public ICollection<SafetyDataSheet> SafetyDataSheets { get; set; } = new List<SafetyDataSheet>();
 }

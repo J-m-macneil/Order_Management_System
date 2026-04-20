@@ -68,3 +68,31 @@
   margin-bottom: 1rem;
   color: #b00020;
 }
+
+.sds-section {
+  margin-top: 2rem;
+}
+
+.sds-list-card,
+.sds-form-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+  .sds-list-card h3,
+  .sds-form-card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+.section-header {
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  margin: 0;
+  color: #666;
+}

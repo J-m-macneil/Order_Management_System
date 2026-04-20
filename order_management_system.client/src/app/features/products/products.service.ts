@@ -9,6 +9,7 @@ import { UpdateProductRequest } from "../models/update-product.model";
 import { UnitOfMeasure } from "../models/unit-of-measure.model";
 import { HazardClass } from "../models/hazard-class.model";
 import { ProductList } from "../models/product-list.model";
+import { SafetyDataSheet, CreateSafetyDataSheetRequest, UpdateSafetyDataSheetRequest } from "../models/safety-data-sheet-model";
 
 @Injectable({
   providedIn: 'root'
@@ -48,5 +49,21 @@ export class ProductsService {
 
   getHazardClasses(): Observable<HazardClass[]> {
     return this.http.get<HazardClass[]>('https://localhost:7233/api/hazard-classes');
+  }
+
+  getSafetyDataSheets(productId: number): Observable<SafetyDataSheet[]> {
+    return this.http.get<SafetyDataSheet[]>(`${this.baseUrl}/${productId}/sds`);
+  }
+
+  createSafetyDataSheet(productId: number, request: CreateSafetyDataSheetRequest): Observable<SafetyDataSheet> {
+    return this.http.post<SafetyDataSheet>(`${this.baseUrl}/${productId}/sds`, request);
+  }
+
+  updateSafetyDataSheet(productId: number, sdsId: number, request: UpdateSafetyDataSheetRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${productId}/sds/${sdsId}`, request);
+  }
+
+  deleteSafetyDataSheet(productId: number, sdsId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${productId}/sds/${sdsId}`);
   }
 }
