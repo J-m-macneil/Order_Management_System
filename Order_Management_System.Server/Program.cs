@@ -1,6 +1,7 @@
 using Application;
 using Application.Interfaces;
 using Infrastructure.DependencyInjection;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -19,6 +20,7 @@ public static class Program
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddScoped<IPricingService, PricingService>();
 
         builder.Services.AddCors(options =>
         {
