@@ -23,11 +23,40 @@ public class PricingService : IPricingService
         var product = await _dbContext.Products
             .FirstOrDefaultAsync(x => x.ProductId == productId && x.DeletedAt == null);
 
-        if (customer == null || product == null || customer.PricingTier == null)
+        if (customer == null || customer.PricingTier == null || product == null)
             return null;
 
-        var discountPercent = customer.PricingTier.DiscountPercent;
+        var today = DateTime.UtcNow.Date;
+
+        var overridePrice = await _dbContext.CustomerProductPrices
+            .Where(x =>
+                x.CustomerId == customerId &&
+                x.ProductId == productId &&
+                x.IsActive &&
+                x.DeletedAt == null &&
+                x.EffectiveFrom <= today &&
+                (x.EffectiveTo == null || x.EffectiveTo >= today))
+            .OrderByDescending(x => x.EffectiveFrom)
+            .FirstOrDefaultAsync();
+
+        if (overridePrice != null)
+        {
+            return new PricingCalculationDto
+            {
+                CustomerId = customerId,
+                ProductId = productId,
+                BasePrice = product.BasePrice,
+                DiscountPercent = 0,
+                DiscountAmount = 0,
+                FinalPrice = overridePrice.OverridePrice,
+                PricingTierName = customer.PricingTier.Name,
+                Currency = product.Currency,
+                IsOverrideApplied = true
+            };
+        }
+
         var basePrice = product.BasePrice;
+        var discountPercent = customer.PricingTier.DiscountPercent;
         var discountAmount = Math.Round(basePrice * (discountPercent / 100m), 2);
         var finalPrice = Math.Round(basePrice - discountAmount, 2);
 
@@ -40,7 +69,8 @@ public class PricingService : IPricingService
             DiscountAmount = discountAmount,
             FinalPrice = finalPrice,
             PricingTierName = customer.PricingTier.Name,
-            Currency = product.Currency
+            Currency = product.Currency,
+            IsOverrideApplied = false
         };
     }
 }

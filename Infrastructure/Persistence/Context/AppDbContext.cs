@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UnitOfMeasure> UnitsOfMeasure => Set<UnitOfMeasure>();
     public DbSet<HazardClass> HazardClasses => Set<HazardClass>();
     public DbSet<SafetyDataSheet> SafetyDataSheets => Set<SafetyDataSheet>();
+    public DbSet<CustomerProductPrice> CustomerProductPrices => Set<CustomerProductPrice>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -847,6 +848,57 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(x => x.UploadedByUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<CustomerProductPrice>(entity =>
+        {
+            entity.ToTable("CustomerProductPrices");
+
+            entity.HasKey(x => x.CustomerProductPriceId);
+
+            entity.Property(x => x.OverridePrice)
+                .HasColumnType("decimal(10,2)")
+                .IsRequired();
+
+            entity.Property(x => x.MinimumOrderQuantity)
+                .HasColumnType("decimal(10,2)")
+                .IsRequired();
+
+            entity.Property(x => x.EffectiveFrom)
+                .HasColumnType("date")
+                .IsRequired();
+
+            entity.Property(x => x.EffectiveTo)
+                .HasColumnType("date")
+                .IsRequired(false);
+
+            entity.Property(x => x.Notes)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
+            entity.HasOne(x => x.Customer)
+                .WithMany(x => x.CustomerProductPrices)
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.Product)
+                .WithMany(x => x.CustomerProductPrices)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasIndex(x => new { x.CustomerId, x.ProductId, x.EffectiveFrom });
         });
     }
 }

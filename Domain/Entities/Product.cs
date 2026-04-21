@@ -31,4 +31,5 @@ public class Product
 
     public DateTime? DeletedAt { get; set; }
     public ICollection<SafetyDataSheet> SafetyDataSheets { get; set; } = new List<SafetyDataSheet>();
+    public ICollection<CustomerProductPrice> CustomerProductPrices { get; set; } = new List<CustomerProductPrice>();
 }

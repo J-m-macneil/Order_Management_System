@@ -12,4 +12,8 @@ public class PricingCalculationDto
 
     public string PricingTierName { get; set; } = string.Empty;
     public string Currency { get; set; } = "GBP";
+
+    public bool IsOverrideApplied { get; set; }
+    public decimal? OverridePrice { get; set; }
+    public decimal? MinimumOrderQuantity { get; set; }
 }

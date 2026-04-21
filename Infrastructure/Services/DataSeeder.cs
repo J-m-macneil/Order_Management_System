@@ -192,7 +192,32 @@ public class DataSeeder : IDataSeeder
         }
 
         // =========================
-        // 5. Safety Data Sheets ✅ NEW
+        // 5. Customer Product Prices
+        // =========================
+        if (!await _dbContext.CustomerProductPrices.AnyAsync())
+        {
+            var items = new List<CustomerProductPrice>
+    {
+        new CustomerProductPrice
+        {
+            CustomerId = customers[1].CustomerId,
+            ProductId = 2,
+            OverridePrice = 90.18m,
+            MinimumOrderQuantity = 2m,
+            EffectiveFrom = new DateTime(2026, 1, 1),
+            EffectiveTo = new DateTime(2026, 12, 31),
+            Notes = "Framework agreement",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        }
+    };
+
+            await _dbContext.CustomerProductPrices.AddRangeAsync(items);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // =========================
+        // 6. Safety Data Sheets ✅ NEW
         // =========================
 
         if (!await _dbContext.SafetyDataSheets.AnyAsync())
@@ -228,7 +253,7 @@ public class DataSeeder : IDataSeeder
         }
 
         // =========================
-        // 6. Set Default Addresses
+        // 7. Set Default Addresses
         // =========================
         var updatedCustomers = await _dbContext.Customers.ToListAsync();
 
