@@ -4,6 +4,7 @@ using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421131832_AddOrders")]
+    partial class AddOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,7 +63,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -100,72 +103,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Addresses", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.Carrier", b =>
-                {
-                    b.Property<int>("CarrierId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CarrierId"));
-
-                    b.Property<string>("ContactEmail")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.Property<string>("ServiceType")
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.HasKey("CarrierId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Carriers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            CarrierId = 1,
-                            ContactEmail = "ops@northhaul.co.uk",
-                            IsActive = true,
-                            Name = "NorthHaul Logistics",
-                            ServiceType = "ADR / General Haulage"
-                        },
-                        new
-                        {
-                            CarrierId = 2,
-                            ContactEmail = "bookings@merseyfreight.co.uk",
-                            IsActive = true,
-                            Name = "Mersey Freight Partners",
-                            ServiceType = "Regional Pallet and Drum Delivery"
-                        },
-                        new
-                        {
-                            CarrierId = 3,
-                            ContactEmail = "orders@chemsafe-transport.co.uk",
-                            IsActive = true,
-                            Name = "ChemSafe Transport",
-                            ServiceType = "Hazardous Goods Specialist"
-                        },
-                        new
-                        {
-                            CarrierId = 4,
-                            ContactEmail = "dispatch@westline.co.uk",
-                            IsActive = false,
-                            Name = "WestLine Distribution",
-                            ServiceType = "General Commercial Distribution"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Customer", b =>
@@ -463,9 +400,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("BillingAddressId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CarrierId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -475,7 +409,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasMaxLength(3)
-                        .HasColumnType("char(3)");
+                        .HasColumnType("nchar(3)")
+                        .IsFixedLength();
 
                     b.Property<int?>("CustomerContactId")
                         .HasColumnType("int");
@@ -511,14 +446,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("OrderStatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PurchaseOrderReference")
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
@@ -545,15 +472,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
                     b.HasKey("OrderId");
 
                     b.HasIndex("AddressId");
@@ -561,10 +479,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("AssignedToUserId");
 
                     b.HasIndex("BillingAddressId");
-
-                    b.HasIndex("CarrierId");
-
-                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("CreatedByUserId");
 
@@ -576,18 +490,6 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OrderNumber")
                         .IsUnique();
-
-                    b.HasIndex("OrderStatusId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("RequestedDeliveryDate");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
-
-                    b.HasIndex("WarehouseId");
 
                     b.ToTable("Orders", (string)null);
                 });
@@ -629,46 +531,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderItems", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.OrderStatusHistory", b =>
-                {
-                    b.Property<int>("OrderStatusHistoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderStatusHistoryId"));
-
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ChangedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("FromStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("ToStatusId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrderStatusHistoryId");
-
-                    b.HasIndex("ChangedByUserId");
-
-                    b.HasIndex("FromStatusId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ToStatusId");
-
-                    b.ToTable("OrderStatusHistories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PricingTier", b =>
@@ -905,52 +767,6 @@ namespace Infrastructure.Migrations
                             Description = "Additives, agents and specialist blends.",
                             Name = "Industrial Additives"
                         });
-                });
-
-            modelBuilder.Entity("Domain.Entities.Project", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProjectId"));
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("ProjectCode")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("ProjectName")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("nvarchar(160)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.HasKey("ProjectId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ProjectCode")
-                        .IsUnique();
-
-                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Role", b =>
@@ -1406,146 +1222,13 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Entities.Warehouse", b =>
-                {
-                    b.Property<int>("WarehouseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WarehouseId"));
-
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ContactName")
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.Property<string>("ContactPhone")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.HasKey("WarehouseId");
-
-                    b.HasIndex("AddressId");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("Warehouses", (string)null);
-                });
-
-            modelBuilder.Entity("OrderStatus", b =>
-                {
-                    b.Property<int>("OrderStatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderStatusId"));
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsTerminal")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("OrderStatusId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("OrderStatuses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            OrderStatusId = 1,
-                            DisplayOrder = 1,
-                            IsTerminal = false,
-                            Name = "Draft"
-                        },
-                        new
-                        {
-                            OrderStatusId = 2,
-                            DisplayOrder = 2,
-                            IsTerminal = false,
-                            Name = "Submitted"
-                        },
-                        new
-                        {
-                            OrderStatusId = 3,
-                            DisplayOrder = 3,
-                            IsTerminal = false,
-                            Name = "Pending Review"
-                        },
-                        new
-                        {
-                            OrderStatusId = 4,
-                            DisplayOrder = 4,
-                            IsTerminal = false,
-                            Name = "Approved"
-                        },
-                        new
-                        {
-                            OrderStatusId = 5,
-                            DisplayOrder = 5,
-                            IsTerminal = false,
-                            Name = "In Processing"
-                        },
-                        new
-                        {
-                            OrderStatusId = 6,
-                            DisplayOrder = 6,
-                            IsTerminal = false,
-                            Name = "Awaiting Dispatch"
-                        },
-                        new
-                        {
-                            OrderStatusId = 7,
-                            DisplayOrder = 7,
-                            IsTerminal = true,
-                            Name = "Completed"
-                        },
-                        new
-                        {
-                            OrderStatusId = 8,
-                            DisplayOrder = 8,
-                            IsTerminal = true,
-                            Name = "Failed"
-                        },
-                        new
-                        {
-                            OrderStatusId = 9,
-                            DisplayOrder = 9,
-                            IsTerminal = true,
-                            Name = "Cancelled"
-                        });
-                });
-
             modelBuilder.Entity("Domain.Entities.Address", b =>
                 {
                     b.HasOne("Domain.Entities.Customer", "Customer")
                         .WithMany("Addresses")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Customer");
                 });
@@ -1612,7 +1295,7 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("AddressId");
 
                     b.HasOne("Domain.Entities.User", "AssignedToUser")
-                        .WithMany()
+                        .WithMany("AssignedOrders")
                         .HasForeignKey("AssignedToUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -1622,13 +1305,8 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Carrier", "Carrier")
-                        .WithMany("Orders")
-                        .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Domain.Entities.User", "CreatedByUser")
-                        .WithMany()
+                        .WithMany("CreatedOrders")
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1649,48 +1327,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("OrderStatus", "OrderStatus")
-                        .WithMany("Orders")
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Project", "Project")
-                        .WithMany("Orders")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("AssignedOrders")
-                        .HasForeignKey("UserId");
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("CreatedOrders")
-                        .HasForeignKey("UserId1");
-
-                    b.HasOne("Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany("Orders")
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("AssignedToUser");
 
                     b.Navigation("BillingAddress");
-
-                    b.Navigation("Carrier");
 
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Customer");
 
                     b.Navigation("DeliveryAddress");
-
-                    b.Navigation("OrderStatus");
-
-                    b.Navigation("Project");
-
-                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderItem", b =>
@@ -1710,40 +1355,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Domain.Entities.OrderStatusHistory", b =>
-                {
-                    b.HasOne("Domain.Entities.User", "ChangedByUser")
-                        .WithMany()
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("OrderStatus", "FromStatus")
-                        .WithMany()
-                        .HasForeignKey("FromStatusId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.Order", "Order")
-                        .WithMany("OrderStatusHistory")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("OrderStatus", "ToStatus")
-                        .WithMany()
-                        .HasForeignKey("ToStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ChangedByUser");
-
-                    b.Navigation("FromStatus");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("ToStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -1771,17 +1382,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductCategory");
 
                     b.Navigation("UnitOfMeasure");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Project", b =>
-                {
-                    b.HasOne("Domain.Entities.Customer", "Customer")
-                        .WithMany("Projects")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Domain.Entities.SafetyDataSheet", b =>
@@ -1822,28 +1422,12 @@ namespace Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Warehouse", b =>
-                {
-                    b.HasOne("Domain.Entities.Address", "Address")
-                        .WithMany()
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Address");
-                });
-
             modelBuilder.Entity("Domain.Entities.Address", b =>
                 {
                     b.Navigation("BillingOrders");
 
                     b.Navigation("DeliveryOrders");
 
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Carrier", b =>
-                {
                     b.Navigation("Orders");
                 });
 
@@ -1856,8 +1440,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("CustomerProductPrices");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("Domain.Entities.CustomerContact", b =>
@@ -1878,8 +1460,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
-
-                    b.Navigation("OrderStatusHistory");
                 });
 
             modelBuilder.Entity("Domain.Entities.PricingTier", b =>
@@ -1901,11 +1481,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Project", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
             modelBuilder.Entity("Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
@@ -1923,16 +1498,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("CreatedOrders");
 
                     b.Navigation("UploadedSafetyDataSheets");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Warehouse", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("OrderStatus", b =>
-                {
-                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

@@ -18,6 +18,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<HazardClass> HazardClasses => Set<HazardClass>();
     public DbSet<SafetyDataSheet> SafetyDataSheets => Set<SafetyDataSheet>();
     public DbSet<CustomerProductPrice> CustomerProductPrices => Set<CustomerProductPrice>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+    public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
+    public DbSet<Project> Projects => Set<Project>();
+    public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -564,6 +570,41 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithMany(x => x.Addresses)
                 .HasForeignKey(x => x.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+        });
+
+        modelBuilder.Entity<Warehouse>(entity =>
+        {
+            entity.ToTable("Warehouses");
+
+            entity.HasKey(x => x.WarehouseId);
+
+            entity.Property(x => x.Code)
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(x => x.Name)
+                .HasMaxLength(120)
+                .IsRequired();
+
+            entity.Property(x => x.ContactName)
+                .HasMaxLength(120)
+                .IsRequired(false);
+
+            entity.Property(x => x.ContactPhone)
+                .HasMaxLength(50)
+                .IsRequired(false);
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.HasIndex(x => x.Code)
+                .IsUnique();
+
+            entity.HasOne(x => x.Address)
+                .WithMany()
+                .HasForeignKey(x => x.AddressId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
         });
 
@@ -899,6 +940,407 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.HasIndex(x => new { x.CustomerId, x.ProductId, x.EffectiveFrom });
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Orders");
+
+            entity.HasKey(x => x.OrderId);
+
+            entity.Property(x => x.OrderNumber)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            entity.HasIndex(x => x.OrderNumber)
+                .IsUnique();
+
+            entity.Property(x => x.RequestedDeliveryDate)
+                .HasColumnType("date")
+                .IsRequired();
+
+            entity.Property(x => x.SubmittedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
+            entity.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.UpdatedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.DeletedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
+            entity.Property(x => x.Currency)
+                .HasColumnType("char(3)")
+                .HasMaxLength(3)
+                .IsRequired();
+
+            entity.Property(x => x.Subtotal)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(x => x.DiscountAmount)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(x => x.TaxAmount)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(x => x.TotalAmount)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(x => x.PurchaseOrderReference)
+                .HasMaxLength(40);
+
+            entity.Property(x => x.SpecialInstructions)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.InternalNotes)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.FailureReason)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.IsPriorityOrder)
+                .IsRequired();
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.OrderStatusId)
+                .HasDefaultValue(1)
+                .IsRequired();
+
+            entity.HasIndex(x => x.CustomerId);
+            entity.HasIndex(x => x.ProjectId);
+            entity.HasIndex(x => x.WarehouseId);
+            entity.HasIndex(x => x.CarrierId);
+            entity.HasIndex(x => x.OrderStatusId);
+            entity.HasIndex(x => x.CreatedAt);
+            entity.HasIndex(x => x.RequestedDeliveryDate);
+
+            entity.HasOne(x => x.Customer)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.Project)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.ProjectId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.DeliveryAddress)
+                .WithMany(x => x.DeliveryOrders)
+                .HasForeignKey(x => x.DeliveryAddressId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.BillingAddress)
+                .WithMany(x => x.BillingOrders)
+                .HasForeignKey(x => x.BillingAddressId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.AssignedToUser)
+                .WithMany()
+                .HasForeignKey(x => x.AssignedToUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.Warehouse)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.Carrier)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.CarrierId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.OrderStatus)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.OrderStatusId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("OrderItems");
+
+            entity.HasKey(x => x.OrderItemId);
+
+            entity.Property(x => x.Quantity)
+                .HasColumnType("decimal(10,2)")
+                .IsRequired();
+
+            entity.Property(x => x.UnitPrice)
+                .HasColumnType("decimal(10,2)")
+                .IsRequired();
+
+            entity.Property(x => x.DiscountPercent)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(x => x.LineTotal)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(x => x.Notes)
+                .HasMaxLength(255);
+
+            entity.HasOne(x => x.Order)
+                .WithMany(x => x.OrderItems)
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.Product)
+                .WithMany(x => x.OrderItems)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<Carrier>(entity =>
+        {
+            entity.ToTable("Carriers");
+
+            entity.HasKey(x => x.CarrierId);
+
+            entity.Property(x => x.Name)
+                .HasMaxLength(120)
+                .IsRequired();
+
+            entity.Property(x => x.ContactEmail)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.ServiceType)
+                .HasMaxLength(120);
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.HasIndex(x => x.Name)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<Carrier>().HasData(
+            new Carrier
+            {
+                CarrierId = 1,
+                Name = "NorthHaul Logistics",
+                ContactEmail = "ops@northhaul.co.uk",
+                ServiceType = "ADR / General Haulage",
+                IsActive = true
+            },
+            new Carrier
+            {
+                CarrierId = 2,
+                Name = "Mersey Freight Partners",
+                ContactEmail = "bookings@merseyfreight.co.uk",
+                ServiceType = "Regional Pallet and Drum Delivery",
+                IsActive = true
+            },
+            new Carrier
+            {
+                CarrierId = 3,
+                Name = "ChemSafe Transport",
+                ContactEmail = "orders@chemsafe-transport.co.uk",
+                ServiceType = "Hazardous Goods Specialist",
+                IsActive = true
+            },
+            new Carrier
+            {
+                CarrierId = 4,
+                Name = "WestLine Distribution",
+                ContactEmail = "dispatch@westline.co.uk",
+                ServiceType = "General Commercial Distribution",
+                IsActive = false
+            }
+        );
+
+        modelBuilder.Entity<OrderStatus>(entity =>
+        {
+            entity.ToTable("OrderStatuses");
+
+            entity.HasKey(x => x.OrderStatusId);
+
+            entity.Property(x => x.Name)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(x => x.IsTerminal)
+                .IsRequired();
+
+            entity.Property(x => x.DisplayOrder)
+                .IsRequired();
+
+            entity.HasIndex(x => x.Name)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<OrderStatus>().HasData(
+            new OrderStatus
+            {
+                OrderStatusId = 1,
+                Name = "Draft",
+                IsTerminal = false,
+                DisplayOrder = 1
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 2,
+                Name = "Submitted",
+                IsTerminal = false,
+                DisplayOrder = 2
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 3,
+                Name = "Pending Review",
+                IsTerminal = false,
+                DisplayOrder = 3
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 4,
+                Name = "Approved",
+                IsTerminal = false,
+                DisplayOrder = 4
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 5,
+                Name = "In Processing",
+                IsTerminal = false,
+                DisplayOrder = 5
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 6,
+                Name = "Awaiting Dispatch",
+                IsTerminal = false,
+                DisplayOrder = 6
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 7,
+                Name = "Completed",
+                IsTerminal = true,
+                DisplayOrder = 7
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 8,
+                Name = "Failed",
+                IsTerminal = true,
+                DisplayOrder = 8
+            },
+            new OrderStatus
+            {
+                OrderStatusId = 9,
+                Name = "Cancelled",
+                IsTerminal = true,
+                DisplayOrder = 9
+            }
+        );
+
+        modelBuilder.Entity<Project>(entity =>
+        {
+            entity.ToTable("Projects");
+
+            entity.HasKey(x => x.ProjectId);
+
+            entity.Property(x => x.ProjectCode)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            entity.Property(x => x.ProjectName)
+                .HasMaxLength(160)
+                .IsRequired();
+
+            entity.Property(x => x.Description)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.StartDate)
+                .HasColumnType("date")
+                .IsRequired();
+
+            entity.Property(x => x.EndDate)
+                .HasColumnType("date")
+                .IsRequired(false);
+
+            entity.Property(x => x.Status)
+                .HasMaxLength(40)
+                .IsRequired();
+
+            entity.HasIndex(x => x.ProjectCode)
+                .IsUnique();
+
+            entity.HasIndex(x => x.CustomerId);
+
+            entity.HasOne(x => x.Customer)
+                .WithMany(x => x.Projects)
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<OrderStatusHistory>(entity =>
+        {
+            entity.ToTable("OrderStatusHistories");
+
+            entity.HasKey(x => x.OrderStatusHistoryId);
+
+            entity.Property(x => x.ChangedAt)
+                .HasColumnType("datetime2")
+                .IsRequired();
+
+            entity.Property(x => x.Reason)
+                .HasMaxLength(255)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.Order)
+                .WithMany(x => x.OrderStatusHistory)
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.FromStatus)
+                .WithMany()
+                .HasForeignKey(x => x.FromStatusId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasOne(x => x.ToStatus)
+                .WithMany()
+                .HasForeignKey(x => x.ToStatusId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne(x => x.ChangedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.ChangedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
         });
     }
 }

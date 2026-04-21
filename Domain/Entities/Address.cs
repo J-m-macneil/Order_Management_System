@@ -4,8 +4,8 @@ public class Address
 {
     public int AddressId { get; set; }
 
-    public int CustomerId { get; set; }
-    public Customer Customer { get; set; } = null!;
+    public int? CustomerId { get; set; }
+    public Customer? Customer { get; set; }
 
     public string AddressType { get; set; } = string.Empty;
     public string SiteName { get; set; } = string.Empty;
@@ -27,4 +27,7 @@ public class Address
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+    public ICollection<Order> DeliveryOrders { get; set; } = new List<Order>();
+    public ICollection<Order> BillingOrders { get; set; } = new List<Order>();
 }

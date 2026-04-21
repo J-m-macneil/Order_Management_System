@@ -31,4 +31,6 @@ public class Customer
     public ICollection<Address> Addresses { get; set; } = new List<Address>();
     public ICollection<CustomerContact> Contacts { get; set; } = new List<CustomerContact>();
     public ICollection<CustomerProductPrice> CustomerProductPrices { get; set; } = new List<CustomerProductPrice>();
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+    public ICollection<Project> Projects { get; set; } = new List<Project>();
 }

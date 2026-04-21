@@ -3,7 +3,7 @@
 public class AddressDto
 {
     public int AddressId { get; set; }
-    public int CustomerId { get; set; }
+    public int? CustomerId { get; set; }
 
     public string AddressType { get; set; } = string.Empty;
     public string SiteName { get; set; } = string.Empty;

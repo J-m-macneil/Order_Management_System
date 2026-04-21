@@ -17,4 +17,5 @@ public class CustomerContact
 
     public DateTime CreatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
