@@ -1,7 +1,9 @@
+export type AddressType = 'Billing' | 'DeliverySite' | 'WarehousePartner';
+
 export interface Address {
   addressId: number;
   customerId: number;
-  addressType: string;
+  addressType: AddressType;
   siteName: string;
   line1: string;
   line2?: string | null;
@@ -16,7 +18,7 @@ export interface Address {
 }
 
 export interface CreateAddressRequest {
-  addressType: string;
+  addressType: AddressType;
   siteName: string;
   line1: string;
   line2?: string | null;

@@ -1,2 +1,24 @@
 <h1>Orders</h1>
-<p>Order management page.</p>
+
+<a routerLink="/orders/create">Create Order</a>
+
+<table>
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Customer</th>
+      <th>Delivery Date</th>
+      <th>Total</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let order of orders">
+      <td>{{ order.orderNumber }}</td>
+      <td>{{ order.customerName || order.customerId }}</td>
+      <td>{{ order.requestedDeliveryDate | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ order.totalAmount | currency:'GBP' }}</td>
+      <td>{{ order.isPriorityOrder ? 'Yes' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>

@@ -28,6 +28,7 @@ import { OrdersComponent } from './features/orders/orders.component';
 import { AdminComponent } from './features/admin/admin.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { OrderCreateComponent } from './features/orders/order-create/order-create.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     ProductFormComponent,
     OrdersComponent,
     AdminComponent,
-    LoginComponent
+    LoginComponent,
+    OrderCreateComponent
   ],
   imports: [
     BrowserModule,

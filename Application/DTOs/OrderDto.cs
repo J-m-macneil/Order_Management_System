@@ -9,6 +9,10 @@ public class OrderDto
     public int DeliveryAddressId { get; set; }
     public int BillingAddressId { get; set; }
 
+    public int WarehouseId { get; set; }
+    public int? CarrierId { get; set; }
+    public int OrderStatusId { get; set; }
+
     public int CreatedByUserId { get; set; }
     public int? AssignedToUserId { get; set; }
 

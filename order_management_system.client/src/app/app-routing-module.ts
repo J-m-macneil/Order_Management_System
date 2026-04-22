@@ -10,6 +10,7 @@ import { ProductFormComponent } from './features/products/product-form/product-f
 import { OrdersComponent } from './features/orders/orders.component';
 import { AdminComponent } from './features/admin/admin.component';
 import { LoginComponent } from './features/auth/login/login.component';
+import { OrderCreateComponent } from './features/orders/order-create/order-create.component'
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
@@ -32,7 +33,10 @@ const routes: Routes = [
       { path: 'products/edit/:id', component: ProductFormComponent, canActivate: [AuthGuard] },
 
       { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
-      { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] }
+      { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] },
+
+      { path: 'orders', component: OrdersComponent },
+      { path: 'orders/create', component: OrderCreateComponent }
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

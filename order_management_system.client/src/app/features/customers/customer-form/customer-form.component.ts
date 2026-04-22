@@ -1,14 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
-import { Address, CreateAddressRequest } from '../../models/address.model';
-import { CreateCustomerRequest } from '../../models/create-customer.model';
-import { Customer } from '../../models/customer.model';
-import { UpdateCustomerRequest } from '../../models/update-customer.model';
-import { CustomerContact } from '../../models/customer-contact.model';
-import { CreateCustomerContactRequest } from '../../models/customer-contact.model';
-import { CustomersService } from '../customers.service';
+import { Address, CreateAddressRequest } from '../../../core/models/address.model';
+import { CreateCustomerRequest } from '../../../core/models/create-customer.model';
+import { CustomerContact, CreateCustomerContactRequest } from '../../../core/models/customer-contact.model';
+import { Customer } from '../../../core/models/customer.model';
+import { UpdateCustomerRequest } from '../../../core/models/update-customer.model';
+import { CustomersService } from '../../../core/services/customers.service';
 
 @Component({
   selector: 'app-customer-form',

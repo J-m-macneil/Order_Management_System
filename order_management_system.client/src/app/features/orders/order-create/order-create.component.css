@@ -1,0 +1,110 @@
+/* Page spacing */
+h1 {
+  margin-bottom: 16px;
+}
+
+/* Form container */
+form {
+  max-width: 800px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+  /* Form groups */
+  form > div {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+/* Labels */
+label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Inputs + selects + textarea */
+input,
+select,
+textarea {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #1976d2;
+  }
+
+  /* Checkbox */
+  input[type="checkbox"] {
+    margin-right: 6px;
+  }
+
+/* Items section */
+[formArrayName="items"] {
+  margin-top: 16px;
+}
+
+  [formArrayName="items"] > div {
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    background: #fafafa;
+  }
+
+/* Buttons */
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+  /* Primary button */
+  button[type="submit"] {
+    background-color: #1976d2;
+    color: #fff;
+  }
+
+    button[type="submit"]:hover {
+      background-color: #1565c0;
+    }
+
+  /* Secondary buttons */
+  button[type="button"] {
+    background-color: #e0e0e0;
+  }
+
+    button[type="button"]:hover {
+      background-color: #d5d5d5;
+    }
+
+/* Remove button (danger style) */
+[formArrayName="items"] button {
+  margin-top: 8px;
+  background-color: #f44336;
+  color: white;
+}
+
+  [formArrayName="items"] button:hover {
+    background-color: #d32f2f;
+  }
+
+/* Divider */
+hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #eee;
+}

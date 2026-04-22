@@ -1,0 +1,124 @@
+<form [formGroup]="orderForm" (ngSubmit)="submit()">
+
+  <div>
+    <label>Customer</label>
+    <select formControlName="customerId">
+      <option [ngValue]="null">Select customer</option>
+      <option *ngFor="let customer of customers" [ngValue]="customer.customerId">
+        {{ customer.companyName }}
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label>Billing Address</label>
+    <select formControlName="billingAddressId">
+      <option [ngValue]="null">Select billing address</option>
+      <option *ngFor="let address of billingAddresses" [ngValue]="address.addressId">
+        {{ address.siteName }} - {{ address.line1 }}
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label>Delivery Address</label>
+    <select formControlName="deliveryAddressId">
+      <option [ngValue]="null">Select delivery address</option>
+      <option *ngFor="let address of deliveryAddresses" [ngValue]="address.addressId">
+        {{ address.siteName }} - {{ address.line1 }}
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label>Warehouse</label>
+    <select formControlName="warehouseId">
+      <option [ngValue]="null">Select warehouse</option>
+      <option *ngFor="let warehouse of warehouses" [ngValue]="warehouse.warehouseId">
+        {{ warehouse.name }}
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label>Carrier</label>
+    <select formControlName="carrierId">
+      <option [ngValue]="null">Select carrier</option>
+      <option *ngFor="let carrier of carriers" [ngValue]="carrier.carrierId">
+        {{ carrier.name }}
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label>Project</label>
+    <select formControlName="projectId">
+      <option [ngValue]="null">Select project</option>
+      <option *ngFor="let project of projects" [ngValue]="project.projectId">
+        {{ project.projectCode }} - {{ project.projectName }}
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label>Requested Delivery Date</label>
+    <input type="date" formControlName="requestedDeliveryDate" />
+  </div>
+
+  <div>
+    <label>PO Reference</label>
+    <input type="text" formControlName="purchaseOrderReference" />
+  </div>
+
+  <div>
+    <label>Special Instructions</label>
+    <textarea formControlName="specialInstructions"></textarea>
+  </div>
+
+  <div>
+    <label>Internal Notes</label>
+    <textarea formControlName="internalNotes"></textarea>
+  </div>
+
+  <div>
+    <label>
+      <input type="checkbox" formControlName="isPriorityOrder" />
+      Priority Order
+    </label>
+  </div>
+
+  <hr />
+
+  <div formArrayName="items">
+    <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
+      <label>Product</label>
+      <select formControlName="productId">
+        <option [ngValue]="null">Select product</option>
+        <option *ngFor="let product of products" [ngValue]="product.productId">
+          {{ product.productName }}
+        </option>
+      </select>
+
+      <label>Quantity</label>
+      <input type="number" formControlName="quantity" min="1" />
+
+      <label>Unit Price</label>
+      <input type="number" formControlName="unitPrice" min="0" step="0.01" />
+
+      <label>Discount %</label>
+      <input type="number" formControlName="discountPercent" min="0" step="0.01" />
+
+      <label>Item Notes</label>
+      <input type="text" formControlName="notes" />
+
+      <button type="button" (click)="removeItem(i)">Remove</button>
+    </div>
+  </div>
+
+  <button type="button" (click)="addItem()">Add Item</button>
+
+  <hr />
+
+  <button type="submit">Create Order</button>
+
+</form>

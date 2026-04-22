@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ProductList } from '../models/product-list.model';
-import { ProductsService } from './products.service';
+import { ProductList } from '../../core/models/product-list.model';
+import { ProductsService } from '../../core/services/products.service';
 
 @Component({
   selector: 'app-products',

@@ -20,10 +20,19 @@ public class CustomerAddressesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AddressDto>>> Get(int customerId)
+    public async Task<ActionResult<IEnumerable<AddressDto>>> GetAll(int customerId)
     {
+        var customerExists = await _dbContext.Customers
+            .AnyAsync(x => x.CustomerId == customerId && x.IsActive && x.DeletedAt == null);
+
+        if (!customerExists)
+            return NotFound("Customer not found");
+
         var addresses = await _dbContext.Addresses
             .Where(x => x.CustomerId == customerId && x.IsActive && x.DeletedAt == null)
+            .OrderBy(x => x.AddressType)
+            .ThenByDescending(x => x.IsPrimary)
+            .ThenBy(x => x.SiteName)
             .Select(x => new AddressDto
             {
                 AddressId = x.AddressId,
@@ -46,11 +55,44 @@ public class CustomerAddressesController : ControllerBase
         return Ok(addresses);
     }
 
+    [HttpGet("{addressId}")]
+    public async Task<ActionResult<AddressDto>> GetById(int customerId, int addressId)
+    {
+        var address = await _dbContext.Addresses
+            .Where(x => x.AddressId == addressId &&
+                        x.CustomerId == customerId &&
+                        x.IsActive &&
+                        x.DeletedAt == null)
+            .Select(x => new AddressDto
+            {
+                AddressId = x.AddressId,
+                CustomerId = x.CustomerId,
+                AddressType = x.AddressType,
+                SiteName = x.SiteName,
+                Line1 = x.Line1,
+                Line2 = x.Line2,
+                City = x.City,
+                County = x.County,
+                Postcode = x.Postcode,
+                Country = x.Country,
+                ContactName = x.ContactName,
+                ContactPhone = x.ContactPhone,
+                DeliveryInstructions = x.DeliveryInstructions,
+                IsPrimary = x.IsPrimary
+            })
+            .FirstOrDefaultAsync();
+
+        if (address == null)
+            return NotFound();
+
+        return Ok(address);
+    }
+
     [HttpPost]
     public async Task<ActionResult<AddressDto>> Create(int customerId, [FromBody] CreateAddressDto dto)
     {
         var customerExists = await _dbContext.Customers
-            .AnyAsync(x => x.CustomerId == customerId && x.DeletedAt == null);
+            .AnyAsync(x => x.CustomerId == customerId && x.IsActive && x.DeletedAt == null);
 
         if (!customerExists)
             return NotFound("Customer not found");
@@ -78,7 +120,7 @@ public class CustomerAddressesController : ControllerBase
         _dbContext.Addresses.Add(address);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(new AddressDto
+        var result = new AddressDto
         {
             AddressId = address.AddressId,
             CustomerId = address.CustomerId,
@@ -94,14 +136,19 @@ public class CustomerAddressesController : ControllerBase
             ContactPhone = address.ContactPhone,
             DeliveryInstructions = address.DeliveryInstructions,
             IsPrimary = address.IsPrimary
-        });
+        };
+
+        return CreatedAtAction(nameof(GetById), new { customerId, addressId = address.AddressId }, result);
     }
 
     [HttpPut("{addressId}")]
     public async Task<IActionResult> Update(int customerId, int addressId, [FromBody] UpdateAddressDto dto)
     {
         var address = await _dbContext.Addresses
-            .FirstOrDefaultAsync(x => x.AddressId == addressId && x.CustomerId == customerId && x.DeletedAt == null);
+            .FirstOrDefaultAsync(x => x.AddressId == addressId &&
+                                      x.CustomerId == customerId &&
+                                      x.IsActive &&
+                                      x.DeletedAt == null);
 
         if (address == null)
             return NotFound();
@@ -128,7 +175,10 @@ public class CustomerAddressesController : ControllerBase
     public async Task<IActionResult> Delete(int customerId, int addressId)
     {
         var address = await _dbContext.Addresses
-            .FirstOrDefaultAsync(x => x.AddressId == addressId && x.CustomerId == customerId && x.DeletedAt == null);
+            .FirstOrDefaultAsync(x => x.AddressId == addressId &&
+                                      x.CustomerId == customerId &&
+                                      x.IsActive &&
+                                      x.DeletedAt == null);
 
         if (address == null)
             return NotFound();

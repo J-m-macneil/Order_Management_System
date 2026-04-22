@@ -1,14 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
-import { Product } from '../../models/product.model';
-import { ProductCategory } from '../../models/product-category.model';
-import { UnitOfMeasure } from '../../models/unit-of-measure.model';
-import { HazardClass } from '../../models/hazard-class.model';
-
-import { ProductsService } from '../products.service';
-import { SafetyDataSheet, CreateSafetyDataSheetRequest } from '../../models/safety-data-sheet-model';
+import { HazardClass } from '../../../core/models/hazard-class.model';
+import { ProductCategory } from '../../../core/models/product-category.model';
+import { Product } from '../../../core/models/product.model';
+import { SafetyDataSheet, CreateSafetyDataSheetRequest } from '../../../core/models/safety-data-sheet-model';
+import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
+import { ProductsService } from '../../../core/services/products.service';
 
 @Component({
   selector: 'app-product-form',
