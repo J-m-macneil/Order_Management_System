@@ -5,14 +5,28 @@ export interface Order {
   orderNumber: string;
 
   customerId: number;
+  customerName?: string;
+
   deliveryAddressId: number;
   billingAddressId: number;
 
+  warehouseId: number;
+  warehouseName?: string;
+
+  carrierId?: number | null;
+  carrierName?: string | null;
+
+  projectId?: number | null;
+  projectName?: string | null;
+
+  orderStatusId: number;
+  orderStatusName?: string;
+
   createdByUserId: number;
-  assignedToUserId?: number;
+  assignedToUserId?: number | null;
 
   requestedDeliveryDate: string;
-  submittedAt?: string;
+  submittedAt?: string | null;
 
   createdAt: string;
   updatedAt: string;
@@ -24,10 +38,10 @@ export interface Order {
   taxAmount: number;
   totalAmount: number;
 
-  purchaseOrderReference?: string;
-  specialInstructions?: string;
-  internalNotes?: string;
-  failureReason?: string;
+  purchaseOrderReference?: string | null;
+  specialInstructions?: string | null;
+  internalNotes?: string | null;
+  failureReason?: string | null;
 
   isPriorityOrder: boolean;
 

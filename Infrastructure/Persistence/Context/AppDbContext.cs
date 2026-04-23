@@ -951,8 +951,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasKey(x => x.OrderId);
 
             entity.Property(x => x.OrderNumber)
-                .HasMaxLength(30)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(30);
 
             entity.HasIndex(x => x.OrderNumber)
                 .IsUnique();
@@ -999,21 +999,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.PurchaseOrderReference)
-                .HasMaxLength(40);
+                .HasMaxLength(40)
+                .IsRequired(false);
 
             entity.Property(x => x.SpecialInstructions)
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.Property(x => x.InternalNotes)
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.Property(x => x.FailureReason)
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.Property(x => x.IsPriorityOrder)
-                .IsRequired();
-
-            entity.Property(x => x.IsActive)
                 .IsRequired();
 
             entity.Property(x => x.OrderStatusId)
@@ -1022,6 +1023,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             entity.HasIndex(x => x.CustomerId);
             entity.HasIndex(x => x.ProjectId);
+            entity.HasIndex(x => x.DeliveryAddressId);
+            entity.HasIndex(x => x.BillingAddressId);
+            entity.HasIndex(x => x.CreatedByUserId);
+            entity.HasIndex(x => x.AssignedToUserId);
             entity.HasIndex(x => x.WarehouseId);
             entity.HasIndex(x => x.CarrierId);
             entity.HasIndex(x => x.OrderStatusId);

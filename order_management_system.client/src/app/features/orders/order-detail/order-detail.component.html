@@ -1,0 +1,77 @@
+<div *ngIf="isLoading">
+  <p>Loading order details...</p>
+</div>
+
+<div *ngIf="errorMessage && !isLoading">
+  <p>{{ errorMessage }}</p>
+</div>
+
+<div *ngIf="order as currentOrder">
+  <h1>Order {{ currentOrder.orderNumber }}</h1>
+
+  <a routerLink="/orders">Back to Orders</a>
+
+  <section>
+    <h2>Summary</h2>
+    <p><strong>Customer:</strong> {{ currentOrder.customerName || currentOrder.customerId }}</p>
+    <p><strong>Status:</strong> {{ currentOrder.orderStatusName || currentOrder.orderStatusId }}</p>
+    <p><strong>Priority:</strong> {{ currentOrder.isPriorityOrder ? 'Yes' : 'No' }}</p>
+    <p><strong>Requested Delivery Date:</strong> {{ currentOrder.requestedDeliveryDate | date:'dd/MM/yyyy' }}</p>
+    <p><strong>PO Reference:</strong> {{ currentOrder.purchaseOrderReference || '-' }}</p>
+    <p><strong>Project:</strong> {{ currentOrder.projectName || currentOrder.projectId || '-' }}</p>
+  </section>
+
+  <section>
+    <h2>Logistics</h2>
+    <p><strong>Billing Address Id:</strong> {{ currentOrder.billingAddressId }}</p>
+    <p><strong>Delivery Address Id:</strong> {{ currentOrder.deliveryAddressId }}</p>
+    <p><strong>Warehouse:</strong> {{ currentOrder.warehouseName || currentOrder.warehouseId }}</p>
+    <p><strong>Carrier:</strong> {{ currentOrder.carrierName || currentOrder.carrierId || '-' }}</p>
+  </section>
+
+  <section>
+    <h2>Financial Summary</h2>
+    <p><strong>Subtotal:</strong> {{ currentOrder.subtotal | currency:'GBP' }}</p>
+    <p><strong>Discount:</strong> {{ currentOrder.discountAmount | currency:'GBP' }}</p>
+    <p><strong>Tax:</strong> {{ currentOrder.taxAmount | currency:'GBP' }}</p>
+    <p><strong>Total:</strong> {{ currentOrder.totalAmount | currency:'GBP' }}</p>
+  </section>
+
+  <section>
+    <h2>Items</h2>
+
+    <table *ngIf="currentOrder.items && currentOrder.items.length > 0">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Discount %</th>
+          <th>Line Total</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of currentOrder.items">
+          <td>{{ item.productName || item.productId }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.unitPrice | currency:'GBP' }}</td>
+          <td>{{ item.discountPercent }}</td>
+          <td>{{ item.lineTotal | currency:'GBP' }}</td>
+          <td>{{ item.notes || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!currentOrder.items || currentOrder.items.length === 0">
+      No order items found.
+    </p>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <p><strong>Special Instructions:</strong> {{ currentOrder.specialInstructions || '-' }}</p>
+    <p><strong>Internal Notes:</strong> {{ currentOrder.internalNotes || '-' }}</p>
+    <p><strong>Failure Reason:</strong> {{ currentOrder.failureReason || '-' }}</p>
+  </section>
+</div>

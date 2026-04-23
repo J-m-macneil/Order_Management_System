@@ -9,9 +9,20 @@ public class OrderDto
     public int DeliveryAddressId { get; set; }
     public int BillingAddressId { get; set; }
 
-    public int WarehouseId { get; set; }
-    public int? CarrierId { get; set; }
     public int OrderStatusId { get; set; }
+
+    public string? CustomerName { get; set; } 
+
+    public int WarehouseId { get; set; }
+    public string? WarehouseName { get; set; }
+
+    public int? CarrierId { get; set; }
+    public string? CarrierName { get; set; }
+
+    public int? ProjectId { get; set; }
+    public string? ProjectName { get; set; }
+
+    public string? OrderStatusName { get; set; }
 
     public int CreatedByUserId { get; set; }
     public int? AssignedToUserId { get; set; }

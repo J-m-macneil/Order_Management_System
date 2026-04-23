@@ -16,4 +16,6 @@ public class OrderItem
     public decimal LineTotal { get; set; }
 
     public string? Notes { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 }

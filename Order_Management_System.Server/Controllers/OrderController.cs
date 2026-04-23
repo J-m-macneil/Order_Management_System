@@ -42,8 +42,7 @@ public class OrdersController : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Currency = "GBP",
-            IsPriorityOrder = dto.IsPriorityOrder,
-            IsActive = true
+            IsPriorityOrder = dto.IsPriorityOrder
         };
 
         // =========================
@@ -139,7 +138,13 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<List<OrderDto>>> GetAll()
     {
         var orders = await _dbContext.Orders
+            .Include(o => o.Customer)
+            .Include(o => o.Warehouse)
+            .Include(o => o.Carrier)
+            .Include(o => o.Project)
+            .Include(o => o.OrderStatus)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
             .Where(o => o.DeletedAt == null)
             .ToListAsync();
 
@@ -149,8 +154,22 @@ public class OrdersController : ControllerBase
             OrderNumber = order.OrderNumber,
 
             CustomerId = order.CustomerId,
+            CustomerName = order.Customer != null ? order.Customer.CompanyName : null,
+
             DeliveryAddressId = order.DeliveryAddressId,
             BillingAddressId = order.BillingAddressId,
+
+            WarehouseId = order.WarehouseId,
+            WarehouseName = order.Warehouse != null ? order.Warehouse.Name : null,
+
+            CarrierId = order.CarrierId,
+            CarrierName = order.Carrier != null ? order.Carrier.Name : null,
+
+            ProjectId = order.ProjectId,
+            ProjectName = order.Project != null ? order.Project.ProjectName : null,
+
+            OrderStatusId = order.OrderStatusId,
+            OrderStatusName = order.OrderStatus != null ? order.OrderStatus.Name : null,
 
             CreatedByUserId = order.CreatedByUserId,
             AssignedToUserId = order.AssignedToUserId,
@@ -179,6 +198,7 @@ public class OrdersController : ControllerBase
             {
                 OrderItemId = x.OrderItemId,
                 ProductId = x.ProductId,
+                ProductName = x.Product != null ? x.Product.ProductName : null,
                 Quantity = x.Quantity,
                 UnitPrice = x.UnitPrice,
                 DiscountPercent = x.DiscountPercent,
@@ -197,7 +217,13 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<OrderDto>> GetById(int id)
     {
         var order = await _dbContext.Orders
+            .Include(o => o.Customer)
+            .Include(o => o.Warehouse)
+            .Include(o => o.Carrier)
+            .Include(o => o.Project)
+            .Include(o => o.OrderStatus)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
             .FirstOrDefaultAsync(o => o.OrderId == id && o.DeletedAt == null);
 
         if (order == null)
@@ -209,8 +235,22 @@ public class OrdersController : ControllerBase
             OrderNumber = order.OrderNumber,
 
             CustomerId = order.CustomerId,
+            CustomerName = order.Customer != null ? order.Customer.CompanyName : null,
+
             DeliveryAddressId = order.DeliveryAddressId,
             BillingAddressId = order.BillingAddressId,
+
+            WarehouseId = order.WarehouseId,
+            WarehouseName = order.Warehouse != null ? order.Warehouse.Name : null,
+
+            CarrierId = order.CarrierId,
+            CarrierName = order.Carrier != null ? order.Carrier.Name : null,
+
+            ProjectId = order.ProjectId,
+            ProjectName = order.Project != null ? order.Project.ProjectName : null,
+
+            OrderStatusId = order.OrderStatusId,
+            OrderStatusName = order.OrderStatus != null ? order.OrderStatus.Name : null,
 
             CreatedByUserId = order.CreatedByUserId,
             AssignedToUserId = order.AssignedToUserId,
@@ -239,6 +279,7 @@ public class OrdersController : ControllerBase
             {
                 OrderItemId = x.OrderItemId,
                 ProductId = x.ProductId,
+                ProductName = x.Product != null ? x.Product.ProductName : null,
                 Quantity = x.Quantity,
                 UnitPrice = x.UnitPrice,
                 DiscountPercent = x.DiscountPercent,

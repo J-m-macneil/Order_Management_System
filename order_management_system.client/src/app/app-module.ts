@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -29,6 +29,7 @@ import { AdminComponent } from './features/admin/admin.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { OrderCreateComponent } from './features/orders/order-create/order-create.component';
+import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
 
 @NgModule({
   declarations: [
@@ -42,9 +43,10 @@ import { OrderCreateComponent } from './features/orders/order-create/order-creat
     ProductsComponent,
     ProductFormComponent,
     OrdersComponent,
+    OrderCreateComponent,
+    OrderDetailComponent,
     AdminComponent,
-    LoginComponent,
-    OrderCreateComponent
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -58,7 +60,8 @@ import { OrderCreateComponent } from './features/orders/order-create/order-creat
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    FormsModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

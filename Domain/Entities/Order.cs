@@ -38,6 +38,7 @@ public class Order
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? DeletedAt { get; set; }
 
     public string Currency { get; set; } = "GBP";
 
@@ -52,9 +53,6 @@ public class Order
     public string? FailureReason { get; set; }
 
     public bool IsPriorityOrder { get; set; } = false;
-
-    public bool IsActive { get; set; } = true;
-    public DateTime? DeletedAt { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<OrderStatusHistory> OrderStatusHistory { get; set; } = new List<OrderStatusHistory>();

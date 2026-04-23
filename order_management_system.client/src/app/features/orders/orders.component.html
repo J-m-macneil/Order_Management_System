@@ -2,7 +2,41 @@
 
 <a routerLink="/orders/create">Create Order</a>
 
-<table>
+<div>
+  <input type="text"
+         [(ngModel)]="searchTerm"
+         (input)="applyFilters()"
+         placeholder="Search by order number, customer or PO reference" />
+
+  <select [(ngModel)]="priorityFilter" (change)="applyFilters()">
+    <option value="">All priorities</option>
+    <option value="priority">Priority</option>
+    <option value="standard">Standard</option>
+  </select>
+
+  <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+    <option value="">All statuses</option>
+    <option value="1">Draft</option>
+    <option value="2">Submitted</option>
+    <option value="3">Pending Review</option>
+    <option value="4">Approved</option>
+    <option value="5">In Processing</option>
+    <option value="6">Awaiting Dispatch</option>
+    <option value="7">Completed</option>
+    <option value="8">Failed</option>
+    <option value="9">Cancelled</option>
+  </select>
+</div>
+
+<div *ngIf="isLoading">
+  <p>Loading orders...</p>
+</div>
+
+<div *ngIf="errorMessage && !isLoading">
+  <p>{{ errorMessage }}</p>
+</div>
+
+<table *ngIf="!isLoading && !errorMessage">
   <thead>
     <tr>
       <th>Order</th>
@@ -10,15 +44,23 @@
       <th>Delivery Date</th>
       <th>Total</th>
       <th>Priority</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let order of orders">
+    <tr *ngFor="let order of filteredOrders">
       <td>{{ order.orderNumber }}</td>
       <td>{{ order.customerName || order.customerId }}</td>
       <td>{{ order.requestedDeliveryDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ order.totalAmount | currency:'GBP' }}</td>
       <td>{{ order.isPriorityOrder ? 'Yes' : 'No' }}</td>
+      <td>
+        <a [routerLink]="['/orders', order.orderId]">View</a>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div *ngIf="!isLoading && !errorMessage && filteredOrders.length === 0">
+  <p>No orders found.</p>
+</div>
