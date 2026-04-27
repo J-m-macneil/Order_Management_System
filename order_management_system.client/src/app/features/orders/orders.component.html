@@ -1,66 +1,194 @@
-<h1>Orders</h1>
-
-<a routerLink="/orders/create">Create Order</a>
-
-<div>
-  <input type="text"
-         [(ngModel)]="searchTerm"
-         (input)="applyFilters()"
-         placeholder="Search by order number, customer or PO reference" />
-
-  <select [(ngModel)]="priorityFilter" (change)="applyFilters()">
-    <option value="">All priorities</option>
-    <option value="priority">Priority</option>
-    <option value="standard">Standard</option>
-  </select>
-
-  <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-    <option value="">All statuses</option>
-    <option value="1">Draft</option>
-    <option value="2">Submitted</option>
-    <option value="3">Pending Review</option>
-    <option value="4">Approved</option>
-    <option value="5">In Processing</option>
-    <option value="6">Awaiting Dispatch</option>
-    <option value="7">Completed</option>
-    <option value="8">Failed</option>
-    <option value="9">Cancelled</option>
-  </select>
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
+  <div>
+    <h1 class="text-3xl font-light text-slate-900 dark:text-white">Orders</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">Manage and track your chemical orders</p>
+  </div>
+  <a
+    routerLink="/orders/create"
+    class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+  >
+    + New Order
+  </a>
 </div>
 
-<div *ngIf="isLoading">
-  <p>Loading orders...</p>
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div *ngFor="let stat of stats" class="metric-card">
+    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">
+      {{ stat.label }}
+    </p>
+    <p [class]="'text-3xl font-light text-slate-900 dark:text-white mt-2 ' + stat.color">
+      {{ stat.value }}
+    </p>
+  </div>
 </div>
 
-<div *ngIf="errorMessage && !isLoading">
-  <p>{{ errorMessage }}</p>
+<!-- Search Bar -->
+<div class="mb-6">
+  <div class="relative">
+    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="applyFilters()"
+      placeholder="Search by order number, customer, or reference..."
+      class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all"
+    />
+  </div>
 </div>
 
-<table *ngIf="!isLoading && !errorMessage">
-  <thead>
-    <tr>
-      <th>Order</th>
-      <th>Customer</th>
-      <th>Delivery Date</th>
-      <th>Total</th>
-      <th>Priority</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let order of filteredOrders">
-      <td>{{ order.orderNumber }}</td>
-      <td>{{ order.customerName || order.customerId }}</td>
-      <td>{{ order.requestedDeliveryDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ order.totalAmount | currency:'GBP' }}</td>
-      <td>{{ order.isPriorityOrder ? 'Yes' : 'No' }}</td>
-      <td>
-        <a [routerLink]="['/orders', order.orderId]">View</a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<!-- Filter Toggle and Panel -->
+<div class="mb-6">
+  <button
+    (click)="toggleFilters()"
+    class="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+  >
+    <span>🔽</span>
+    <span>Filters</span>
+    <span *ngIf="priorityFilter || statusFilter" class="ml-auto px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
+      {{ (priorityFilter ? 1 : 0) + (statusFilter ? 1 : 0) }}
+    </span>
+  </button>
 
-<div *ngIf="!isLoading && !errorMessage && filteredOrders.length === 0">
-  <p>No orders found.</p>
+  <!-- Collapsible Filter Panel -->
+  <div
+    *ngIf="showFilters()"
+    class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-3 gap-4"
+  >
+    <!-- Priority Filter -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Priority</label>
+      <select
+        [(ngModel)]="priorityFilter"
+        (change)="applyFilters()"
+        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      >
+        <option value="">All priorities</option>
+        <option value="priority">Priority Orders</option>
+        <option value="standard">Standard Orders</option>
+      </select>
+    </div>
+
+    <!-- Status Filter -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Status</label>
+      <select
+        [(ngModel)]="statusFilter"
+        (change)="applyFilters()"
+        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      >
+        <option value="">All statuses</option>
+        <option value="1">Draft</option>
+        <option value="2">Submitted</option>
+        <option value="3">Pending Review</option>
+        <option value="4">Approved</option>
+        <option value="5">In Processing</option>
+        <option value="6">Awaiting Dispatch</option>
+        <option value="7">Completed</option>
+        <option value="8">Failed</option>
+        <option value="9">Cancelled</option>
+      </select>
+    </div>
+
+    <!-- Clear Filters -->
+    <div class="flex items-end">
+      <button
+        (click)="priorityFilter = ''; statusFilter = ''; applyFilters()"
+        class="w-full px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
+      >
+        Clear Filters
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading()" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">Loading orders...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="errorMessage && !isLoading()" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+</div>
+
+<!-- Orders Table -->
+<div *ngIf="!isLoading() && !errorMessage" class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+        <tr>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Order #
+          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Customer
+          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Status
+          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Priority
+          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Delivery Date
+          </th>
+          <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Total
+          </th>
+          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        <tr
+          *ngFor="let order of filteredOrders"
+          class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+        >
+          <td class="px-6 py-4">
+            <a
+              [routerLink]="['/orders', order.orderId]"
+              class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
+              {{ order.orderNumber }}
+            </a>
+          </td>
+          <td class="px-6 py-4 text-slate-900 dark:text-white">{{ order.customerName }}</td>
+          <td class="px-6 py-4">
+            <span
+              [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getStatusColor(order.statusId)"
+            >
+              {{ statusLabels[order.statusId] }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <span [class]="'text-xs font-medium ' + getPriorityColor(order.isPriorityOrder)">
+              {{ getPriorityLabel(order.isPriorityOrder) }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+            {{ order.requestedDeliveryDate | date: 'short' }}
+          </td>
+          <td class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white">
+            {{ formatCurrency(order.totalAmount) }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <a
+              [routerLink]="['/orders', order.orderId]"
+              class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
+            >
+              View
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredOrders.length === 0" class="text-center py-12">
+    <p class="text-slate-500 dark:text-slate-400">No orders found.</p>
+  </div>
 </div>
