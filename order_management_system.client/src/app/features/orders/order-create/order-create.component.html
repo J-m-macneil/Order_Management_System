@@ -1,124 +1,354 @@
-<form [formGroup]="orderForm" (ngSubmit)="submit()">
-
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
   <div>
-    <label>Customer</label>
-    <select formControlName="customerId">
-      <option [ngValue]="null">Select customer</option>
-      <option *ngFor="let customer of customers" [ngValue]="customer.customerId">
-        {{ customer.companyName }}
-      </option>
-    </select>
+    <h1 class="text-3xl font-light text-slate-900 dark:text-white">Create Order</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">Fill in the form below to create a new order</p>
   </div>
+  <a routerLink="/orders" class="text-blue-600 dark:text-blue-400 hover:underline">
+    ← Back to Orders
+  </a>
+</div>
 
-  <div>
-    <label>Billing Address</label>
-    <select formControlName="billingAddressId">
-      <option [ngValue]="null">Select billing address</option>
-      <option *ngFor="let address of billingAddresses" [ngValue]="address.addressId">
-        {{ address.siteName }} - {{ address.line1 }}
-      </option>
-    </select>
-  </div>
+<!-- Order Creation Form -->
+<form [formGroup]="orderForm" (ngSubmit)="submit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Main Content (2 columns) -->
+  <div class="lg:col-span-2 space-y-6">
+    <!-- Customer Information -->
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Customer Information</h2>
+      <div class="space-y-4">
+        <!-- Customer Selection -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Customer <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="customerId"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          >
+            <option [ngValue]="null">Select a customer</option>
+            <option *ngFor="let customer of customers" [ngValue]="customer.customerId">
+              {{ customer.companyName }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('customerId')?.hasError('required') && orderForm.get('customerId')?.touched" class="mt-1 text-sm text-red-500">
+            Customer is required
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div>
-    <label>Delivery Address</label>
-    <select formControlName="deliveryAddressId">
-      <option [ngValue]="null">Select delivery address</option>
-      <option *ngFor="let address of deliveryAddresses" [ngValue]="address.addressId">
-        {{ address.siteName }} - {{ address.line1 }}
-      </option>
-    </select>
-  </div>
+    <!-- Delivery Information -->
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Delivery Information</h2>
+      <div class="space-y-4">
+        <!-- Billing Address -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Billing Address <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="billingAddressId"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          >
+            <option [ngValue]="null">Select billing address</option>
+            <option *ngFor="let address of billingAddresses" [ngValue]="address.addressId">
+              {{ address.siteName }} - {{ address.line1 }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('billingAddressId')?.hasError('required') && orderForm.get('billingAddressId')?.touched" class="mt-1 text-sm text-red-500">
+            Billing address is required
+          </div>
+        </div>
 
-  <div>
-    <label>Warehouse</label>
-    <select formControlName="warehouseId">
-      <option [ngValue]="null">Select warehouse</option>
-      <option *ngFor="let warehouse of warehouses" [ngValue]="warehouse.warehouseId">
-        {{ warehouse.name }}
-      </option>
-    </select>
-  </div>
+        <!-- Delivery Address -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Delivery Address <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="deliveryAddressId"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          >
+            <option [ngValue]="null">Select delivery address</option>
+            <option *ngFor="let address of deliveryAddresses" [ngValue]="address.addressId">
+              {{ address.siteName }} - {{ address.line1 }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('deliveryAddressId')?.hasError('required') && orderForm.get('deliveryAddressId')?.touched" class="mt-1 text-sm text-red-500">
+            Delivery address is required
+          </div>
+        </div>
 
-  <div>
-    <label>Carrier</label>
-    <select formControlName="carrierId">
-      <option [ngValue]="null">Select carrier</option>
-      <option *ngFor="let carrier of carriers" [ngValue]="carrier.carrierId">
-        {{ carrier.name }}
-      </option>
-    </select>
-  </div>
+        <!-- Warehouse -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Warehouse <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="warehouseId"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          >
+            <option [ngValue]="null">Select warehouse</option>
+            <option *ngFor="let warehouse of warehouses" [ngValue]="warehouse.warehouseId">
+              {{ warehouse.name }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('warehouseId')?.hasError('required') && orderForm.get('warehouseId')?.touched" class="mt-1 text-sm text-red-500">
+            Warehouse is required
+          </div>
+        </div>
 
-  <div>
-    <label>Project</label>
-    <select formControlName="projectId">
-      <option [ngValue]="null">Select project</option>
-      <option *ngFor="let project of projects" [ngValue]="project.projectId">
-        {{ project.projectCode }} - {{ project.projectName }}
-      </option>
-    </select>
-  </div>
+        <!-- Carrier -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Carrier
+          </label>
+          <select
+            formControlName="carrierId"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          >
+            <option [ngValue]="null">Select carrier (optional)</option>
+            <option *ngFor="let carrier of carriers" [ngValue]="carrier.carrierId">
+              {{ carrier.name }}
+            </option>
+          </select>
+        </div>
 
-  <div>
-    <label>Requested Delivery Date</label>
-    <input type="date" formControlName="requestedDeliveryDate" />
-  </div>
+        <!-- Requested Delivery Date -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Requested Delivery Date <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            formControlName="requestedDeliveryDate"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          />
+          <div *ngIf="orderForm.get('requestedDeliveryDate')?.hasError('required') && orderForm.get('requestedDeliveryDate')?.touched" class="mt-1 text-sm text-red-500">
+            Delivery date is required
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div>
-    <label>PO Reference</label>
-    <input type="text" formControlName="purchaseOrderReference" />
-  </div>
+    <!-- Order Items -->
+    <div class="form-card">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white">Order Items</h2>
+        <button
+          type="button"
+          (click)="addItem()"
+          class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm"
+        >
+          + Add Item
+        </button>
+      </div>
 
-  <div>
-    <label>Special Instructions</label>
-    <textarea formControlName="specialInstructions"></textarea>
-  </div>
+      <div formArrayName="items" class="space-y-4">
+        <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+          <div class="flex items-start justify-between mb-4">
+            <h3 class="text-sm font-medium text-slate-900 dark:text-white">Item {{ i + 1 }}</h3>
+            <button
+              type="button"
+              *ngIf="items.length > 1"
+              (click)="removeItem(i)"
+              class="text-red-500 hover:text-red-600 text-sm font-medium"
+            >
+              Remove
+            </button>
+          </div>
 
-  <div>
-    <label>Internal Notes</label>
-    <textarea formControlName="internalNotes"></textarea>
-  </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Product -->
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Product <span class="text-red-500">*</span>
+              </label>
+              <select
+                formControlName="productId"
+                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              >
+                <option [ngValue]="null">Select product</option>
+                <option *ngFor="let product of products" [ngValue]="product.productId">
+                  {{ product.productName }}
+                </option>
+              </select>
+            </div>
 
-  <div>
-    <label>
-      <input type="checkbox" formControlName="isPriorityOrder" />
-      Priority Order
-    </label>
-  </div>
+            <!-- Quantity -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Quantity <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                formControlName="quantity"
+                min="1"
+                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
 
-  <hr />
+            <!-- Unit Price -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Unit Price <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                formControlName="unitPrice"
+                min="0"
+                step="0.01"
+                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
 
-  <div formArrayName="items">
-    <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
-      <label>Product</label>
-      <select formControlName="productId">
-        <option [ngValue]="null">Select product</option>
-        <option *ngFor="let product of products" [ngValue]="product.productId">
-          {{ product.productName }}
-        </option>
-      </select>
+            <!-- Discount % -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Discount %
+              </label>
+              <input
+                type="number"
+                formControlName="discountPercent"
+                min="0"
+                max="100"
+                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
 
-      <label>Quantity</label>
-      <input type="number" formControlName="quantity" min="1" />
+            <!-- Notes -->
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Notes
+              </label>
+              <textarea
+                formControlName="notes"
+                rows="2"
+                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                placeholder="Add any notes for this item..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <label>Unit Price</label>
-      <input type="number" formControlName="unitPrice" min="0" step="0.01" />
+    <!-- Additional Information -->
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Additional Information</h2>
+      <div class="space-y-4">
+        <!-- PO Reference -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            PO Reference
+          </label>
+          <input
+            type="text"
+            formControlName="purchaseOrderReference"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            placeholder="Enter PO reference number"
+          />
+        </div>
 
-      <label>Discount %</label>
-      <input type="number" formControlName="discountPercent" min="0" step="0.01" />
+        <!-- Project -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Project
+          </label>
+          <select
+            formControlName="projectId"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          >
+            <option [ngValue]="null">Select project (optional)</option>
+            <option *ngFor="let project of projects" [ngValue]="project.projectId">
+              {{ project.projectCode }} - {{ project.projectName }}
+            </option>
+          </select>
+        </div>
 
-      <label>Item Notes</label>
-      <input type="text" formControlName="notes" />
+        <!-- Special Instructions -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Special Instructions
+          </label>
+          <textarea
+            formControlName="specialInstructions"
+            rows="3"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+            placeholder="Enter any special instructions for this order..."
+          ></textarea>
+        </div>
 
-      <button type="button" (click)="removeItem(i)">Remove</button>
+        <!-- Internal Notes -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Internal Notes
+          </label>
+          <textarea
+            formControlName="internalNotes"
+            rows="3"
+            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+            placeholder="Internal notes (not visible to customer)..."
+          ></textarea>
+        </div>
+
+        <!-- Priority Checkbox -->
+        <div class="flex items-center gap-3 pt-2">
+          <input
+            type="checkbox"
+            id="priorityOrder"
+            formControlName="isPriorityOrder"
+            class="w-4 h-4 accent-blue-600"
+          />
+          <label for="priorityOrder" class="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            Mark as priority order
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
-  <button type="button" (click)="addItem()">Add Item</button>
+  <!-- Sidebar (1 column) -->
+  <div class="space-y-6">
+    <!-- Order Summary -->
+    <div class="form-card sticky top-24">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Order Summary</h2>
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400">Items</span>
+          <span class="text-slate-900 dark:text-white font-medium">{{ items.length }}</span>
+        </div>
+        <div class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400">Status</span>
+          <span class="inline-flex px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
+            Draft
+          </span>
+        </div>
+        <div *ngIf="orderForm.get('isPriorityOrder')?.value" class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400">Priority</span>
+          <span class="inline-flex px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+            Yes
+          </span>
+        </div>
+      </div>
 
-  <hr />
-
-  <button type="submit">Create Order</button>
-
+      <!-- Form Actions -->
+      <div class="mt-8 space-y-3">
+        <button
+          type="submit"
+          [disabled]="orderForm.invalid"
+          class="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Create Order
+        </button>
+        <a
+          routerLink="/orders"
+          class="block text-center px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+        >
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
 </form>

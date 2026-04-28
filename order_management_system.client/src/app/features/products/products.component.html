@@ -1,30 +1,104 @@
-<div class="page-header">
-  <h1>Products</h1>
-  <a routerLink="/products/create">Create Product</a>
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
+  <div>
+    <h1 class="text-3xl font-light text-slate-900 dark:text-white">Products</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">Manage your chemical products and pricing</p>
+  </div>
+  <a
+    routerLink="/products/create"
+    class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+  >
+    + New Product
+  </a>
 </div>
 
-<table *ngIf="products.length > 0" class="customers-table">
-  <thead>
-    <tr>
-      <th>SKU</th>
-      <th>Name</th>
-      <th>Pack</th>
-      <th>Price</th>
-      <th>Restricted</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let p of products">
-      <td>{{ p.sku }}</td>
-      <td>{{ p.productName }}</td>
-      <td>{{ p.packSize }}</td>
-      <td>{{ p.basePrice | currency:'GBP' }}</td>
-      <td>{{ p.isRestricted ? 'Yes' : 'No' }}</td>
-      <td>
-        <a [routerLink]="['/products/edit', p.productId]">Edit</a>
-        <button (click)="deleteProduct(p.productId)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<!-- Loading State -->
+<div *ngIf="isLoading" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">Loading products...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="errorMessage && !isLoading" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+</div>
+
+<!-- Products Table -->
+<div *ngIf="!isLoading && products.length > 0" class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+        <tr>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            SKU
+          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Product Name
+          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Pack Size
+          </th>
+          <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Base Price
+          </th>
+          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Restricted
+          </th>
+          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        <tr *ngFor="let product of products" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+          <td class="px-6 py-4 text-slate-900 dark:text-white font-medium font-mono text-xs">
+            {{ product.sku }}
+          </td>
+          <td class="px-6 py-4">
+            <a
+              [routerLink]="['/products/edit', product.productId]"
+              class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
+              {{ product.productName }}
+            </a>
+          </td>
+          <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+            {{ product.packSize || '—' }}
+          </td>
+          <td class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white">
+            {{ product.basePrice | currency: 'USD' }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <span *ngIf="product.isRestricted" class="inline-flex px-2 py-1 rounded-md bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-medium">
+              Yes
+            </span>
+            <span *ngIf="!product.isRestricted" class="text-slate-500 dark:text-slate-400 text-xs">
+              No
+            </span>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <a
+                [routerLink]="['/products/edit', product.productId]"
+                class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
+              >
+                Edit
+              </a>
+              <button
+                type="button"
+                (click)="deleteProduct(product.productId)"
+                class="text-red-600 dark:text-red-400 hover:underline text-xs font-medium"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Empty State -->
+<div *ngIf="!isLoading && products.length === 0" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">No products found.</p>
+</div>

@@ -1,19 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { OrdersService } from '../../core/services/orders.service';
-
-interface Order {
-  orderId: string;
-  orderNumber: string;
-  customerName: string;
-  customerId: string;
-  status: string;
-  statusId: number;
-  priority: string;
-  isPriorityOrder: boolean;
-  requestedDeliveryDate: string;
-  assignedTo?: string;
-  totalAmount: number;
-}
+import { Order } from '../../core/models/order.model';
 
 @Component({
   selector: 'app-orders',
@@ -120,7 +107,7 @@ export class OrdersComponent implements OnInit {
 
       const matchesStatus =
         !this.statusFilter ||
-        order.statusId?.toString() === this.statusFilter;
+        order.orderStatusId?.toString() === this.statusFilter;
 
       return matchesSearch && matchesPriority && matchesStatus;
     });
@@ -146,5 +133,9 @@ export class OrdersComponent implements OnInit {
 
   getPriorityColor(isPriority: boolean): string {
     return isPriority ? this.priorityColors['high'] : this.priorityColors['medium'];
+  }
+
+  getOrderStatusId(order: Order): number {
+    return order.orderStatusId;
   }
 }

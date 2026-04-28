@@ -158,9 +158,9 @@
           <td class="px-6 py-4 text-slate-900 dark:text-white">{{ order.customerName }}</td>
           <td class="px-6 py-4">
             <span
-              [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getStatusColor(order.statusId)"
+              [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getStatusColor(order.orderStatusId)"
             >
-              {{ statusLabels[order.statusId] }}
+              {{ statusLabels[order.orderStatusId] }}
             </span>
           </td>
           <td class="px-6 py-4">
