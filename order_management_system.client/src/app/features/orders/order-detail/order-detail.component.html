@@ -24,7 +24,7 @@
         <h1 class="text-2xl font-light text-slate-900 dark:text-white">{{ currentOrder.orderNumber }}</h1>
         <p class="text-slate-500 dark:text-slate-400 mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
       </div>
-      <div class="flex gap-3">
+      <div class="flex gap-2">
         <button class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
           Edit
         </button>
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Badges -->
-    <div class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-2">
       <span class="inline-flex px-3 py-1 rounded-md bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-medium">
         {{ currentOrder.orderStatusName || 'Status ' + currentOrder.orderStatusId }}
       </span>

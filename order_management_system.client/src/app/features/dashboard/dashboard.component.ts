@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 
+type MetricType = 'orders' | 'activeOrders' | 'failedOrders' | 'totalValue';
+
 interface MetricCard {
   label: string;
   value: number;
-  icon: string;
+  type: MetricType;
   color: string;
 }
 
@@ -45,25 +47,25 @@ export class DashboardComponent {
     {
       label: 'Total Orders',
       value: 1243,
-      icon: '📋',
+      type: 'orders',
       color: 'text-blue-600'
     },
     {
       label: 'Active Orders',
       value: 287,
-      icon: '⏳',
+      type: 'activeOrders',
       color: 'text-emerald-500'
     },
     {
       label: 'Failed Orders',
       value: 12,
-      icon: '⚠️',
+      type: 'failedOrders',
       color: 'text-red-500'
     },
     {
       label: 'Total Value',
       value: 145230,
-      icon: '💰',
+      type: 'totalValue',
       color: 'text-purple-500'
     }
   ];
@@ -119,6 +121,7 @@ export class DashboardComponent {
       high: 'text-amber-600 dark:text-amber-400',
       urgent: 'text-red-600 dark:text-red-400'
     };
+
     return colors[priority.toLowerCase()] || colors['low'];
   }
 
