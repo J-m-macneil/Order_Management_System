@@ -23,6 +23,7 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { OrderCreateComponent } from './features/orders/order-create/order-create.component';
 import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
 import { InputModalComponent } from './features/input-modal/input-modal.component';
+import { ProcessingJobsPanelComponent } from './features/processing-jobs-panel/processing-jobs-panel.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { InputModalComponent } from './features/input-modal/input-modal.componen
     OrderDetailComponent,
     AdminComponent,
     LoginComponent,
-    InputModalComponent
+    InputModalComponent,
+    ProcessingJobsPanelComponent
   ],
   imports: [
     BrowserModule,

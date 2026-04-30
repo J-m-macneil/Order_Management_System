@@ -7,12 +7,14 @@ import { AllowedStatus } from '../models/allowed-status.model';
 import { ChangeOrderStatusRequest } from '../models/change-order-status-request.model';
 import { OrderStatus } from '../models/order-status.enum';
 import { OrderStatusHistory } from '../models/order-status-history.model';
+import { ProcessingJob } from '../models/processing-job.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrdersService {
   private readonly baseUrl = 'https://localhost:7233/api/orders';
+    apiUrl: any;
 
   constructor(private http: HttpClient) { }
 

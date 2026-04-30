@@ -255,6 +255,13 @@
           </p>
         </ng-template>
       </div>
+
+      <!-- Processing Jobs -->
+      <div class="mt-6">
+        <app-processing-jobs-panel [orderId]="currentOrder.orderId">
+        </app-processing-jobs-panel>
+      </div>
+
     </div>
   </div>
 </div>
@@ -266,3 +273,5 @@
                  (confirm)="onReasonConfirm($event)"
                  (cancel)="onReasonCancel()">
 </app-input-modal>
+
+

@@ -121,34 +121,34 @@ public class JobProcessingService : BackgroundService
             job.ErrorMessage = ex.Message;
 
             if (job.AttemptCount >= job.MaxAttempts)
-            {
-                job.Status = "Failed";
-                job.FailedAt = DateTime.UtcNow;
-                job.NextAttemptAt = null;
+{
+    job.Status = "Failed";
+    job.FailedAt = DateTime.UtcNow;
+    job.NextAttemptAt = null;
 
-                var order = await dbContext.Orders
-                    .FirstOrDefaultAsync(o => o.OrderId == job.OrderId, cancellationToken);
+    var order = await dbContext.Orders
+        .FirstOrDefaultAsync(o => o.OrderId == job.OrderId, cancellationToken);
 
-                if (order != null)
-                {
-                    var oldOrderStatus = order.OrderStatusId;
+    if (order != null)
+    {
+        var oldOrderStatus = order.OrderStatusId;
 
-                    order.OrderStatusId = 8; // Failed
-                    order.FailureReason = $"Background job failed: {job.JobType}. {ex.Message}";
-                    order.UpdatedAt = DateTime.UtcNow;
+        order.OrderStatusId = 8; // Failed
+        order.FailureReason = $"Background job failed: {job.JobType}. {ex.Message}";
+        order.UpdatedAt = DateTime.UtcNow;
 
-                    AddAuditLog(
-                        dbContext,
-                        "Order",
-                        order.OrderId,
-                        "StatusChanged:Failed",
-                        null,
-                        $$"""{"statusId":{{oldOrderStatus}}}""",
-                        $$"""{"statusId":8,"status":"Failed","reason":"{{EscapeJson(order.FailureReason)}}"}""",
-                        $"Order moved to Failed after background job reached max retry attempts."
-                    );
-                }
-            }
+        AddAuditLog(
+            dbContext,
+            "Order",
+            order.OrderId,
+            "StatusChanged:Failed",
+            null,
+            $$"""{"statusId":{{oldOrderStatus}}}""",
+            $$"""{"statusId":8,"status":"Failed","reason":"{{EscapeJson(order.FailureReason)}}"}""",
+            $"Order moved to Failed after background job reached max retry attempts."
+        );
+    }
+}
             else
             {
                 job.Status = "Queued";

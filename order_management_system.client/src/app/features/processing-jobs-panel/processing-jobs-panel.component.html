@@ -1,0 +1,91 @@
+<div class="detail-card" mt-6>
+  <div class="flex items-start justify-between gap-3 mb-6">
+    <div>
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white">
+        Processing Jobs
+      </h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        Background work for this order
+      </p>
+    </div>
+
+    <span *ngIf="processingJobs.length > 0"
+          class="inline-flex px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium">
+      {{ processingJobs.length }}
+    </span>
+  </div>
+
+  <div *ngIf="errorMessage"
+       class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+    <p class="text-sm text-red-600 dark:text-red-400">
+      {{ errorMessage }}
+    </p>
+  </div>
+
+  <p *ngIf="isLoading" class="text-slate-500 dark:text-slate-400 text-sm">
+    Loading processing jobs...
+  </p>
+
+  <div *ngIf="!isLoading && processingJobs.length > 0; else noProcessingJobs"
+       class="space-y-3">
+    <div *ngFor="let job of processingJobs"
+         class="border border-slate-200 dark:border-slate-700 rounded-lg p-4 bg-white/50 dark:bg-slate-900/20">
+
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-slate-900 dark:text-white break-words">
+            {{ job.jobType }}
+          </p>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Attempts {{ job.attemptCount }} / {{ job.maxAttempts }}
+          </p>
+        </div>
+
+        <span class="inline-flex shrink-0 px-2 py-1 rounded-md text-xs font-medium"
+              [ngClass]="getJobStatusClass(job.status)">
+          {{ job.status }}
+        </span>
+      </div>
+
+      <div *ngIf="job.errorMessage"
+           class="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50">
+        <p class="text-xs uppercase tracking-wide text-red-500 dark:text-red-400 font-medium">
+          Error
+        </p>
+        <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+          {{ job.errorMessage }}
+        </p>
+      </div>
+
+      <div class="text-xs text-slate-500 dark:text-slate-400 mt-3 space-y-1">
+        <p>Created: {{ job.createdAt | date: 'MMM d, yyyy h:mm a' }}</p>
+        <p *ngIf="job.startedAt">Started: {{ job.startedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+        <p *ngIf="job.completedAt">Completed: {{ job.completedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+        <p *ngIf="job.failedAt">Failed: {{ job.failedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+        <p *ngIf="job.lastRetryAt">Last Retry: {{ job.lastRetryAt | date: 'MMM d, yyyy h:mm a' }}</p>
+        <p *ngIf="job.nextAttemptAt">Next Retry: {{ job.nextAttemptAt | date: 'MMM d, yyyy h:mm a' }}</p>
+      </div>
+
+      <button *ngIf="canRetryJob(job)"
+              type="button"
+              [disabled]="isRetryingJobId === job.processingJobId"
+              (click)="retryJob(job)"
+              class="mt-4 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ isRetryingJobId === job.processingJobId ? 'Retrying...' : 'Retry Job' }}
+      </button>
+
+      <p *ngIf="job.status === 'Failed' && job.attemptCount >= job.maxAttempts"
+         class="mt-4 text-xs text-red-600 dark:text-red-400 font-medium">
+        Max retries reached. Manual investigation required.
+      </p>
+    </div>
+  </div>
+
+  <ng-template #noProcessingJobs>
+    <p *ngIf="!isLoading && !errorMessage"
+       class="text-slate-500 dark:text-slate-400 text-sm">
+      No processing jobs found.
+    </p>
+  </ng-template>
+</div>
