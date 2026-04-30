@@ -2411,6 +2411,419 @@ public class DataSeeder : IDataSeeder
         }
 
         // =========================
+        // X. Processing Jobs
+        // =========================
+        if (!await _dbContext.ProcessingJobs.AnyAsync())
+        {
+            var ordersByNumber = await _dbContext.Orders
+                .ToDictionaryAsync(o => o.OrderNumber, o => o.OrderId);
+
+            var processingJobs = new List<ProcessingJob>
+    {
+        // Submitted / Pending Review examples
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001011"],
+            JobType = "GenerateOrderSummaryDocument",
+            Status = "Completed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 17, 23, 35, 0),
+            StartedAt = new DateTime(2025, 12, 17, 23, 36, 0),
+            CompletedAt = new DateTime(2025, 12, 17, 23, 38, 0)
+        },
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001012"],
+            JobType = "GenerateSdsBundle",
+            Status = "Completed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 17, 17, 35, 0),
+            StartedAt = new DateTime(2025, 12, 17, 17, 36, 0),
+            CompletedAt = new DateTime(2025, 12, 17, 17, 41, 0),
+            PayloadJson = "{\"reason\":\"Order contains products requiring SDS documentation\"}"
+        },
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001013"],
+            JobType = "CreateSubmissionNotification",
+            Status = "Completed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 17, 7, 35, 0),
+            StartedAt = new DateTime(2025, 12, 17, 7, 36, 0),
+            CompletedAt = new DateTime(2025, 12, 17, 7, 37, 0)
+        },
+
+        // Pending review jobs still queued
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001020"],
+            JobType = "GenerateOrderSummaryDocument",
+            Status = "Queued",
+            AttemptCount = 0,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 16, 14, 35, 0)
+        },
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001021"],
+            JobType = "GenerateSdsBundle",
+            Status = "Queued",
+            AttemptCount = 0,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 16, 18, 35, 0),
+            PayloadJson = "{\"reason\":\"Customer order requires SDS bundle validation\"}"
+        },
+
+        // Approved / processing examples
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001025"],
+            JobType = "GenerateDeliveryNote",
+            Status = "Completed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 16, 16, 0, 0),
+            StartedAt = new DateTime(2025, 12, 16, 16, 1, 0),
+            CompletedAt = new DateTime(2025, 12, 16, 16, 4, 0)
+        },
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001025"],
+            JobType = "PushToLogisticsProvider",
+            Status = "Completed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 16, 16, 5, 0),
+            StartedAt = new DateTime(2025, 12, 16, 16, 6, 0),
+            CompletedAt = new DateTime(2025, 12, 16, 16, 10, 0),
+            PayloadJson = "{\"provider\":\"Simulated Logistics\",\"shipmentReference\":\"SHP-2026-001025\"}"
+        },
+
+        // Failed job visible to Operations
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001026"],
+            JobType = "PushToLogisticsProvider",
+            Status = "Failed",
+            AttemptCount = 3,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 17, 9, 0, 0),
+            StartedAt = new DateTime(2025, 12, 17, 9, 20, 0),
+            FailedAt = new DateTime(2025, 12, 17, 9, 22, 0),
+            LastRetryAt = new DateTime(2025, 12, 17, 9, 15, 0),
+            ErrorMessage = "Simulated logistics provider rejected shipment because delivery postcode could not be validated.",
+            PayloadJson = "{\"provider\":\"Simulated Logistics\",\"reason\":\"Invalid delivery postcode\"}"
+        },
+
+        // Retryable failed job
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001027"],
+            JobType = "GenerateSdsBundle",
+            Status = "Failed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 17, 19, 0, 0),
+            StartedAt = new DateTime(2025, 12, 17, 19, 1, 0),
+            FailedAt = new DateTime(2025, 12, 17, 19, 2, 0),
+            NextAttemptAt = new DateTime(2025, 12, 17, 19, 7, 0),
+            ErrorMessage = "SDS bundle generation failed because one restricted product did not have an SDS template.",
+            PayloadJson = "{\"documentType\":\"SdsBundle\"}"
+        },
+
+        // In-progress example
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001028"],
+            JobType = "ProcessLogisticsEvent",
+            Status = "Processing",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 17, 6, 20, 0),
+            StartedAt = new DateTime(2025, 12, 17, 6, 21, 0),
+            PayloadJson = "{\"eventType\":\"DISPATCHED\",\"shipmentReference\":\"SHP-2026-001028\"}"
+        },
+
+        // Queued webhook/logistics event
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001029"],
+            JobType = "ProcessLogisticsEvent",
+            Status = "Queued",
+            AttemptCount = 0,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 22, 20, 35, 0),
+            PayloadJson = "{\"eventType\":\"DELIVERED\",\"shipmentReference\":\"SHP-2026-001029\"}"
+        },
+
+        // Notification example
+        new ProcessingJob
+        {
+            OrderId = ordersByNumber["ORD-2026-001030"],
+            JobType = "CreateApprovalNotification",
+            Status = "Completed",
+            AttemptCount = 1,
+            MaxAttempts = 3,
+            CreatedAt = new DateTime(2025, 12, 18, 4, 0, 0),
+            StartedAt = new DateTime(2025, 12, 18, 4, 1, 0),
+            CompletedAt = new DateTime(2025, 12, 18, 4, 2, 0)
+        }
+    };
+
+            await _dbContext.ProcessingJobs.AddRangeAsync(processingJobs);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // =========================
+        // X. Audit Logs
+        // =========================
+        if (!await _dbContext.AuditLogs.AnyAsync())
+        {
+            var ordersByNumber = await _dbContext.Orders
+                .ToDictionaryAsync(o => o.OrderNumber, o => o.OrderId);
+
+            var auditLogs = new List<AuditLog>
+            {
+                new AuditLog
+                {
+                    EntityType = "Order",
+                    EntityId = ordersByNumber["ORD-2026-001001"],
+                    Action = "Created",
+                    PerformedByUserId = 4,
+                    PerformedAt = new DateTime(2025, 12, 16, 14, 30, 0),
+                    OldValuesJson = null,
+                    NewValuesJson = "{\"orderNumber\":\"ORD-2026-001001\",\"status\":\"Draft\"}",
+                    Notes = "Order record created."
+                },
+                new AuditLog
+                {
+                    EntityType = "Order",
+                    EntityId = ordersByNumber["ORD-2026-001001"],
+                    Action = "StatusChanged:Draft",
+                    PerformedByUserId = 4,
+                    PerformedAt = new DateTime(2025, 12, 16, 14, 30, 0),
+                    OldValuesJson = null,
+                    NewValuesJson = "{\"status\":\"Draft\"}",
+                    Notes = "Workflow moved to Draft."
+                },
+                new AuditLog
+                {
+                    EntityType = "Order",
+                    EntityId = ordersByNumber["ORD-2026-001011"],
+                    Action = "StatusChanged:Submitted",
+                    PerformedByUserId = 4,
+                    PerformedAt = new DateTime(2025, 12, 17, 23, 30, 0),
+                    OldValuesJson = "{\"status\":\"Draft\"}",
+                    NewValuesJson = "{\"status\":\"Submitted\"}",
+                    Notes = "Sales submitted the order for review."
+                },
+                new AuditLog
+                {
+                    EntityType = "ProcessingJob",
+                    EntityId = 1,
+                    Action = "Completed",
+                    PerformedByUserId = null,
+                    PerformedAt = new DateTime(2025, 12, 17, 23, 38, 0),
+                    OldValuesJson = "{\"status\":\"Processing\"}",
+                    NewValuesJson = "{\"status\":\"Completed\",\"jobType\":\"GenerateOrderSummaryDocument\"}",
+                    Notes = "System background worker completed order summary generation."
+                },
+                new AuditLog
+                {
+                    EntityType = "ProcessingJob",
+                    EntityId = 8,
+                    Action = "Failed",
+                    PerformedByUserId = null,
+                    PerformedAt = new DateTime(2025, 12, 17, 9, 22, 0),
+                    OldValuesJson = "{\"status\":\"Processing\"}",
+                    NewValuesJson = "{\"status\":\"Failed\",\"attemptCount\":3}",
+                    Notes = "System background worker failed after reaching retry limit."
+                }
+            };
+
+            await _dbContext.AuditLogs.AddRangeAsync(auditLogs);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // =========================
+        // X. Documents
+        // =========================
+        if (!await _dbContext.Documents.AnyAsync())
+        {
+            var ordersByNumber = await _dbContext.Orders
+                .ToDictionaryAsync(o => o.OrderNumber, o => o.OrderId);
+
+            static Document CreateDocument(
+                Dictionary<string, int> ordersByNumber,
+                string orderNumber,
+                string documentType,
+                DateTime createdAt,
+                int? createdByUserId)
+            {
+                var safeType = documentType.ToLowerInvariant();
+
+                return new Document
+                {
+                    OrderId = ordersByNumber[orderNumber],
+                    DocumentType = documentType,
+                    FileName = $"{orderNumber.ToLowerInvariant()}_{safeType}.pdf",
+                    FilePath = $"/documents/{orderNumber.ToLowerInvariant()}_{safeType}.pdf",
+                    CreatedAt = createdAt,
+                    CreatedByUserId = createdByUserId
+                };
+            }
+
+            var documents = new List<Document>
+            {
+                CreateDocument(ordersByNumber, "ORD-2026-001011", "OrderSummary", new DateTime(2025, 12, 18, 1, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001011", "SafetyDataSheetBundle", new DateTime(2025, 12, 18, 1, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001012", "OrderSummary", new DateTime(2025, 12, 17, 19, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001012", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 19, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001013", "OrderSummary", new DateTime(2025, 12, 17, 9, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001013", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 9, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001014", "OrderSummary", new DateTime(2025, 12, 18, 2, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001014", "SafetyDataSheetBundle", new DateTime(2025, 12, 18, 2, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001015", "OrderSummary", new DateTime(2025, 12, 18, 3, 30, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001016", "OrderSummary", new DateTime(2025, 12, 17, 9, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001016", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 9, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001020", "OrderSummary", new DateTime(2025, 12, 16, 16, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001020", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 16, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001025", "OrderSummary", new DateTime(2025, 12, 16, 17, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001025", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 17, 31, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001025", "DeliveryNote", new DateTime(2025, 12, 17, 16, 4, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001026", "OrderSummary", new DateTime(2025, 12, 17, 6, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001026", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 6, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001027", "OrderSummary", new DateTime(2025, 12, 17, 20, 30, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001028", "OrderSummary", new DateTime(2025, 12, 16, 18, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001028", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 18, 31, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001028", "DeliveryNote", new DateTime(2025, 12, 17, 6, 10, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001029", "OrderSummary", new DateTime(2025, 12, 17, 20, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001029", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 20, 31, 0), null),
+
+                CreateDocument(ordersByNumber, "ORD-2026-001030", "OrderSummary", new DateTime(2025, 12, 18, 6, 30, 0), null),
+                CreateDocument(ordersByNumber, "ORD-2026-001030", "SafetyDataSheetBundle", new DateTime(2025, 12, 18, 6, 31, 0), null)
+            };
+
+            await _dbContext.Documents.AddRangeAsync(documents);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // =========================
+        // X. Notifications
+        // =========================
+        if (!await _dbContext.Notifications.AnyAsync())
+        {
+            var ordersByNumber = await _dbContext.Orders
+                .ToDictionaryAsync(o => o.OrderNumber, o => o.OrderId);
+
+            static Notification CreateNotification(
+                Dictionary<string, int> ordersByNumber,
+                string orderNumber,
+                string email,
+                string type,
+                DateTime createdAt,
+                string status,
+                DateTime? sentAt = null,
+                string? failure = null)
+            {
+                return new Notification
+                {
+                    OrderId = ordersByNumber[orderNumber],
+                    RecipientEmail = email,
+                    NotificationType = type,
+                    Subject = $"Confirmation for {orderNumber}",
+                    CreatedAt = createdAt,
+                    SentAt = sentAt,
+                    Status = status,
+                    FailureReason = failure
+                };
+            }
+
+            var notifications = new List<Notification>
+            {
+                // =========================
+                // ORD-2026-001011
+                // =========================
+                CreateNotification(ordersByNumber, "ORD-2026-001011", "purchasing11@riverlinepackaging.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 18, 0, 25, 0), "Sent",
+                    new DateTime(2025, 12, 18, 0, 30, 0)),
+
+                CreateNotification(ordersByNumber, "ORD-2026-001011", "purchasing22@granthampackaging.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 17, 18, 25, 0), "Sent",
+                    new DateTime(2025, 12, 17, 18, 30, 0)),
+
+                // =========================
+                // ORD-2026-001012
+                // =========================
+                CreateNotification(ordersByNumber, "ORD-2026-001012", "purchasing10@northernfoodprocess.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 17, 8, 20, 0), "Sent",
+                    new DateTime(2025, 12, 17, 8, 30, 0)),
+
+                CreateNotification(ordersByNumber, "ORD-2026-001012", "purchasing3@alderleyanalytical.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 18, 1, 20, 0), "Sent",
+                    new DateTime(2025, 12, 18, 1, 30, 0)),
+
+                // =========================
+                // ORD-2026-001013 (queued)
+                // =========================
+                CreateNotification(ordersByNumber, "ORD-2026-001013", "purchasing5@redbrickmanufacturing.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 17, 8, 25, 0), "Queued"),
+
+                CreateNotification(ordersByNumber, "ORD-2026-001013", "purchasing8@seftonfacilities.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 17, 23, 25, 0), "Queued"),
+
+                // =========================
+                // ORD-2026-001014 (failed)
+                // =========================
+                CreateNotification(ordersByNumber, "ORD-2026-001014", "purchasing4@pennineindustrial.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 17, 18, 20, 0), "Failed", null,
+                    "SMTP timeout"),
+
+                CreateNotification(ordersByNumber, "ORD-2026-001014", "purchasing25@unionprocessmaterials.co.uk", "OrderSubmitted",
+                    new DateTime(2025, 12, 17, 14, 20, 0), "Failed", null,
+                    "Invalid email domain"),
+
+                // =========================
+                // ORD-2026-001020
+                // =========================
+                CreateNotification(ordersByNumber, "ORD-2026-001020", "purchasing2@merseywatersolutions.co.uk", "OrderApproved",
+                    new DateTime(2025, 12, 17, 5, 25, 0), "Sent",
+                    new DateTime(2025, 12, 17, 5, 30, 0)),
+
+                CreateNotification(ordersByNumber, "ORD-2026-001020", "purchasing15@medilabconsumables.co.uk", "OrderApproved",
+                    new DateTime(2025, 12, 16, 17, 25, 0), "Sent",
+                    new DateTime(2025, 12, 16, 17, 30, 0)),
+
+                // =========================
+                // ORD-2026-001025
+                // =========================
+                CreateNotification(ordersByNumber, "ORD-2026-001025", "purchasing12@westcoastengineering.co.uk", "OrderCompleted",
+                    new DateTime(2025, 12, 18, 10, 25, 0), "Sent",
+                    new DateTime(2025, 12, 18, 10, 30, 0)),
+
+                CreateNotification(ordersByNumber, "ORD-2026-001025", "purchasing13@liverpoolindustrial.co.uk", "OrderCompleted",
+                    new DateTime(2025, 12, 18, 10, 20, 0), "Queued")
+            };
+
+            await _dbContext.Notifications.AddRangeAsync(notifications);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // =========================
         // 7. Set Default Addresses
         // =========================
         var updatedCustomers = await _dbContext.Customers.ToListAsync();

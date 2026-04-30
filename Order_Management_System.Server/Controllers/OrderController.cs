@@ -1,5 +1,4 @@
 ﻿using Application.DTOs;
-using Domain.Entities;
 using Domain.Entities.Orders;
 using Domain.Enums;
 using Infrastructure.Persistence.Context;
@@ -15,10 +14,14 @@ namespace Server.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
+    private readonly IProcessingJobQueueService _processingJobQueueService;
 
-    public OrdersController(AppDbContext dbContext)
+    public OrdersController(
+        AppDbContext dbContext,
+        IProcessingJobQueueService processingJobQueueService)
     {
         _dbContext = dbContext;
+        _processingJobQueueService = processingJobQueueService;
     }
 
     // =========================
@@ -409,6 +412,16 @@ public class OrdersController : ControllerBase
         });
 
         await _dbContext.SaveChangesAsync();
+
+        if (newStatus == OrderStatusEnum.Submitted)
+        {
+            await _processingJobQueueService.QueueSubmissionJobsAsync(order.OrderId);
+        }
+
+        if (newStatus == OrderStatusEnum.Approved)
+        {
+            await _processingJobQueueService.QueueApprovalJobsAsync(order.OrderId);
+        }
 
         return NoContent();
     }

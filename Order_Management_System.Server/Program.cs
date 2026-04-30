@@ -21,6 +21,13 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddScoped<IPricingService, PricingService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
+        builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+        builder.Services.AddScoped<IPasswordService, PasswordService>();
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<IProcessingJobQueueService, ProcessingJobQueueService>();
+        builder.Services.AddHostedService<JobProcessingService>();
 
         builder.Services.AddCors(options =>
         {

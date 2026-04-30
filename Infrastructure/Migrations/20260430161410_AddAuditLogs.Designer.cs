@@ -4,6 +4,7 @@ using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260430161410_AddAuditLogs")]
+    partial class AddAuditLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,47 +67,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("PerformedByUserId");
 
                     b.ToTable("AuditLogs");
-                });
-
-            modelBuilder.Entity("Document", b =>
-                {
-                    b.Property<int>("DocumentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DocumentType")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("DocumentId");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("Domain.Entities.Address", b =>
@@ -1533,54 +1495,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Warehouses", (string)null);
                 });
 
-            modelBuilder.Entity("Notification", b =>
-                {
-                    b.Property<int>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FailureReason")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("NotificationType")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RecipientEmail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("nvarchar(160)");
-
-                    b.HasKey("NotificationId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Notifications");
-                });
-
             modelBuilder.Entity("OrderStatus", b =>
                 {
                     b.Property<int>("OrderStatusId")
@@ -1732,103 +1646,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("ProcessingJobs");
                 });
 
-            modelBuilder.Entity("SystemSetting", b =>
-                {
-                    b.Property<int>("SystemSettingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SystemSettingId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("SettingKey")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<string>("SettingValue")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SystemSettingId");
-
-                    b.HasIndex("SettingKey")
-                        .IsUnique();
-
-                    b.ToTable("SystemSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            SystemSettingId = 1,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "integer",
-                            Description = "Default VAT rate used in order total calculations.",
-                            SettingKey = "DefaultTaxRate",
-                            SettingValue = "20"
-                        },
-                        new
-                        {
-                            SystemSettingId = 2,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "boolean",
-                            Description = "Whether priority flagging is enabled in the order workflow.",
-                            SettingKey = "EnablePriorityOrders",
-                            SettingValue = "true"
-                        },
-                        new
-                        {
-                            SystemSettingId = 3,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "boolean",
-                            Description = "Whether low-value orders can bypass manual review.",
-                            SettingKey = "AutoApproveLowValueOrders",
-                            SettingValue = "false"
-                        },
-                        new
-                        {
-                            SystemSettingId = 4,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "integer",
-                            Description = "Maximum number of retry attempts for background processing jobs.",
-                            SettingKey = "BackgroundJobRetryLimit",
-                            SettingValue = "3"
-                        },
-                        new
-                        {
-                            SystemSettingId = 5,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "integer",
-                            Description = "Default date window used for the operational dashboard.",
-                            SettingKey = "DashboardDefaultDays",
-                            SettingValue = "30"
-                        },
-                        new
-                        {
-                            SystemSettingId = 6,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "boolean",
-                            Description = "Whether SDS metadata is mandatory for hazardous or restricted products.",
-                            SettingKey = "RequireSdsForHazardousProducts",
-                            SettingValue = "true"
-                        });
-                });
-
             modelBuilder.Entity("AuditLog", b =>
                 {
                     b.HasOne("Domain.Entities.User", "PerformedByUser")
@@ -1837,24 +1654,6 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PerformedByUser");
-                });
-
-            modelBuilder.Entity("Document", b =>
-                {
-                    b.HasOne("Domain.Entities.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.Orders.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Domain.Entities.Address", b =>
@@ -2148,17 +1947,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Address");
-                });
-
-            modelBuilder.Entity("Notification", b =>
-                {
-                    b.HasOne("Domain.Entities.Orders.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("ProcessingJob", b =>

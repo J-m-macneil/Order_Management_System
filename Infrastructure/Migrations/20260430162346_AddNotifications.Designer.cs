@@ -4,6 +4,7 @@ using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260430162346_AddNotifications")]
+    partial class AddNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1730,103 +1733,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("ProcessingJobs");
-                });
-
-            modelBuilder.Entity("SystemSetting", b =>
-                {
-                    b.Property<int>("SystemSettingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SystemSettingId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("SettingKey")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<string>("SettingValue")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SystemSettingId");
-
-                    b.HasIndex("SettingKey")
-                        .IsUnique();
-
-                    b.ToTable("SystemSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            SystemSettingId = 1,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "integer",
-                            Description = "Default VAT rate used in order total calculations.",
-                            SettingKey = "DefaultTaxRate",
-                            SettingValue = "20"
-                        },
-                        new
-                        {
-                            SystemSettingId = 2,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "boolean",
-                            Description = "Whether priority flagging is enabled in the order workflow.",
-                            SettingKey = "EnablePriorityOrders",
-                            SettingValue = "true"
-                        },
-                        new
-                        {
-                            SystemSettingId = 3,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "boolean",
-                            Description = "Whether low-value orders can bypass manual review.",
-                            SettingKey = "AutoApproveLowValueOrders",
-                            SettingValue = "false"
-                        },
-                        new
-                        {
-                            SystemSettingId = 4,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "integer",
-                            Description = "Maximum number of retry attempts for background processing jobs.",
-                            SettingKey = "BackgroundJobRetryLimit",
-                            SettingValue = "3"
-                        },
-                        new
-                        {
-                            SystemSettingId = 5,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "integer",
-                            Description = "Default date window used for the operational dashboard.",
-                            SettingKey = "DashboardDefaultDays",
-                            SettingValue = "30"
-                        },
-                        new
-                        {
-                            SystemSettingId = 6,
-                            CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DataType = "boolean",
-                            Description = "Whether SDS metadata is mandatory for hazardous or restricted products.",
-                            SettingKey = "RequireSdsForHazardousProducts",
-                            SettingValue = "true"
-                        });
                 });
 
             modelBuilder.Entity("AuditLog", b =>
