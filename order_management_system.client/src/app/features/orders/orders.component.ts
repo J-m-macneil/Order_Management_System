@@ -19,12 +19,16 @@ export class OrdersComponent implements OnInit {
   priorityFilter = '';
   statusFilter = '';
 
-  // Mock stats
-  stats = [
-    { label: 'Total Orders', value: 342, color: 'text-blue-600' },
-    { label: 'Active', value: 87, color: 'text-emerald-500' },
-    { label: 'Pending', value: 23, color: 'text-amber-500' },
-    { label: 'Failed', value: 4, color: 'text-red-500' }
+  orderStatuses = [
+    { id: 1, name: 'Draft' },
+    { id: 2, name: 'Submitted' },
+    { id: 3, name: 'Pending Review' },
+    { id: 4, name: 'Approved' },
+    { id: 5, name: 'In Processing' },
+    { id: 6, name: 'Awaiting Dispatch' },
+    { id: 7, name: 'Completed' },
+    { id: 8, name: 'Failed' },
+    { id: 9, name: 'Cancelled' }
   ];
 
   statusLabels: Record<number | string, string> = {
@@ -90,6 +94,15 @@ export class OrdersComponent implements OnInit {
     this.showFilters.update(value => !value);
   }
 
+  filterByStatus(statusId: number | ''): void {
+    this.statusFilter = statusId === '' ? '' : statusId.toString();
+    this.applyFilters();
+  }
+
+  getStatusCount(statusId: number): number {
+    return this.orders.filter(order => order.orderStatusId === statusId).length;
+  }
+
   applyFilters(): void {
     const term = this.searchTerm.trim().toLowerCase();
 
@@ -116,9 +129,9 @@ export class OrdersComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-GB', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'GBP',
       maximumFractionDigits: 2
     }).format(value);
   }

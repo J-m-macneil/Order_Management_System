@@ -4,12 +4,104 @@
     <h1 class="text-3xl font-light text-slate-900 dark:text-white">Customers</h1>
     <p class="text-slate-500 dark:text-slate-400 mt-2">Manage customer accounts and information</p>
   </div>
-  <a
-    routerLink="/customers/new"
-    class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-  >
+  <a routerLink="/customers/new" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
     + New Customer
   </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  <div *ngFor="let stat of stats" class="metric-card">
+    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">
+      {{ stat.label }}
+    </p>
+    <p [class]="'text-3xl font-light text-slate-900 dark:text-white mt-2 ' + stat.color">
+      {{ stat.value }}
+    </p>
+  </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="mb-6">
+  <div class="flex flex-col sm:flex-row gap-3">
+
+    <!-- Search -->
+    <div class="relative flex-1">
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg></span>
+      <input type="text"
+             [(ngModel)]="searchTerm"
+             (input)="applyFilters()"
+             placeholder="Search by account number, company, contact, or email..."
+             class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all" />
+    </div>
+
+    <!-- Filter Button -->
+    <button type="button"
+            (click)="toggleFilters()"
+            class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="20"
+           height="20"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
+      </svg>
+
+      <span>Filters</span>
+
+      <span *ngIf="industryFilter || paymentTermsFilter"
+            class="ml-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
+        {{ (industryFilter ? 1 : 0) + (paymentTermsFilter ? 1 : 0) }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Filter Panel -->
+  <div *ngIf="showFilters()"
+       class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-3 gap-2">
+
+    <!-- Industry -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Industry</label>
+      <select [(ngModel)]="industryFilter"
+              (change)="applyFilters()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+        <option value="">All industries</option>
+        <option *ngFor="let industry of industries" [value]="industry">
+          {{ industry }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Payment Terms -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Payment Terms</label>
+      <select [(ngModel)]="paymentTermsFilter"
+              (change)="applyFilters()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+        <option value="">All terms</option>
+        <option value="30">30 days</option>
+        <option value="60">60 days</option>
+        <option value="90">90 days</option>
+      </select>
+    </div>
+
+    <!-- Clear Filters -->
+    <div class="flex items-end">
+      <button type="button"
+              (click)="industryFilter = ''; paymentTermsFilter = ''; applyFilters()"
+              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors whitespace-nowrap">
+        Clear Filters
+      </button>
+    </div>
+
+  </div>
 </div>
 
 <!-- Loading State -->
@@ -23,47 +115,29 @@
 </div>
 
 <!-- Customers Table -->
-<div *ngIf="!isLoading && customers.length > 0" class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
+<div *ngIf="!isLoading && !errorMessage" class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
         <tr>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Account #
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Company Name
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Industry
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Contact
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Email
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Payment Terms
-          </th>
-          <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Credit Limit
-          </th>
-          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Actions
-          </th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Account #</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Company Name</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Industry</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Contact</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Email</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Payment Terms</th>
+          <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Credit Limit</th>
+          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Actions</th>
         </tr>
       </thead>
+
       <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-        <tr *ngFor="let customer of customers" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+        <tr *ngFor="let customer of filteredCustomers" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
           <td class="px-6 py-4 text-slate-900 dark:text-white font-medium">
             {{ customer.accountNumber }}
           </td>
           <td class="px-6 py-4">
-            <a
-              [routerLink]="['/customers/edit', customer.customerId]"
-              class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
-            >
+            <a [routerLink]="['/customers/edit', customer.customerId]" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">
               {{ customer.companyName }}
             </a>
           </td>
@@ -85,17 +159,10 @@
           </td>
           <td class="px-6 py-4 text-center">
             <div class="flex items-center justify-center gap-2">
-              <a
-                [routerLink]="['/customers/edit', customer.customerId]"
-                class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
-              >
+              <a [routerLink]="['/customers/edit', customer.customerId]" class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium">
                 Edit
               </a>
-              <button
-                type="button"
-                (click)="deleteCustomer(customer.customerId)"
-                class="text-red-600 dark:text-red-400 hover:underline text-xs font-medium"
-              >
+              <button type="button" (click)="deleteCustomer(customer.customerId)" class="text-red-600 dark:text-red-400 hover:underline text-xs font-medium">
                 Delete
               </button>
             </div>
@@ -104,9 +171,9 @@
       </tbody>
     </table>
   </div>
-</div>
 
-<!-- Empty State -->
-<div *ngIf="!isLoading && customers.length === 0" class="text-center py-12">
-  <p class="text-slate-500 dark:text-slate-400">No customers found.</p>
+  <!-- Empty State -->
+  <div *ngIf="filteredCustomers.length === 0" class="text-center py-12">
+    <p class="text-slate-500 dark:text-slate-400">No customers found.</p>
+  </div>
 </div>

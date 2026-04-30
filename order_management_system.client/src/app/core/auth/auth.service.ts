@@ -24,20 +24,45 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  getUserRole(): string | null {
+  private getTokenPayload(): any | null {
     const token = this.getToken();
-    if (!token) return null;
+
+    if (!token) {
+      return null;
+    }
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return (
-        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
-        payload['role'] ||
-        null
-      );
+      return JSON.parse(atob(token.split('.')[1]));
     } catch {
       return null;
     }
+  }
+
+  getUserRole(): string | null {
+    const payload = this.getTokenPayload();
+
+    return (
+      payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+      payload?.role ||
+      null
+    );
+  }
+
+  getUserFullName(): string | null {
+    const payload = this.getTokenPayload();
+
+    return payload?.fullName || null;
+  }
+
+  getUsername(): string | null {
+    const payload = this.getTokenPayload();
+
+    return (
+      payload?.unique_name ||
+      payload?.['unique_name'] ||
+      payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+      null
+    );
   }
 
   hasRole(...roles: string[]): boolean {

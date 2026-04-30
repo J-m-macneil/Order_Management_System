@@ -140,6 +140,31 @@
 
     <!-- Sidebar (1 column) -->
     <div class="space-y-6">
+
+      <!-- Status Actions -->
+      <div class="detail-card">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">
+          Status Actions
+        </h2>
+
+        <div *ngIf="allowedStatuses.length > 0; else noStatusActions" class="space-y-3">
+          <button *ngFor="let status of allowedStatuses"
+                  type="button"
+                  [disabled]="isChangingStatus"
+                  (click)="changeStatus(status.id)"
+                  class="w-full px-4 py-2 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  [ngClass]="getStatusButtonClass(status.name)">
+            Move to {{ status.name }}
+          </button>
+        </div>
+
+        <ng-template #noStatusActions>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">
+            No available status actions.
+          </p>
+        </ng-template>
+      </div>
+
       <!-- Summary Card -->
       <div class="detail-card">
         <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Summary</h2>
@@ -200,6 +225,44 @@
           </div>
         </div>
       </div>
+
+      <!-- Status History -->
+      <div class="detail-card">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">
+          Status History
+        </h2>
+
+        <div *ngIf="history.length > 0; else noHistory" class="space-y-4">
+          <div *ngFor="let h of history"
+               class="border-l-2 border-slate-200 dark:border-slate-700 pl-4">
+            <p class="text-sm font-medium text-slate-900 dark:text-white">
+              {{ h.fromStatusName || '—' }} → {{ h.toStatusName }}
+            </p>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {{ h.changedByUserName }} • {{ h.changedAt | date: 'MMM d, yyyy h:mm a' }}
+            </p>
+
+            <p *ngIf="h.reason" class="text-sm text-red-600 dark:text-red-400 mt-2">
+              Reason: {{ h.reason }}
+            </p>
+          </div>
+        </div>
+
+        <ng-template #noHistory>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">
+            No history available.
+          </p>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>
+
+<app-input-modal *ngIf="showReasonModal"
+                 [title]="'Provide Reason'"
+                 [placeholder]="'Enter reason...'"
+                 [requireInput]="true"
+                 (confirm)="onReasonConfirm($event)"
+                 (cancel)="onReasonCancel()">
+</app-input-modal>

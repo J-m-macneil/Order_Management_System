@@ -1,4 +1,7 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Customers;
+using Domain.Entities.Orders;
+
+namespace Domain.Entities;
 
 public class Project
 {

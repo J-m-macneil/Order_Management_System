@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities;
+﻿namespace Domain.Entities.Orders;
 
 public class OrderStatusHistory
 {
@@ -16,7 +16,7 @@ public class OrderStatusHistory
     public int ChangedByUserId { get; set; }
     public User ChangedByUser { get; set; } = null!;
 
-    public DateTime ChangedAt { get; set; }
+    public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
 
     public string? Reason { get; set; }
 }

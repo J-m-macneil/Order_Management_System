@@ -1,6 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,39 +9,29 @@ import { CommonModule } from '@angular/common';
 })
 export class NavbarComponent {
   isDarkMode = signal(false);
-  currentRole = signal<'sales' | 'operations' | 'admin'>('sales');
-  userName = signal('John Doe');
+  currentRole = signal('User');
+  userName = signal('User');
 
-  roles: Array<'sales' | 'operations' | 'admin'> = ['sales', 'operations', 'admin'];
-
-  roleLabels: Record<string, string> = {
-    sales: 'Sales',
-    operations: 'Operations',
-    admin: 'Admin'
-  };
-
-  roleIcons: Record<string, string> = {
-    sales: '📊',
-    operations: '⚙️',
-    admin: '🔐'
-  };
-
-  constructor() {
-    // Load dark mode preference from localStorage
+  constructor(private authService: AuthService) {
     const savedDarkMode = localStorage.getItem('darkMode');
+
     if (savedDarkMode === 'true') {
       this.isDarkMode.set(true);
       document.documentElement.classList.add('dark');
     }
 
-    // Load user role from localStorage
-    const savedRole = localStorage.getItem('userRole') as 'sales' | 'operations' | 'admin' | null;
-    if (savedRole && this.roles.includes(savedRole)) {
-      this.currentRole.set(savedRole);
-    }
+    this.loadUserFromToken();
   }
 
-  toggleDarkMode() {
+  private loadUserFromToken(): void {
+    const role = this.authService.getUserRole();
+    const name = this.authService.getUserFullName();
+
+    this.currentRole.set(role ?? 'User');
+    this.userName.set(name ?? 'User');
+  }
+
+  toggleDarkMode(): void {
     const newDarkMode = !this.isDarkMode();
     this.isDarkMode.set(newDarkMode);
 
@@ -53,11 +42,6 @@ export class NavbarComponent {
     }
 
     localStorage.setItem('darkMode', newDarkMode.toString());
-  }
-
-  switchRole(role: 'sales' | 'operations' | 'admin') {
-    this.currentRole.set(role);
-    localStorage.setItem('userRole', role);
   }
 
   getUserInitials(): string {

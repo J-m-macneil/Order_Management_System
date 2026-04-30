@@ -1,4 +1,8 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Customers;
+using Domain.Entities.Orders;
+using Domain.Entities.Products;
+
+namespace Domain.Entities;
 
 public class Product
 {
