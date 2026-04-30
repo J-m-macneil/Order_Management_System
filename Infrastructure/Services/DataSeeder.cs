@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
+using Domain.Entities.Customers;
+using Domain.Entities.Orders;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 

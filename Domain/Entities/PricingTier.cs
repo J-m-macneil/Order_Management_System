@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Customers;
+
+namespace Domain.Entities;
 
 public class PricingTier
 {

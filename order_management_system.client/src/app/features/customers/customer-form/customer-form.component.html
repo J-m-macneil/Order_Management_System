@@ -1,263 +1,121 @@
-<div class="page-header">
-  <h1>{{ isEditMode ? 'Edit Customer' : 'Create Customer' }}</h1>
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
+  <div>
+    <h1 class="text-3xl font-light text-slate-900 dark:text-white">
+      {{ isEditMode ? 'Edit Customer' : 'Create Customer' }}
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">
+      {{ isEditMode ? 'Update customer details' : 'Create a new customer account' }}
+    </p>
+  </div>
+  <a routerLink="/customers" class="text-blue-600 dark:text-blue-400 hover:underline">
+    ← Back to Customers
+  </a>
 </div>
 
-<div *ngIf="isLoading">Loading...</div>
-<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<!-- Loading -->
+<div *ngIf="isLoading" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">Loading...</p>
+</div>
 
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="customer-form">
-  <label>
-    Account Number
-    <input type="text" formControlName="accountNumber" />
-  </label>
+<!-- Error -->
+<div *ngIf="errorMessage && !isLoading"
+     class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg mb-6">
+  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+</div>
 
-  <label>
-    Company Name
-    <input type="text" formControlName="companyName" />
-  </label>
+<!-- Form -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-  <label>
-    Industry Type
-    <input type="text" formControlName="industryType" />
-  </label>
+  <!-- Main -->
+  <div class="lg:col-span-2 space-y-6">
 
-  <label>
-    Main Contact Name
-    <input type="text" formControlName="mainContactName" />
-  </label>
+    <!-- Customer Details -->
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Customer Details</h2>
 
-  <label>
-    Main Contact Email
-    <input type="email" formControlName="mainContactEmail" />
-  </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-  <label>
-    Main Contact Phone
-    <input type="text" formControlName="mainContactPhone" />
-  </label>
+        <div>
+          <label class="form-label">Account Number</label>
+          <input type="text" formControlName="accountNumber" class="form-input" />
+        </div>
 
-  <label>
-    Billing Address Id
-    <input type="number" formControlName="billingAddressId" />
-  </label>
+        <div>
+          <label class="form-label">Company Name</label>
+          <input type="text" formControlName="companyName" class="form-input" />
+        </div>
 
-  <label>
-    Default Delivery Address Id
-    <input type="number" formControlName="defaultDeliveryAddressId" />
-  </label>
+        <div>
+          <label class="form-label">Industry</label>
+          <input type="text" formControlName="industryType" class="form-input" />
+        </div>
 
-  <label>
-    Pricing Tier Id
-    <input type="number" formControlName="pricingTierId" />
-  </label>
+        <div>
+          <label class="form-label">Payment Terms (Days)</label>
+          <input type="number" formControlName="paymentTermsDays" class="form-input" />
+        </div>
 
-  <label>
-    Payment Terms Days
-    <input type="number" formControlName="paymentTermsDays" />
-  </label>
+        <div>
+          <label class="form-label">Credit Limit</label>
+          <input type="number" step="0.01" formControlName="creditLimit" class="form-input" />
+        </div>
 
-  <label>
-    Credit Limit
-    <input type="number" step="0.01" formControlName="creditLimit" />
-  </label>
+      </div>
+    </div>
 
-  <label class="checkbox-label">
-    <input type="checkbox" formControlName="isActive" />
-    Active
-  </label>
+    <!-- Contact Info -->
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Main Contact</h2>
 
-  <div class="actions">
-    <button type="submit" [disabled]="isLoading">
-      {{ isEditMode ? 'Update Customer' : 'Create Customer' }}
-    </button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-    <a routerLink="/customers">Cancel</a>
+        <div>
+          <label class="form-label">Name</label>
+          <input type="text" formControlName="mainContactName" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Email</label>
+          <input type="email" formControlName="mainContactEmail" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Phone</label>
+          <input type="text" formControlName="mainContactPhone" class="form-input" />
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sidebar -->
+  <div class="space-y-6">
+
+    <!-- Status -->
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Status</h2>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" formControlName="isActive" class="w-4 h-4 accent-blue-600" />
+        <span class="text-sm text-slate-700 dark:text-slate-300">Active Customer</span>
+      </label>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-card">
+      <button type="submit"
+              [disabled]="isLoading"
+              class="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+        {{ isEditMode ? 'Update Customer' : 'Create Customer' }}
+      </button>
+
+      <a routerLink="/customers"
+         class="block mt-3 text-center px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600">
+        Cancel
+      </a>
+    </div>
+
   </div>
 </form>
-
-<div *ngIf="isEditMode" class="addresses-section">
-  <div class="section-header">
-    <h2>Customer Addresses</h2>
-    <p class="section-subtitle">Manage billing, head office, and delivery sites for this customer.</p>
-  </div>
-
-  <div class="addresses-list-card">
-    <h3>Existing Addresses</h3>
-
-    <table *ngIf="addresses.length > 0" class="customers-table">
-      <thead>
-        <tr>
-          <th>Site</th>
-          <th>Type</th>
-          <th>Line 1</th>
-          <th>City</th>
-          <th>Postcode</th>
-          <th>Primary</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let address of addresses">
-          <td>{{ address.siteName }}</td>
-          <td>{{ address.addressType }}</td>
-          <td>{{ address.line1 }}</td>
-          <td>{{ address.city }}</td>
-          <td>{{ address.postcode }}</td>
-          <td>{{ address.isPrimary ? 'Yes' : 'No' }}</td>
-          <td>
-            <button type="button" (click)="deleteAddress(address.addressId)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div *ngIf="addresses.length === 0" class="empty-state">
-      No addresses found for this customer yet.
-    </div>
-  </div>
-
-  <div class="address-form-card">
-    <h3>Add New Address</h3>
-
-    <form [formGroup]="addressForm" (ngSubmit)="createAddress()" class="customer-form">
-      <label>
-        Address Type
-        <input type="text" formControlName="addressType" />
-      </label>
-
-      <label>
-        Site Name
-        <input type="text" formControlName="siteName" />
-      </label>
-
-      <label>
-        Line 1
-        <input type="text" formControlName="line1" />
-      </label>
-
-      <label>
-        Line 2
-        <input type="text" formControlName="line2" />
-      </label>
-
-      <label>
-        City
-        <input type="text" formControlName="city" />
-      </label>
-
-      <label>
-        County
-        <input type="text" formControlName="county" />
-      </label>
-
-      <label>
-        Postcode
-        <input type="text" formControlName="postcode" />
-      </label>
-
-      <label>
-        Country
-        <input type="text" formControlName="country" />
-      </label>
-
-      <label>
-        Contact Name
-        <input type="text" formControlName="contactName" />
-      </label>
-
-      <label>
-        Contact Phone
-        <input type="text" formControlName="contactPhone" />
-      </label>
-
-      <label>
-        Delivery Instructions
-        <input type="text" formControlName="deliveryInstructions" />
-      </label>
-
-      <label class="checkbox-label">
-        <input type="checkbox" formControlName="isPrimary" />
-        Primary address
-      </label>
-
-      <div class="actions">
-        <button type="submit">Add Address</button>
-      </div>
-    </form>
-
-    <div *ngIf="isEditMode" class="contacts-section">
-      <div class="section-header">
-        <h2>Customer Contacts</h2>
-        <p class="section-subtitle">Manage the customer’s key contacts.</p>
-      </div>
-
-      <div class="contacts-list-card">
-        <h3>Existing Contacts</h3>
-
-        <table *ngIf="contacts.length > 0" class="customers-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Job Title</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Primary</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let contact of contacts">
-              <td>{{ contact.name }}</td>
-              <td>{{ contact.jobTitle }}</td>
-              <td>{{ contact.email }}</td>
-              <td>{{ contact.phone }}</td>
-              <td>{{ contact.isPrimary ? 'Yes' : 'No' }}</td>
-              <td>
-                <button type="button" (click)="deleteContact(contact.customerContactId)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div *ngIf="contacts.length === 0" class="empty-state">
-          No contacts found for this customer yet.
-        </div>
-      </div>
-
-      <div class="contact-form-card">
-        <h3>Add New Contact</h3>
-
-        <form [formGroup]="contactForm" (ngSubmit)="createContact()" class="customer-form">
-          <label>
-            Name
-            <input type="text" formControlName="name" />
-          </label>
-
-          <label>
-            Job Title
-            <input type="text" formControlName="jobTitle" />
-          </label>
-
-          <label>
-            Email
-            <input type="email" formControlName="email" />
-          </label>
-
-          <label>
-            Phone
-            <input type="text" formControlName="phone" />
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="isPrimary" />
-            Primary contact
-          </label>
-
-          <div class="actions">
-            <button type="submit">Add Contact</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>

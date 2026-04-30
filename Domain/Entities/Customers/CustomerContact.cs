@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Orders;
+
+namespace Domain.Entities.Customers;
 
 public class CustomerContact
 {

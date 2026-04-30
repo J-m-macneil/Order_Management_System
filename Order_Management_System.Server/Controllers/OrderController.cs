@@ -1,5 +1,7 @@
 ﻿using Application.DTOs;
 using Domain.Entities;
+using Domain.Entities.Orders;
+using Domain.Enums;
 using Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -289,5 +291,155 @@ public class OrdersController : ControllerBase
         };
 
         return Ok(result);
+    }
+
+    [HttpGet("{id:int}/allowed-statuses")]
+    [Authorize(Roles = "Sales,Operations,Admin")]
+    public async Task<IActionResult> GetAllowedStatuses(int id)
+    {
+        var order = await _dbContext.Orders
+            .FirstOrDefaultAsync(o => o.OrderId == id && o.DeletedAt == null);
+
+        if (order == null)
+            return NotFound();
+
+        var roles = User.Claims
+            .Where(c =>
+                c.Type == System.Security.Claims.ClaimTypes.Role ||
+                c.Type == "role")
+            .Select(c => c.Value)
+            .ToList();
+
+        if (!roles.Any())
+            return Forbid();
+
+        var currentStatus = (OrderStatusEnum)order.OrderStatusId;
+
+        var allowedStatusIds = new List<int>();
+
+        foreach (var role in roles)
+        {
+            var allowed = OrderStatusTransitions.GetAllowedTransitions(
+                currentStatus,
+                role
+            );
+
+            allowedStatusIds.AddRange(allowed.Select(x => (int)x));
+        }
+
+        allowedStatusIds = allowedStatusIds
+            .Distinct()
+            .ToList();
+
+        var result = await _dbContext.OrderStatuses
+            .Where(s => allowedStatusIds.Contains(s.OrderStatusId))
+            .OrderBy(s => s.DisplayOrder)
+            .Select(s => new AllowedStatusDto
+            {
+                Id = s.OrderStatusId,
+                Name = s.Name
+            })
+            .ToListAsync();
+
+        return Ok(result);
+    }
+
+    [HttpPost("{id:int}/status")]
+    [Authorize(Roles = "Sales,Operations,Admin")]
+    public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeOrderStatusDto dto)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.OrderId == id && o.DeletedAt == null);
+
+        if (order == null)
+            return NotFound();
+
+        var roles = User.Claims
+            .Where(c =>
+                c.Type == System.Security.Claims.ClaimTypes.Role ||
+                c.Type == "role")
+            .Select(c => c.Value)
+            .ToList();
+
+        if (!roles.Any())
+            return Forbid();
+
+        var userIdClaim = User.Claims.FirstOrDefault(c =>
+            c.Type == System.Security.Claims.ClaimTypes.NameIdentifier ||
+            c.Type == "sub" ||
+            c.Type == "userId")?.Value;
+
+        if (!int.TryParse(userIdClaim, out var changedByUserId))
+            return Forbid();
+
+        var currentStatus = (OrderStatusEnum)order.OrderStatusId;
+        var newStatus = (OrderStatusEnum)dto.Status;
+
+        var canTransition = roles.Any(role =>
+            OrderStatusTransitions.CanTransition(currentStatus, newStatus, role));
+
+        if (!canTransition)
+            return BadRequest("Invalid status transition.");
+
+        if (newStatus is OrderStatusEnum.Failed or OrderStatusEnum.Cancelled)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Reason))
+                return BadRequest("A reason is required for failed or cancelled orders.");
+
+            order.FailureReason = dto.Reason.Trim();
+        }
+
+        order.OrderStatusId = dto.Status;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        if (newStatus == OrderStatusEnum.Submitted && order.SubmittedAt == null)
+        {
+            order.SubmittedAt = DateTime.UtcNow;
+        }
+
+        _dbContext.OrderStatusHistories.Add(new OrderStatusHistory
+        {
+            OrderId = order.OrderId,
+            FromStatusId = (int)currentStatus,
+            ToStatusId = dto.Status,
+            ChangedByUserId = changedByUserId,
+            ChangedAt = DateTime.UtcNow,
+            Reason = dto.Reason
+        });
+
+        await _dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:int}/history")]
+    [Authorize(Roles = "Sales,Operations,Admin")]
+    public async Task<IActionResult> GetStatusHistory(int id)
+    {
+        var orderExists = await _dbContext.Orders
+            .AnyAsync(o => o.OrderId == id && o.DeletedAt == null);
+
+        if (!orderExists)
+            return NotFound();
+
+        var history = await _dbContext.OrderStatusHistories
+            .Include(h => h.FromStatus)
+            .Include(h => h.ToStatus)
+            .Include(h => h.ChangedByUser)
+            .Where(h => h.OrderId == id)
+            .OrderByDescending(h => h.ChangedAt)
+            .Select(h => new OrderStatusHistoryDto
+            {
+                OrderStatusHistoryId = h.OrderStatusHistoryId,
+                FromStatusName = h.FromStatus != null ? h.FromStatus.Name : null,
+                ToStatusName = h.ToStatus.Name,
+                ChangedByUserName = h.ChangedByUser.FullName,
+                ChangedAt = h.ChangedAt,
+                Reason = h.Reason
+            })
+            .ToListAsync();
+
+        return Ok(history);
     }
 }

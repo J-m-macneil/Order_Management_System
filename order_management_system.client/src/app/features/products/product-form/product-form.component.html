@@ -1,186 +1,262 @@
-<div class="page-header">
-  <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
+  <div>
+    <h1 class="text-3xl font-light text-slate-900 dark:text-white">
+      {{ isEditMode ? 'Edit Product' : 'Create Product' }}
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">
+      {{ isEditMode ? 'Update product details and safety information' : 'Create a new chemical product' }}
+    </p>
+  </div>
+  <a routerLink="/products" class="text-blue-600 dark:text-blue-400 hover:underline">
+    ← Back to Products
+  </a>
 </div>
 
-<div *ngIf="isLoading">Loading...</div>
-<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<!-- Loading -->
+<div *ngIf="isLoading" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">Loading...</p>
+</div>
 
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="product-form">
+<!-- Error -->
+<div *ngIf="errorMessage && !isLoading"
+     class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg mb-6">
+  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+</div>
 
-  <div class="form-grid">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-6">
 
-    <label>
-      SKU
-      <input type="text" formControlName="sku" />
-    </label>
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Product Details</h2>
 
-    <label>
-      Product Name
-      <input type="text" formControlName="productName" />
-    </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">SKU</label>
+          <input type="text" formControlName="sku" class="form-input" />
+        </div>
 
-    <label class="full-width">
-      Description
-      <textarea formControlName="description"></textarea>
-    </label>
+        <div>
+          <label class="form-label">Product Name</label>
+          <input type="text" formControlName="productName" class="form-input" />
+        </div>
 
-    <label>
-      Category
-      <select formControlName="productCategoryId">
-        <option *ngFor="let category of productCategories" [value]="category.productCategoryId">
-          {{ category.name }}
-        </option>
-      </select>
-    </label>
+        <div class="sm:col-span-2">
+          <label class="form-label">Description</label>
+          <textarea formControlName="description" rows="3" class="form-input resize-none"></textarea>
+        </div>
 
-    <label>
-      Unit Of Measure
-      <select formControlName="unitOfMeasureId">
-        <option *ngFor="let unit of unitsOfMeasure" [value]="unit.unitOfMeasureId">
-          {{ unit.name }} ({{ unit.code }})
-        </option>
-      </select>
-    </label>
+        <div>
+          <label class="form-label">Category</label>
+          <select formControlName="productCategoryId" class="form-input">
+            <option *ngFor="let category of productCategories" [value]="category.productCategoryId">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
 
-    <label>
-      Pack Size
-      <input type="text" formControlName="packSize" />
-    </label>
+        <div>
+          <label class="form-label">Unit Of Measure</label>
+          <select formControlName="unitOfMeasureId" class="form-input">
+            <option *ngFor="let unit of unitsOfMeasure" [value]="unit.unitOfMeasureId">
+              {{ unit.name }} ({{ unit.code }})
+            </option>
+          </select>
+        </div>
 
-    <label>
-      Base Price
-      <input type="number" formControlName="basePrice" />
-    </label>
+        <div>
+          <label class="form-label">Pack Size</label>
+          <input type="text" formControlName="packSize" class="form-input" />
+        </div>
 
-    <label>
-      Currency
-      <input type="text" formControlName="currency" />
-    </label>
+        <div>
+          <label class="form-label">Base Price</label>
+          <input type="number" formControlName="basePrice" class="form-input" />
+        </div>
 
-    <label>
-      Hazard Class
-      <select formControlName="hazardClassId">
-        <option *ngFor="let hazard of hazardClasses" [value]="hazard.hazardClassId">
-          {{ hazard.name }}
-        </option>
-      </select>
-    </label>
-
-    <label>
-      UN Number
-      <input type="text" formControlName="unNumber" />
-    </label>
-
-    <label class="full-width">
-      Storage Requirement
-      <input type="text" formControlName="storageRequirement" />
-    </label>
-
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="requiresSds" />
-      Requires SDS
-    </label>
-
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="isRestricted" />
-      Restricted
-    </label>
-
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="isActive" />
-      Active
-    </label>
-
-  </div>
-
-  <div class="actions">
-    <button type="submit">
-      {{ isEditMode ? 'Update Product' : 'Create Product' }}
-    </button>
-
-    <a routerLink="/products">Cancel</a>
-  </div>
-
-  <div *ngIf="isEditMode" class="sds-section">
-    <div class="section-header">
-      <h2>Safety Data Sheets</h2>
-      <p class="section-subtitle">Manage SDS records linked to this product.</p>
-    </div>
-
-    <div class="sds-list-card">
-      <h3>Existing SDS Records</h3>
-
-      <table *ngIf="safetyDataSheets.length > 0" class="customers-table">
-        <thead>
-          <tr>
-            <th>File Name</th>
-            <th>Version</th>
-            <th>Effective Date</th>
-            <th>Uploaded At</th>
-            <th>Uploaded By</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sds of safetyDataSheets">
-            <td>{{ sds.fileName }}</td>
-            <td>{{ sds.version }}</td>
-            <td>{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
-            <td>{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ sds.uploadedByUserId }}</td>
-            <td>
-              <button type="button" (click)="deleteSafetyDataSheet(sds.safetyDataSheetId)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div *ngIf="safetyDataSheets.length === 0" class="empty-state">
-        No SDS records found for this product.
+        <div>
+          <label class="form-label">Currency</label>
+          <input type="text" formControlName="currency" class="form-input" />
+        </div>
       </div>
     </div>
 
-    <div class="sds-form-card">
-      <h3>Add SDS Record</h3>
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Safety & Storage</h2>
 
-      <form [formGroup]="sdsForm" (ngSubmit)="createSafetyDataSheet()" class="product-form">
-        <div class="form-grid">
-          <label>
-            File Name
-            <input type="text" formControlName="fileName" />
-          </label>
-
-          <label>
-            File Path
-            <input type="text" formControlName="filePath" />
-          </label>
-
-          <label>
-            Version
-            <input type="text" formControlName="version" />
-          </label>
-
-          <label>
-            Effective Date
-            <input type="date" formControlName="effectiveDate" />
-          </label>
-
-          <label>
-            Uploaded At
-            <input type="datetime-local" formControlName="uploadedAt" />
-          </label>
-
-          <label>
-            Uploaded By User Id
-            <input type="number" formControlName="uploadedByUserId" />
-          </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Hazard Class</label>
+          <select formControlName="hazardClassId" class="form-input">
+            <option *ngFor="let hazard of hazardClasses" [value]="hazard.hazardClassId">
+              {{ hazard.name }}
+            </option>
+          </select>
         </div>
 
-        <div class="actions">
-          <button type="submit">Add SDS</button>
+        <div>
+          <label class="form-label">UN Number</label>
+          <input type="text" formControlName="unNumber" class="form-input" />
         </div>
-      </form>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Storage Requirement</label>
+          <input type="text" formControlName="storageRequirement" class="form-input" />
+        </div>
+
+        <label class="flex items-center gap-2 pt-2">
+          <input type="checkbox" formControlName="requiresSds" class="w-4 h-4 accent-blue-600" />
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Requires SDS</span>
+        </label>
+
+        <label class="flex items-center gap-2 pt-2">
+          <input type="checkbox" formControlName="isRestricted" class="w-4 h-4 accent-blue-600" />
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Restricted</span>
+        </label>
+      </div>
     </div>
+
+    <div *ngIf="isEditMode" class="form-card">
+      <div class="mb-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white">Safety Data Sheets</h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">
+          Manage SDS records linked to this product.
+        </p>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-4">Existing SDS Records</h3>
+
+        <div class="overflow-x-auto">
+          <table *ngIf="safetyDataSheets.length > 0" class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+              <tr>
+                <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">File Name</th>
+                <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Version</th>
+                <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Effective Date</th>
+                <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Uploaded At</th>
+                <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Uploaded By</th>
+                <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+              <tr *ngFor="let sds of safetyDataSheets" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                <td class="px-6 py-4 text-slate-900 dark:text-white font-medium">{{ sds.fileName }}</td>
+                <td class="px-6 py-4 text-slate-600 dark:text-slate-300">{{ sds.version }}</td>
+                <td class="px-6 py-4 text-slate-600 dark:text-slate-300">{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
+                <td class="px-6 py-4 text-slate-600 dark:text-slate-300">{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="px-6 py-4 text-slate-600 dark:text-slate-300">{{ sds.uploadedByUserId }}</td>
+                <td class="px-6 py-4 text-center">
+                  <button type="button"
+                          (click)="deleteSafetyDataSheet(sds.safetyDataSheetId)"
+                          class="text-red-600 dark:text-red-400 hover:underline text-xs font-medium">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="safetyDataSheets.length === 0" class="text-center py-8 text-slate-500 dark:text-slate-400">
+          No SDS records found for this product.
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-4">Add SDS Record</h3>
+
+        <div [formGroup]="sdsForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="form-label">File Name</label>
+            <input type="text" formControlName="fileName" class="form-input" />
+          </div>
+
+          <div>
+            <label class="form-label">File Path</label>
+            <input type="text" formControlName="filePath" class="form-input" />
+          </div>
+
+          <div>
+            <label class="form-label">Version</label>
+            <input type="text" formControlName="version" class="form-input" />
+          </div>
+
+          <div>
+            <label class="form-label">Effective Date</label>
+            <input type="date" formControlName="effectiveDate" class="form-input" />
+          </div>
+
+          <div>
+            <label class="form-label">Uploaded At</label>
+            <input type="datetime-local" formControlName="uploadedAt" class="form-input" />
+          </div>
+
+          <div>
+            <label class="form-label">Uploaded By User Id</label>
+            <input type="number" formControlName="uploadedByUserId" class="form-input" />
+          </div>
+
+          <div class="sm:col-span-2">
+            <button type="button"
+                    (click)="createSafetyDataSheet()"
+                    class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+              Add SDS
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
+  <div class="space-y-6">
+    <div class="form-card sticky top-24">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Product Summary</h2>
+
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400">Status</span>
+          <span class="inline-flex px-2 py-1 rounded-md text-xs font-medium"
+                [ngClass]="form.get('isActive')?.value
+              ? 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'">
+            {{ form.get('isActive')?.value ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+
+        <div *ngIf="form.get('isRestricted')?.value" class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400">Restricted</span>
+          <span class="inline-flex px-2 py-1 rounded-md bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-medium">
+            Yes
+          </span>
+        </div>
+
+        <div *ngIf="form.get('requiresSds')?.value" class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400">SDS Required</span>
+          <span class="inline-flex px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+            Yes
+          </span>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 mt-6">
+        <input type="checkbox" formControlName="isActive" class="w-4 h-4 accent-blue-600" />
+        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Active Product</span>
+      </label>
+
+      <div class="mt-8 space-y-3">
+        <button type="submit"
+                [disabled]="isLoading"
+                class="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          {{ isEditMode ? 'Update Product' : 'Create Product' }}
+        </button>
+
+        <a routerLink="/products"
+           class="block text-center px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
 </form>

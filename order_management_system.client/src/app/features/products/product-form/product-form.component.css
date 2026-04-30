@@ -1,98 +1,15 @@
-.product-form {
-  max-width: 900px;
+.form-card {
+  @apply bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg p-6;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 1rem;
+.form-label {
+  @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2;
 }
 
-  .form-grid label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    font-weight: 500;
-  }
-
-  .form-grid input,
-  .form-grid select,
-  .form-grid textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.65rem 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font: inherit;
-    background: #fff;
-  }
-
-  .form-grid textarea {
-    min-height: 80px;
-    resize: vertical;
-  }
-
-.full-width {
-  grid-column: 1 / -1;
+.form-input {
+  @apply w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all;
 }
 
-.checkbox-label {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-}
-
-  .checkbox-label input {
-    width: auto;
-    margin: 0;
-  }
-
-.actions {
-  margin-top: 1.5rem;
-  display: flex;
-  gap: 1rem;
-}
-
-  .actions button,
-  .actions a {
-    padding: 0.65rem 1rem;
-  }
-
-.page-header {
-  margin-bottom: 1rem;
-}
-
-.error-message {
-  margin-bottom: 1rem;
-  color: #b00020;
-}
-
-.sds-section {
-  margin-top: 2rem;
-}
-
-.sds-list-card,
-.sds-form-card {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-  .sds-list-card h3,
-  .sds-form-card h3 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-  }
-
-.section-header {
-  margin-bottom: 1rem;
-}
-
-.section-subtitle {
-  margin: 0;
-  color: #666;
+.empty-state {
+  @apply text-center py-8 text-slate-500 dark:text-slate-400;
 }

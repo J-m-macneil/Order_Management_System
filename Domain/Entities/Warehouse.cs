@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Domain.Entities.Orders;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 

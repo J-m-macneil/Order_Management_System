@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Domain.Entities;
+using Domain.Entities.Customers;
 using Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
