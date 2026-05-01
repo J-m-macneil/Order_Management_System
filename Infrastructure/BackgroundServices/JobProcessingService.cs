@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces;
+using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +30,9 @@ public class JobProcessingService : BackgroundService
             try
             {
                 using var scope = _scopeFactory.CreateScope();
+
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var documentGenerator = scope.ServiceProvider.GetRequiredService<IOrderDocumentGenerator>();
 
                 var now = DateTime.UtcNow;
 
@@ -42,7 +45,7 @@ public class JobProcessingService : BackgroundService
 
                 foreach (var job in jobs)
                 {
-                    await ProcessJobAsync(dbContext, job, stoppingToken);
+                    await ProcessJobAsync(dbContext, documentGenerator, job, stoppingToken);
                 }
             }
             catch (Exception ex)
@@ -56,6 +59,7 @@ public class JobProcessingService : BackgroundService
 
     private async Task ProcessJobAsync(
         AppDbContext dbContext,
+        IOrderDocumentGenerator documentGenerator,
         ProcessingJob job,
         CancellationToken cancellationToken)
     {
@@ -71,15 +75,15 @@ public class JobProcessingService : BackgroundService
             switch (job.JobType)
             {
                 case "GenerateOrderSummaryDocument":
-                    await GenerateDocumentAsync(dbContext, job, "OrderSummary", cancellationToken);
+                    await GenerateDocumentAsync(documentGenerator, dbContext, job, "OrderSummary", cancellationToken);
                     break;
 
                 case "GenerateSdsBundle":
-                    await GenerateDocumentAsync(dbContext, job, "SafetyDataSheetBundle", cancellationToken);
+                    await GenerateDocumentAsync(documentGenerator, dbContext, job, "SafetyDataSheetBundle", cancellationToken);
                     break;
 
                 case "GenerateDeliveryNote":
-                    await GenerateDocumentAsync(dbContext, job, "DeliveryNote", cancellationToken);
+                    await GenerateDocumentAsync(documentGenerator, dbContext, job, "DeliveryNote", cancellationToken);
                     break;
 
                 case "CreateSubmissionNotification":
@@ -121,34 +125,34 @@ public class JobProcessingService : BackgroundService
             job.ErrorMessage = ex.Message;
 
             if (job.AttemptCount >= job.MaxAttempts)
-{
-    job.Status = "Failed";
-    job.FailedAt = DateTime.UtcNow;
-    job.NextAttemptAt = null;
+            {
+                job.Status = "Failed";
+                job.FailedAt = DateTime.UtcNow;
+                job.NextAttemptAt = null;
 
-    var order = await dbContext.Orders
-        .FirstOrDefaultAsync(o => o.OrderId == job.OrderId, cancellationToken);
+                var order = await dbContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderId == job.OrderId, cancellationToken);
 
-    if (order != null)
-    {
-        var oldOrderStatus = order.OrderStatusId;
+                if (order != null)
+                {
+                    var oldOrderStatus = order.OrderStatusId;
 
-        order.OrderStatusId = 8; // Failed
-        order.FailureReason = $"Background job failed: {job.JobType}. {ex.Message}";
-        order.UpdatedAt = DateTime.UtcNow;
+                    order.OrderStatusId = 8; // Failed
+                    order.FailureReason = $"Background job failed: {job.JobType}. {ex.Message}";
+                    order.UpdatedAt = DateTime.UtcNow;
 
-        AddAuditLog(
-            dbContext,
-            "Order",
-            order.OrderId,
-            "StatusChanged:Failed",
-            null,
-            $$"""{"statusId":{{oldOrderStatus}}}""",
-            $$"""{"statusId":8,"status":"Failed","reason":"{{EscapeJson(order.FailureReason)}}"}""",
-            $"Order moved to Failed after background job reached max retry attempts."
-        );
-    }
-}
+                    AddAuditLog(
+                        dbContext,
+                        "Order",
+                        order.OrderId,
+                        "StatusChanged:Failed",
+                        null,
+                        $$"""{"statusId":{{oldOrderStatus}}}""",
+                        $$"""{"statusId":8,"status":"Failed","reason":"{{EscapeJson(order.FailureReason)}}"}""",
+                        "Order moved to Failed after background job reached max retry attempts."
+                    );
+                }
+            }
             else
             {
                 job.Status = "Queued";
@@ -172,29 +176,16 @@ public class JobProcessingService : BackgroundService
     }
 
     private static async Task GenerateDocumentAsync(
-      AppDbContext dbContext,
-      ProcessingJob job,
-      string documentType,
-      CancellationToken cancellationToken)
+        IOrderDocumentGenerator generator,
+        AppDbContext dbContext,
+        ProcessingJob job,
+        string documentType,
+        CancellationToken cancellationToken)
     {
-        var order = await dbContext.Orders
-            .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);
-
-        var safeOrderNumber = order.OrderNumber.ToLowerInvariant();
-        var safeDocumentType = documentType.ToLowerInvariant();
-
-        var document = new Document
-        {
-            OrderId = order.OrderId,
-            DocumentType = documentType,
-            FileName = $"{safeOrderNumber}_{safeDocumentType}.pdf",
-            FilePath = $"/documents/{safeOrderNumber}_{safeDocumentType}.pdf",
-            CreatedAt = DateTime.UtcNow,
-            CreatedByUserId = null
-        };
-
-        dbContext.Documents.Add(document);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        var document = await generator.GenerateAsync(
+            job.OrderId,
+            documentType,
+            cancellationToken);
 
         AddAuditLog(
             dbContext,
@@ -203,16 +194,16 @@ public class JobProcessingService : BackgroundService
             "Generated",
             null,
             null,
-            $$"""{"documentId":{{document.DocumentId}},"orderId":{{order.OrderId}},"documentType":"{{documentType}}","orderNumber":"{{order.OrderNumber}}"}""",
-            $"{documentType} generated by background job."
+            $$"""{"documentId":{{document.DocumentId}},"orderId":{{job.OrderId}},"documentType":"{{documentType}}"}""",
+            $"{documentType} generated as PDF by background job."
         );
     }
 
     private static async Task CreateNotificationAsync(
-    AppDbContext dbContext,
-    ProcessingJob job,
-    string notificationType,
-    CancellationToken cancellationToken)
+        AppDbContext dbContext,
+        ProcessingJob job,
+        string notificationType,
+        CancellationToken cancellationToken)
     {
         var order = await dbContext.Orders
             .Include(o => o.Customer)
@@ -228,8 +219,7 @@ public class JobProcessingService : BackgroundService
             Subject = $"Confirmation for {order.OrderNumber}",
             CreatedAt = DateTime.UtcNow,
             SentAt = DateTime.UtcNow,
-            Status = "Sent",
-            FailureReason = null
+            Status = "Sent"
         };
 
         dbContext.Notifications.Add(notification);
@@ -248,9 +238,9 @@ public class JobProcessingService : BackgroundService
     }
 
     private static async Task PushToLogisticsProviderAsync(
-    AppDbContext dbContext,
-    ProcessingJob job,
-    CancellationToken cancellationToken)
+        AppDbContext dbContext,
+        ProcessingJob job,
+        CancellationToken cancellationToken)
     {
         var order = await dbContext.Orders
             .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);

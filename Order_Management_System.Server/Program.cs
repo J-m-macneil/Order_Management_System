@@ -12,6 +12,8 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
         builder.Services.AddControllers()
             .AddJsonOptions(options =>
             {
@@ -27,6 +29,7 @@ public static class Program
         builder.Services.AddScoped<IPasswordService, PasswordService>();
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IProcessingJobQueueService, ProcessingJobQueueService>();
+        builder.Services.AddScoped<IOrderDocumentGenerator, OrderDocumentGenerator>();
         builder.Services.AddHostedService<JobProcessingService>();
 
         builder.Services.AddCors(options =>
