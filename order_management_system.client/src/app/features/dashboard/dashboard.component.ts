@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { DashboardService } from '../../core/services/dashboard.service';
 
 type MetricType = 'orders' | 'activeOrders' | 'failedOrders' | 'totalValue';
 
@@ -42,77 +43,116 @@ interface PriorityOrder {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
-  metrics: MetricCard[] = [
-    {
-      label: 'Total Orders',
-      value: 1243,
-      type: 'orders',
-      color: 'text-blue-600'
-    },
-    {
-      label: 'Active Orders',
-      value: 287,
-      type: 'activeOrders',
-      color: 'text-emerald-500'
-    },
-    {
-      label: 'Failed Orders',
-      value: 12,
-      type: 'failedOrders',
-      color: 'text-red-500'
-    },
-    {
-      label: 'Total Value',
-      value: 145230,
-      type: 'totalValue',
-      color: 'text-purple-500'
-    }
-  ];
+export class DashboardComponent implements OnInit {
+  metrics: MetricCard[] = [];
+  ordersByStatus: OrderByStatus[] = [];
+  topCustomers: TopCustomer[] = [];
+  recentFailures: RecentFailure[] = [];
+  priorityOrders: PriorityOrder[] = [];
 
-  ordersByStatus: OrderByStatus[] = [
-    { status: 'Draft', count: 45, color: 'bg-slate-200 dark:bg-slate-700' },
-    { status: 'Submitted', count: 89, color: 'bg-blue-200 dark:bg-blue-900/30' },
-    { status: 'Approved', count: 123, color: 'bg-emerald-200 dark:bg-emerald-900/30' },
-    { status: 'Processing', count: 87, color: 'bg-amber-200 dark:bg-amber-900/30' }
-  ];
+  isLoading = false;
+  errorMessage = '';
 
-  topCustomers: TopCustomer[] = [
-    { name: 'Acme Corp', initials: 'AC', orders: 156, bgColor: 'bg-blue-600' },
-    { name: 'ChemTech', initials: 'CT', orders: 134, bgColor: 'bg-purple-600' },
-    { name: 'Industrial Solutions', initials: 'IS', orders: 98, bgColor: 'bg-emerald-600' },
-    { name: 'GreenChem', initials: 'GC', orders: 87, bgColor: 'bg-amber-600' }
-  ];
+  constructor(
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
-  recentFailures: RecentFailure[] = [
-    {
-      orderNumber: 'ORD-2024-1089',
-      customer: 'Acme Corp',
-      reason: 'Payment declined',
-      date: '2024-01-15'
-    },
-    {
-      orderNumber: 'ORD-2024-1087',
-      customer: 'TechChemical',
-      reason: 'Out of stock',
-      date: '2024-01-14'
-    }
-  ];
+  ngOnInit(): void {
+    this.loadDashboard();
+  }
 
-  priorityOrders: PriorityOrder[] = [
-    {
-      orderNumber: 'ORD-2024-1090',
-      customer: 'Acme Corp',
-      priority: 'Urgent',
-      dueDate: '2024-01-18'
-    },
-    {
-      orderNumber: 'ORD-2024-1091',
-      customer: 'ChemTech',
-      priority: 'High',
-      dueDate: '2024-01-19'
-    }
-  ];
+  loadDashboard(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
+    this.dashboardService.getMetrics().subscribe({
+      next: (data) => {
+        this.metrics = [
+          { label: 'Total Orders', value: data.metrics.totalOrders, type: 'orders', color: 'text-blue-600' },
+          { label: 'Active Orders', value: data.metrics.activeOrders, type: 'activeOrders', color: 'text-emerald-500' },
+          { label: 'Failed Orders', value: data.metrics.failedOrders, type: 'failedOrders', color: 'text-red-500' },
+          { label: 'Total Value', value: data.metrics.totalValue, type: 'totalValue', color: 'text-purple-500' }
+        ];
+
+        this.ordersByStatus = data.ordersByStatus.map(x => ({
+          status: x.status,
+          count: x.count,
+          color: this.getStatusColor(x.status)
+        }));
+
+        this.topCustomers = data.topCustomers.map((x, index) => ({
+          name: x.name,
+          initials: this.getInitials(x.name),
+          orders: x.orders,
+          bgColor: this.getCustomerColor(index)
+        }));
+
+        this.recentFailures = data.recentFailures.map(x => ({
+          orderNumber: x.orderNumber,
+          customer: x.customer,
+          reason: x.reason,
+          date: this.formatDate(x.date)
+        }));
+
+        this.priorityOrders = data.priorityOrders.map(x => ({
+          orderNumber: x.orderNumber,
+          customer: x.customer,
+          priority: x.priority,
+          dueDate: this.formatDate(x.dueDate)
+        }));
+
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Dashboard metrics error:', err);
+        this.errorMessage = 'Failed to load dashboard metrics.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getStatusColor(status: string): string {
+    const colors: Record<string, string> = {
+      'Draft': 'bg-slate-200 dark:bg-slate-700',
+      'Submitted': 'bg-blue-200 dark:bg-blue-900/30',
+      'Pending Review': 'bg-purple-200 dark:bg-purple-900/30',
+      'Approved': 'bg-emerald-200 dark:bg-emerald-900/30',
+      'In Processing': 'bg-amber-200 dark:bg-amber-900/30',
+      'Awaiting Dispatch': 'bg-orange-200 dark:bg-orange-900/30',
+      'Completed': 'bg-green-200 dark:bg-green-900/30',
+      'Failed': 'bg-red-200 dark:bg-red-900/30',
+      'Cancelled': 'bg-slate-300 dark:bg-slate-600'
+    };
+
+    return colors[status] || 'bg-slate-200 dark:bg-slate-700';
+  }
+
+  getCustomerColor(index: number): string {
+    const colors = [
+      'bg-blue-600',
+      'bg-purple-600',
+      'bg-emerald-600',
+      'bg-amber-600',
+      'bg-red-600'
+    ];
+
+    return colors[index % colors.length];
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '—';
+
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(part => part[0].toUpperCase())
+      .join('');
+  }
 
   getPriorityColor(priority: string): string {
     const colors: Record<string, string> = {
@@ -126,10 +166,20 @@ export class DashboardComponent {
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-UK', {
+    return new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
       maximumFractionDigits: 0
     }).format(value);
+  }
+
+  private formatDate(value: string | null): string {
+    if (!value) return '—';
+
+    return new Date(value).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
   }
 }

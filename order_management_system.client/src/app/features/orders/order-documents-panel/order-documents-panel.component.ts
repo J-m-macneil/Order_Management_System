@@ -67,8 +67,8 @@ export class OrderDocumentsPanelComponent implements OnChanges {
   viewDocument(document: OrderDocument): void {
     this.documentsService.downloadDocument(document.documentId).subscribe({
       next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        const fileURL = URL.createObjectURL(blob);
+        window.open(fileURL);
       },
       error: () => {
         this.errorMessage = 'Failed to open document.';
