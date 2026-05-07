@@ -1,7 +1,8 @@
-﻿using Infrastructure.Persistence.Context;
+﻿using Application.Features.ProcessingJobs.Commands.RetryProcessingJob;
+using Domain.Repositories;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -10,98 +11,77 @@ namespace Server.Controllers;
 [Authorize(Roles = "Operations,Admin")]
 public class ProcessingJobsController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IProcessingJobRepository _repo;
+    private readonly IMediator _mediator;
 
-    public ProcessingJobsController(AppDbContext dbContext)
+    public ProcessingJobsController(
+        IProcessingJobRepository repo,
+        IMediator mediator)
     {
-        _dbContext = dbContext;
+        _repo = repo;
+        _mediator = mediator;
     }
 
     [HttpGet("failed")]
-    public async Task<IActionResult> GetFailedJobs()
+    public async Task<IActionResult> GetFailedJobs(CancellationToken ct)
     {
-        var jobs = await _dbContext.ProcessingJobs
-            .Include(j => j.Order)
-            .Where(j => j.Status == "Failed")
-            .OrderByDescending(j => j.FailedAt ?? j.CreatedAt)
-            .Select(j => new
-            {
-                j.ProcessingJobId,
-                j.OrderId,
-                OrderNumber = j.Order.OrderNumber,
-                j.JobType,
-                j.Status,
-                j.AttemptCount,
-                j.MaxAttempts,
-                j.ErrorMessage,
-                j.CreatedAt,
-                j.StartedAt,
-                j.CompletedAt,
-                j.FailedAt,
-                j.LastRetryAt,
-                j.NextAttemptAt,
-                j.PayloadJson
-            })
-            .ToListAsync();
+        var jobs = await _repo.GetFailedJobsAsync(ct);
 
-        return Ok(jobs);
+        var result = jobs.Select(j => new
+        {
+            j.ProcessingJobId,
+            j.OrderId,
+            OrderNumber = j.Order.OrderNumber,
+            j.JobType,
+            j.Status,
+            j.AttemptCount,
+            j.MaxAttempts,
+            j.ErrorMessage,
+            j.CreatedAt,
+            j.StartedAt,
+            j.CompletedAt,
+            j.FailedAt,
+            j.LastRetryAt,
+            j.NextAttemptAt,
+            j.PayloadJson
+        });
+
+        return Ok(result);
     }
 
     [HttpGet("order/{orderId:int}")]
-    public async Task<IActionResult> GetJobsForOrder(int orderId)
+    public async Task<IActionResult> GetJobsForOrder(int orderId, CancellationToken ct)
     {
-        var orderExists = await _dbContext.Orders
-            .AnyAsync(o => o.OrderId == orderId && o.DeletedAt == null);
+        var jobs = await _repo.GetByOrderIdAsync(orderId, ct);
 
-        if (!orderExists)
-            return NotFound();
+        var result = jobs.Select(j => new
+        {
+            j.ProcessingJobId,
+            j.OrderId,
+            j.JobType,
+            j.Status,
+            j.AttemptCount,
+            j.MaxAttempts,
+            j.ErrorMessage,
+            j.CreatedAt,
+            j.StartedAt,
+            j.CompletedAt,
+            j.FailedAt,
+            j.LastRetryAt,
+            j.NextAttemptAt,
+            j.PayloadJson
+        });
 
-        var jobs = await _dbContext.ProcessingJobs
-            .Where(j => j.OrderId == orderId)
-            .OrderByDescending(j => j.CreatedAt)
-            .Select(j => new
-            {
-                j.ProcessingJobId,
-                j.OrderId,
-                j.JobType,
-                j.Status,
-                j.AttemptCount,
-                j.MaxAttempts,
-                j.ErrorMessage,
-                j.CreatedAt,
-                j.StartedAt,
-                j.CompletedAt,
-                j.FailedAt,
-                j.LastRetryAt,
-                j.NextAttemptAt,
-                j.PayloadJson
-            })
-            .ToListAsync();
-
-        return Ok(jobs);
+        return Ok(result);
     }
 
     [HttpPost("{id:int}/retry")]
-    public async Task<IActionResult> RetryJob(int id)
+    public async Task<IActionResult> RetryJob(int id, CancellationToken ct)
     {
-        var job = await _dbContext.ProcessingJobs
-            .FirstOrDefaultAsync(j => j.ProcessingJobId == id);
-
-        if (job == null)
-            return NotFound();
-
-        if (job.Status != "Failed")
-            return BadRequest("Only failed jobs can be retried.");
-
-        job.Status = "Queued";
-        job.NextAttemptAt = DateTime.UtcNow;
-        job.ErrorMessage = null;
-        job.FailedAt = null;
-
-        // optional: reset attempts
-        job.AttemptCount = 0;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(new RetryProcessingJobCommand
+        {
+            Id = id
+        }, ct);
 
         return NoContent();
     }

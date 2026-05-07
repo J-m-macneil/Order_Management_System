@@ -1,9 +1,8 @@
-﻿using Application.DTOs;
-using Application.Interfaces;
+﻿using Application.Features.Pricing.DTOs;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Services;
+namespace Application.Features.Pricing.Queries;
 
 public class PricingService : IPricingService
 {

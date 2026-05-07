@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Orders;
+using Domain.Entities.Organisation;
 
 namespace Domain.Entities.Customers;
 

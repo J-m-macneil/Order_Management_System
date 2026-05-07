@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.Features.Pricing.DTOs;
 
 public interface IPricingService
 {

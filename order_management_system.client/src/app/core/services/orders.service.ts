@@ -36,19 +36,15 @@ export class OrdersService {
     );
   }
 
-  changeStatus(
-    orderId: number,
-    status: OrderStatus,
-    reason?: string
-  ): Observable<void> {
-    const request: ChangeOrderStatusRequest = {
-      status,
-      reason
+  changeStatus(orderId: number, statusId: number, reason?: string): Observable<void> {
+    const body = {
+      statusId: statusId,
+      reason: reason ?? null
     };
 
     return this.http.post<void>(
       `${this.baseUrl}/${orderId}/status`,
-      request
+      body
     );
   }
 

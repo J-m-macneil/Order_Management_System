@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.Features.Auth.Commands.LoginCommand;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +16,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+    public async Task<IActionResult> Login([FromBody] LoginCommand request)
     {
         var result = await _authService.LoginAsync(request);
 

@@ -1,7 +1,7 @@
-﻿using Infrastructure.Persistence.Context;
+﻿using Application.Common.Interfaces;
+using Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -10,63 +10,49 @@ namespace Server.Controllers;
 [Authorize(Roles = "Operations,Admin,Sales")]
 public class DocumentsController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IDocumentRepository _repo;
+    private readonly IFileStorageService _fileStorage;
 
-    public DocumentsController(AppDbContext dbContext)
+    public DocumentsController(
+        IDocumentRepository repo,
+        IFileStorageService fileStorage)
     {
-        _dbContext = dbContext;
+        _repo = repo;
+        _fileStorage = fileStorage;
     }
 
     [HttpGet("order/{orderId:int}")]
-    public async Task<IActionResult> GetDocumentsForOrder(int orderId)
+    public async Task<IActionResult> GetDocumentsForOrder(int orderId, CancellationToken ct)
     {
-        var orderExists = await _dbContext.Orders
-            .AnyAsync(o => o.OrderId == orderId && o.DeletedAt == null);
+        var documents = await _repo.GetByOrderIdAsync(orderId, ct);
 
-        if (!orderExists)
-            return NotFound();
+        var result = documents.Select(d => new
+        {
+            d.DocumentId,
+            d.OrderId,
+            d.DocumentType,
+            d.FileName,
+            d.FilePath,
+            d.CreatedAt,
+            d.CreatedByUserId
+        });
 
-        var documents = await _dbContext.Documents
-            .Where(d => d.OrderId == orderId)
-            .OrderByDescending(d => d.CreatedAt)
-            .Select(d => new
-            {
-                d.DocumentId,
-                d.OrderId,
-                d.DocumentType,
-                d.FileName,
-                d.FilePath,
-                d.CreatedAt,
-                d.CreatedByUserId
-            })
-            .ToListAsync();
-
-        return Ok(documents);
+        return Ok(result);
     }
 
     [HttpGet("{documentId:int}/download")]
-    public async Task<IActionResult> DownloadDocument(int documentId)
+    public async Task<IActionResult> DownloadDocument(int documentId, CancellationToken ct)
     {
-        var document = await _dbContext.Documents
-            .FirstOrDefaultAsync(d => d.DocumentId == documentId);
+        var document = await _repo.GetByIdAsync(documentId, ct);
 
         if (document == null)
             return NotFound();
 
-        var documentsFolder = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            "documents");
-
-        var physicalPath = Path.Combine(documentsFolder, document.FileName);
-
-        if (!System.IO.File.Exists(physicalPath))
+        if (!_fileStorage.FileExists(document.FileName))
             return NotFound("Document file was not found on disk.");
 
-        var fileBytes = await System.IO.File.ReadAllBytesAsync(physicalPath);
+        var fileBytes = await _fileStorage.GetFileAsync(document.FileName, ct);
 
-        return File(
-            fileBytes,
-            "application/pdf",
-            document.FileName);
+        return File(fileBytes, "application/pdf", document.FileName);
     }
 }

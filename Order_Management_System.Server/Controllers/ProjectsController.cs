@@ -1,8 +1,12 @@
-﻿using Domain.Entities;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Products.DTOs;
+using Application.Features.Products.Queries.GetProductById;
+using Application.Features.Products.Queries.GetProducts;
+using Application.Features.Projects.DTOs;
+using Application.Features.Projects.Queries.GetProjectById;
+using Application.Features.Projects.Queries.GetProjects;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -11,32 +15,31 @@ namespace Server.Controllers;
 [Authorize]
 public class ProjectsController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public ProjectsController(AppDbContext dbContext)
+    public ProjectsController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Project>>> GetAll()
+    public async Task<ActionResult<IEnumerable<ProjectDto>>> GetAll()
     {
-        var projects = await _dbContext.Projects
-            .OrderBy(x => x.ProjectCode)
-            .ToListAsync();
-
-        return Ok(projects);
+        var result = await _mediator.Send(new GetProjectsQuery());
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Project>> GetById(int id)
+    public async Task<ActionResult<ProjectDto>> GetById(int id)
     {
-        var project = await _dbContext.Projects
-            .FirstOrDefaultAsync(x => x.ProjectId == id);
+        var result = await _mediator.Send(new GetProjectByIdQuery
+        {
+            ProjectId = id
+        });
 
-        if (project == null)
+        if (result == null)
             return NotFound();
 
-        return Ok(project);
+        return Ok(result);
     }
 }

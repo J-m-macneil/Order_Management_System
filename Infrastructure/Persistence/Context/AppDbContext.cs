@@ -1,7 +1,10 @@
 ﻿using Domain.Entities;
 using Domain.Entities.Customers;
+using Domain.Entities.Identity;
 using Domain.Entities.Orders;
+using Domain.Entities.Organisation;
 using Domain.Entities.Products;
+using Domain.Entities.Status;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Context;
@@ -33,6 +36,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<SystemSetting> SystemSettings => Set <SystemSetting> ();
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+      => base.SaveChangesAsync(cancellationToken);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

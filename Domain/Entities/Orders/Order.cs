@@ -1,4 +1,9 @@
 ﻿using Domain.Entities.Customers;
+using Domain.Entities.Identity;
+using Domain.Entities.Organisation;
+using Domain.Entities.Status;
+using Domain.Enums;
+using Domain.Rules;
 
 namespace Domain.Entities.Orders;
 
@@ -58,4 +63,33 @@ public class Order
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<OrderStatusHistory> OrderStatusHistory { get; set; } = new List<OrderStatusHistory>();
+
+    public void ChangeStatus(int newStatusId, int userId, string? reason)
+    {
+        if (OrderStatusId == newStatusId)
+            return;
+
+        var fromStatus = (OrderStatusEnum)OrderStatusId;
+        var toStatus = (OrderStatusEnum)newStatusId;
+
+        if (!OrderStatusTransitions.CanTransition(fromStatus, toStatus))
+            throw new InvalidOperationException(
+                $"Invalid transition from {fromStatus} to {toStatus}");
+
+        OrderStatusHistory.Add(new OrderStatusHistory
+        {
+            OrderId = OrderId,
+            FromStatusId = OrderStatusId,
+            ToStatusId = newStatusId,
+            ChangedByUserId = userId,
+            Reason = reason,
+            ChangedAt = DateTime.UtcNow
+        });
+
+        OrderStatusId = newStatusId;
+        UpdatedAt = DateTime.UtcNow;
+
+        if (toStatus == OrderStatusEnum.Cancelled)
+            FailureReason = reason;
+    }
 }

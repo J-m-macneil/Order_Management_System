@@ -1,8 +1,7 @@
-﻿using Application.DTOs;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Products.DTOs;
+using Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -11,24 +10,22 @@ namespace Server.Controllers;
 [Authorize]
 public class HazardClassesController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IHazardClassRepository _repo;
 
-    public HazardClassesController(AppDbContext dbContext)
+    public HazardClassesController(IHazardClassRepository repo)
     {
-        _dbContext = dbContext;
+        _repo = repo;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<HazardClassDto>>> Get()
+    public async Task<ActionResult<IEnumerable<HazardClassDto>>> Get(CancellationToken ct)
     {
-        var hazardClasses = await _dbContext.HazardClasses
-            .Select(x => new HazardClassDto
-            {
-                HazardClassId = x.HazardClassId,
-                Name = x.Name
-            })
-            .ToListAsync();
+        var result = await _repo.GetAllAsync(ct);
 
-        return Ok(hazardClasses);
+        return Ok(result.Select(x => new HazardClassDto
+        {
+            HazardClassId = x.HazardClassId,
+            Name = x.Name
+        }));
     }
 }

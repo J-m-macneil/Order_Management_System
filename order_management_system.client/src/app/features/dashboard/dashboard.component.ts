@@ -1,41 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DashboardService } from '../../core/services/dashboard.service';
-
-type MetricType = 'orders' | 'activeOrders' | 'failedOrders' | 'totalValue';
-
-interface MetricCard {
-  label: string;
-  value: number;
-  type: MetricType;
-  color: string;
-}
-
-interface OrderByStatus {
-  status: string;
-  count: number;
-  color: string;
-}
-
-interface TopCustomer {
-  name: string;
-  initials: string;
-  orders: number;
-  bgColor: string;
-}
-
-interface RecentFailure {
-  orderNumber: string;
-  customer: string;
-  reason: string;
-  date: string;
-}
-
-interface PriorityOrder {
-  orderNumber: string;
-  customer: string;
-  priority: string;
-  dueDate: string;
-}
+import { OrderByStatus, RecentFailure, PriorityOrder } from '../../core/models/dashboard.models';
 
 @Component({
   selector: 'app-dashboard',

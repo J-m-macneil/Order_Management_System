@@ -2,6 +2,8 @@
 using Domain.Entities;
 using Domain.Entities.Customers;
 using Domain.Entities.Orders;
+using Domain.Entities.Organisation;
+using Domain.Entities.Status;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 

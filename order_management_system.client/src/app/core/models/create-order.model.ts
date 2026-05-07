@@ -4,8 +4,19 @@ export interface CreateOrder {
   customerId: number;
   deliveryAddressId: number;
   billingAddressId: number;
+
+  warehouseId: number;
+  carrierId?: number | null;
+  projectId?: number | null;
+
   createdByUserId: number;
   requestedDeliveryDate: string;
+
+  purchaseOrderReference?: string | null;
+  specialInstructions?: string | null;
+  internalNotes?: string | null;
+
   isPriorityOrder: boolean;
+
   items: CreateOrderItem[];
 }
