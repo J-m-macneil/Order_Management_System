@@ -29,6 +29,7 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.CreatedByUser)
             .Include(o => o.AssignedToUser)
             .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
 
             .Include(o => o.OrderStatusHistory)
                 .ThenInclude(h => h.ToStatus)

@@ -1,4 +1,5 @@
-﻿using Infrastructure.Persistence.Context;
+using Infrastructure.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
 
 public class ProcessingJobQueueService : IProcessingJobQueueService
 {
@@ -30,13 +31,25 @@ public class ProcessingJobQueueService : IProcessingJobQueueService
     public async Task QueueApprovalJobsAsync(int orderId)
     {
         var maxAttempts = await _settings.GetIntAsync("BackgroundJobRetryLimit");
+        var requiresSdsBundle = await _context.Orders
+            .Where(o => o.OrderId == orderId)
+            .Select(o => o.OrderItems.Any(i =>
+                i.DeletedAt == null &&
+                (i.Product.RequiresSds || i.Product.IsRestricted)))
+            .FirstAsync();
 
         var jobs = new List<ProcessingJob>
         {
-            CreateJob(orderId, "GenerateDeliveryNote", maxAttempts),
-            CreateJob(orderId, "PushToLogisticsProvider", maxAttempts),
-            CreateJob(orderId, "CreateApprovalNotification", maxAttempts)
+            CreateJob(orderId, "GenerateDeliveryNote", maxAttempts)
         };
+
+        if (requiresSdsBundle)
+        {
+            jobs.Add(CreateJob(orderId, "GenerateSdsBundle", maxAttempts));
+        }
+
+        jobs.Add(CreateJob(orderId, "PushToLogisticsProvider", maxAttempts));
+        jobs.Add(CreateJob(orderId, "CreateApprovalNotification", maxAttempts));
 
         _context.ProcessingJobs.AddRange(jobs);
         await _context.SaveChangesAsync();

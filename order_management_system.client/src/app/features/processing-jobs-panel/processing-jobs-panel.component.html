@@ -26,6 +26,13 @@
     Loading processing jobs...
   </p>
 
+  <div *ngIf="shouldShowMissingJobsWarning()"
+       class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/50 rounded-lg">
+    <p class="text-sm text-amber-700 dark:text-amber-300">
+      This order is waiting for background processing, but no processing jobs were found. The background service should recreate missing jobs automatically; refresh shortly or contact Operations if it remains stuck.
+    </p>
+  </div>
+
   <div *ngIf="!isLoading && processingJobs.length > 0; else noProcessingJobs"
        class="space-y-3">
     <div *ngFor="let job of processingJobs"

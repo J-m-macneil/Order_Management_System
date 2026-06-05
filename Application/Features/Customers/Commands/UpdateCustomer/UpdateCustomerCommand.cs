@@ -1,6 +1,8 @@
-﻿namespace Application.Features.Customers.Commands.UpdateCustomer;
+using MediatR;
 
-public class UpdateCustomerCommand
+namespace Application.Features.Customers.Commands.UpdateCustomer;
+
+public class UpdateCustomerCommand : IRequest<Unit>
 {
     public int CustomerId { get; set; }
     public string AccountNumber { get; set; } = string.Empty;
@@ -9,8 +11,8 @@ public class UpdateCustomerCommand
     public string MainContactName { get; set; } = string.Empty;
     public string MainContactEmail { get; set; } = string.Empty;
     public string MainContactPhone { get; set; } = string.Empty;
-    public int BillingAddressId { get; set; }
-    public int DefaultDeliveryAddressId { get; set; }
+    public int? BillingAddressId { get; set; }
+    public int? DefaultDeliveryAddressId { get; set; }
     public int PricingTierId { get; set; }
     public int PaymentTermsDays { get; set; }
     public decimal CreditLimit { get; set; }

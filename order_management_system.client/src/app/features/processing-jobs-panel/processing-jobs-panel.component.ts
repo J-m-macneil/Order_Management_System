@@ -10,6 +10,7 @@ import { ProcessingJobsService } from '../../core/services/processing-jobs.servi
 })
 export class ProcessingJobsPanelComponent implements OnChanges {
   @Input() orderId!: number;
+  @Input('orderStatusId') orderStatusId: number | null = null;
 
   processingJobs: ProcessingJob[] = [];
   isLoading = false;
@@ -48,6 +49,13 @@ export class ProcessingJobsPanelComponent implements OnChanges {
 
   canRetryJob(job: ProcessingJob): boolean {
     return job.status === 'Failed' && job.attemptCount < job.maxAttempts;
+  }
+
+  shouldShowMissingJobsWarning(): boolean {
+    return !this.isLoading &&
+      !this.errorMessage &&
+      this.processingJobs.length === 0 &&
+      (this.orderStatusId === 4 || this.orderStatusId === 5);
   }
 
   retryJob(job: ProcessingJob): void {

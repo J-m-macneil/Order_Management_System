@@ -98,7 +98,27 @@
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
               <tr *ngFor="let item of currentOrder.items" class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                <td class="px-4 py-4 text-slate-900 dark:text-white font-medium">{{ item.productName || 'Product #' + item.productId }}</td>
+                <td class="px-4 py-4">
+                  <div class="font-medium text-slate-900 dark:text-white">
+                    {{ item.productName || 'Product #' + item.productId }}
+                  </div>
+                  <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span *ngIf="item.productSku" class="font-mono">{{ item.productSku }}</span>
+                    <span *ngIf="item.packSize">{{ item.packSize }}</span>
+                    <span *ngIf="item.unNumber">{{ item.unNumber }}</span>
+                    <span *ngIf="item.requiresSds"
+                          class="inline-flex px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium">
+                      SDS
+                    </span>
+                    <span *ngIf="item.isRestricted"
+                          class="inline-flex px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-medium">
+                      Restricted
+                    </span>
+                  </div>
+                  <div *ngIf="item.notes" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {{ item.notes }}
+                  </div>
+                </td>
                 <td class="px-4 py-4 text-right text-slate-600 dark:text-slate-300">{{ item.quantity }}</td>
                 <td class="px-4 py-4 text-right text-slate-600 dark:text-slate-300">{{ item.unitPrice | currency: currentOrder.currency }}</td>
                 <td class="px-4 py-4 text-right text-slate-600 dark:text-slate-300">
@@ -264,7 +284,9 @@
 
       <!-- Processing Jobs -->
       <div class="mt-6">
-        <app-processing-jobs-panel [orderId]="currentOrder.orderId">
+        <app-processing-jobs-panel
+          [orderId]="currentOrder.orderId"
+          [orderStatusId]="currentOrder.orderStatusId">
         </app-processing-jobs-panel>
       </div>
 

@@ -52,6 +52,22 @@
         </div>
 
         <div>
+          <label class="form-label">Pricing Tier</label>
+          <select formControlName="pricingTierId"
+                  class="form-input">
+
+            <option value="" disabled>Select pricing tier</option>
+
+            <option *ngFor="let tier of pricingTiers"
+                    [value]="tier.pricingTierId">
+              {{ tier.name }} ({{ tier.discountPercent }}% discount)
+              {{ tier.priorityProcessing ? ' - Priority' : '' }}
+            </option>
+
+          </select>
+        </div>
+
+        <div>
           <label class="form-label">Payment Terms (Days)</label>
           <input type="number" formControlName="paymentTermsDays" class="form-input" />
         </div>
@@ -85,6 +101,122 @@
           <input type="text" formControlName="mainContactPhone" class="form-input" />
         </div>
 
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Billing Address</h2>
+
+      <div [formGroup]="billingAddressForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Site Name</label>
+          <input type="text" formControlName="siteName" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Contact Name</label>
+          <input type="text" formControlName="contactName" class="form-input" />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 1</label>
+          <input type="text" formControlName="line1" class="form-input" />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 2</label>
+          <input type="text" formControlName="line2" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">City</label>
+          <input type="text" formControlName="city" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">County</label>
+          <input type="text" formControlName="county" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Postcode</label>
+          <input type="text" formControlName="postcode" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Country</label>
+          <input type="text" formControlName="country" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Contact Phone</label>
+          <input type="text" formControlName="contactPhone" class="form-input" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="flex items-center justify-between gap-4 mb-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white">Delivery Address</h2>
+
+        <label class="flex items-center gap-2">
+          <input type="checkbox" formControlName="deliverySameAsBilling" class="w-4 h-4 accent-blue-600" />
+          <span class="text-sm text-slate-700 dark:text-slate-300">Same as billing</span>
+        </label>
+      </div>
+
+      <div *ngIf="!form.get('deliverySameAsBilling')?.value"
+           [formGroup]="deliveryAddressForm"
+           class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Site Name</label>
+          <input type="text" formControlName="siteName" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Contact Name</label>
+          <input type="text" formControlName="contactName" class="form-input" />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 1</label>
+          <input type="text" formControlName="line1" class="form-input" />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 2</label>
+          <input type="text" formControlName="line2" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">City</label>
+          <input type="text" formControlName="city" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">County</label>
+          <input type="text" formControlName="county" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Postcode</label>
+          <input type="text" formControlName="postcode" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Country</label>
+          <input type="text" formControlName="country" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Contact Phone</label>
+          <input type="text" formControlName="contactPhone" class="form-input" />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Delivery Instructions</label>
+          <textarea formControlName="deliveryInstructions" rows="3" class="form-input resize-none"></textarea>
+        </div>
       </div>
     </div>
 

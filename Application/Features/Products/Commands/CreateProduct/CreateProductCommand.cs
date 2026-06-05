@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Application.Features.Products.DTOs;
+using MediatR;
 
 namespace Application.Features.Products.Commands.CreateProduct
 {
-    public class CreateProductCommand
+    public class CreateProductCommand : IRequest<ProductDto>
     {
         public string SKU { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;

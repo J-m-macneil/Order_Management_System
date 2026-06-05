@@ -17,6 +17,13 @@ public class PricingController : ControllerBase
         _pricingService = pricingService;
     }
 
+    [HttpGet("tiers")]
+    public async Task<ActionResult<List<PricingTierDto>>> GetTiers()
+    {
+        var tiers = await _pricingService.GetTiersAsync();
+        return Ok(tiers);
+    }
+
     [HttpGet("calculate")]
     public async Task<ActionResult<PricingCalculationDto>> Calculate([FromQuery] int customerId, [FromQuery] int productId)
     {

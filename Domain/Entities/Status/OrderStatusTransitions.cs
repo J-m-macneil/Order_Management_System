@@ -9,8 +9,8 @@ public static class OrderStatusTransitions
         { OrderStatusEnum.Draft, new[] { OrderStatusEnum.Submitted } },
         { OrderStatusEnum.Submitted, new[] { OrderStatusEnum.PendingReview } },
         { OrderStatusEnum.PendingReview, new[] { OrderStatusEnum.Approved, OrderStatusEnum.Failed } },
-        { OrderStatusEnum.Approved, new[] { OrderStatusEnum.InProcessing } },
-        { OrderStatusEnum.InProcessing, new[] { OrderStatusEnum.AwaitingDispatch } },
+        { OrderStatusEnum.Approved, Array.Empty<OrderStatusEnum>() },
+        { OrderStatusEnum.InProcessing, Array.Empty<OrderStatusEnum>() },
         { OrderStatusEnum.AwaitingDispatch, new[] { OrderStatusEnum.Completed } }
     };
 

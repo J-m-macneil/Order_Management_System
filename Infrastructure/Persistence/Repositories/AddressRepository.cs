@@ -37,6 +37,15 @@ public class AddressRepository : IAddressRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task DeleteAsync(Address address, CancellationToken ct)
+    {
+        address.IsActive = false;
+        address.DeletedAt = DateTime.UtcNow;
+
+        _db.Addresses.Update(address);
+        await _db.SaveChangesAsync(ct);
+    }
+
     public async Task SaveChangesAsync(CancellationToken ct)
     {
         await _db.SaveChangesAsync(ct);

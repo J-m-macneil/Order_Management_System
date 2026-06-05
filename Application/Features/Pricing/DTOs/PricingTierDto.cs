@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.Pricing.DTOs
+namespace Application.Features.Pricing.DTOs;
+
+public class PricingTierDto
 {
-    internal class PricingTierDto
-    {
-    }
+    public int PricingTierId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal DiscountPercent { get; set; }
+    public bool PriorityProcessing { get; set; }
+    public string? Description { get; set; }
 }

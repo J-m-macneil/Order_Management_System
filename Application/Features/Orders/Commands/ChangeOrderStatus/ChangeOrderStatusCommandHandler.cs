@@ -11,13 +11,16 @@ public class ChangeOrderStatusCommandHandler
 {
     private readonly IOrderRepository _repo;
     private readonly ICurrentUserService _currentUser;
+    private readonly IProcessingJobQueueService _jobQueue;
 
     public ChangeOrderStatusCommandHandler(
         IOrderRepository repo,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IProcessingJobQueueService jobQueue)
     {
         _repo = repo;
         _currentUser = currentUser;
+        _jobQueue = jobQueue;
     }
 
     public async Task<bool> Handle(
@@ -42,12 +45,19 @@ public class ChangeOrderStatusCommandHandler
                 $"Invalid transition from {fromStatus} to {toStatus}");
         }
 
-        order.ChangeStatus(
-            request.StatusId,
-            userId,
-            request.Reason);
+        order.ChangeStatus(request.StatusId, userId, request.Reason);
 
         await _repo.SaveChangesAsync(ct);
+
+        if (toStatus == OrderStatusEnum.Submitted)
+        {
+            await _jobQueue.QueueSubmissionJobsAsync(order.OrderId);
+        }
+
+        if (toStatus == OrderStatusEnum.Approved)
+        {
+            await _jobQueue.QueueApprovalJobsAsync(order.OrderId);
+        }
 
         return true;
     }

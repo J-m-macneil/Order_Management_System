@@ -1,5 +1,11 @@
-﻿public class CreateAddressCommand
+using Application.Features.Addresses.DTOs;
+using MediatR;
+
+namespace Application.Features.Addresses.Commands.CreateAddress;
+
+public class CreateAddressCommand : IRequest<AddressDto>
 {
+    public int CustomerId { get; set; }
     public string AddressType { get; set; } = string.Empty;
     public string SiteName { get; set; } = string.Empty;
 

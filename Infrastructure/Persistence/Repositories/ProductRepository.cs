@@ -39,6 +39,12 @@ public class ProductRepository : IProductRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task UpdateAsync(Product product, CancellationToken ct)
+    {
+        _db.Products.Update(product);
+        await _db.SaveChangesAsync(ct);
+    }
+
     public Task SaveChangesAsync(CancellationToken ct)
         => _db.SaveChangesAsync(ct);
 }

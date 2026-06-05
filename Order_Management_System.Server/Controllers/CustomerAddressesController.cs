@@ -1,4 +1,7 @@
-﻿using Application.Features.Addresses.DTOs;
+using Application.Features.Addresses.Commands.CreateAddress;
+using Application.Features.Addresses.Commands.DeleteAddress;
+using Application.Features.Addresses.Commands.UpdateAddress;
+using Application.Features.Addresses.DTOs;
 using Application.Features.Addresses.Queries.GetAddressById;
 using Application.Features.Addresses.Queries.GetCustomerAddresses;
 using MediatR;
@@ -43,5 +46,41 @@ public class CustomerAddressesController : ControllerBase
             return NotFound();
 
         return Ok(result);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<AddressDto>> Create(int customerId, [FromBody] CreateAddressCommand command)
+    {
+        command.CustomerId = customerId;
+
+        var result = await _mediator.Send(command);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { customerId, addressId = result.AddressId },
+            result);
+    }
+
+    [HttpPut("{addressId}")]
+    public async Task<IActionResult> Update(int customerId, int addressId, [FromBody] UpdateAddressCommand command)
+    {
+        command.CustomerId = customerId;
+        command.AddressId = addressId;
+
+        await _mediator.Send(command);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{addressId}")]
+    public async Task<IActionResult> Delete(int customerId, int addressId)
+    {
+        await _mediator.Send(new DeleteAddressCommand
+        {
+            CustomerId = customerId,
+            AddressId = addressId
+        });
+
+        return NoContent();
     }
 }

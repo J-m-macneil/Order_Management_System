@@ -15,15 +15,16 @@ import { OrderDetailComponent } from './features/orders/order-detail/order-detai
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
+import { LoginGuard } from './core/guards/login.guard';
 
 const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: '', component: LoginComponent, canActivate: [LoginGuard], pathMatch: 'full' },
+  { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
   {
     path: '',
     component: MainLayoutComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
 
       { path: 'customers', component: CustomersComponent, canActivate: [AuthGuard] },
       { path: 'customers/new', component: CustomerFormComponent, canActivate: [AuthGuard] },
@@ -36,12 +37,11 @@ const routes: Routes = [
       { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
       { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] },
 
-      { path: 'orders', component: OrdersComponent },
-      { path: 'orders/create', component: OrderCreateComponent },
-      { path: 'orders/:id', component: OrderDetailComponent }
+      { path: 'orders/create', component: OrderCreateComponent, canActivate: [AuthGuard] },
+      { path: 'orders/:id', component: OrderDetailComponent, canActivate: [AuthGuard] }
     ]
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'login' }
 ];
 
 @NgModule({

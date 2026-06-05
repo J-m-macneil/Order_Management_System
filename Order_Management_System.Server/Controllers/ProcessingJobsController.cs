@@ -8,7 +8,7 @@ namespace Server.Controllers;
 
 [ApiController]
 [Route("api/processing-jobs")]
-[Authorize(Roles = "Operations,Admin")]
+[Authorize]
 public class ProcessingJobsController : ControllerBase
 {
     private readonly IProcessingJobRepository _repo;
@@ -23,6 +23,7 @@ public class ProcessingJobsController : ControllerBase
     }
 
     [HttpGet("failed")]
+    [Authorize(Roles = "Operations,Admin")]
     public async Task<IActionResult> GetFailedJobs(CancellationToken ct)
     {
         var jobs = await _repo.GetFailedJobsAsync(ct);
@@ -76,6 +77,7 @@ public class ProcessingJobsController : ControllerBase
     }
 
     [HttpPost("{id:int}/retry")]
+    [Authorize(Roles = "Operations,Admin")]
     public async Task<IActionResult> RetryJob(int id, CancellationToken ct)
     {
         await _mediator.Send(new RetryProcessingJobCommand

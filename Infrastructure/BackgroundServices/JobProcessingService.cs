@@ -36,6 +36,8 @@ public class JobProcessingService : BackgroundService
 
                 var now = DateTime.UtcNow;
 
+                await EnsureApprovalWorkflowJobsAsync(dbContext, now, stoppingToken);
+
                 var jobs = await dbContext.ProcessingJobs
                     .Where(j => j.Status == "Queued")
                     .Where(j => j.NextAttemptAt == null || j.NextAttemptAt <= now)
@@ -65,6 +67,14 @@ public class JobProcessingService : BackgroundService
     {
         try
         {
+            if (job.JobType == "PushToLogisticsProvider" &&
+                !await RequiredApprovalDocumentsExistAsync(dbContext, job.OrderId, cancellationToken))
+            {
+                job.NextAttemptAt = DateTime.UtcNow.AddSeconds(15);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                return;
+            }
+
             job.Status = "Processing";
             job.StartedAt = DateTime.UtcNow;
             job.AttemptCount++;
@@ -199,6 +209,83 @@ public class JobProcessingService : BackgroundService
         );
     }
 
+    private static async Task EnsureApprovalWorkflowJobsAsync(
+        AppDbContext dbContext,
+        DateTime now,
+        CancellationToken cancellationToken)
+    {
+        var activeStatuses = new[] { 4, 5 };
+        var orders = await dbContext.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .Where(o => activeStatuses.Contains(o.OrderStatusId))
+            .ToListAsync(cancellationToken);
+
+        foreach (var order in orders)
+        {
+            var requiredDocumentTypes = new List<string> { "DeliveryNote" };
+
+            if (order.OrderItems.Any(i =>
+                i.DeletedAt == null &&
+                (i.Product.RequiresSds || i.Product.IsRestricted)))
+            {
+                requiredDocumentTypes.Add("SafetyDataSheetBundle");
+            }
+
+            var generatedDocumentTypes = await dbContext.Documents
+                .Where(d => d.OrderId == order.OrderId)
+                .Where(d => requiredDocumentTypes.Contains(d.DocumentType))
+                .Select(d => d.DocumentType)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            foreach (var documentType in requiredDocumentTypes.Except(generatedDocumentTypes))
+            {
+                var jobType = documentType == "SafetyDataSheetBundle"
+                    ? "GenerateSdsBundle"
+                    : "GenerateDeliveryNote";
+
+                if (!await HasActiveOrCompletedJobAsync(dbContext, order.OrderId, jobType, cancellationToken))
+                {
+                    dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, jobType, now));
+                }
+            }
+
+            if (!await HasActiveOrCompletedJobAsync(dbContext, order.OrderId, "PushToLogisticsProvider", cancellationToken))
+            {
+                dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, "PushToLogisticsProvider", now));
+            }
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task<bool> HasActiveOrCompletedJobAsync(
+        AppDbContext dbContext,
+        int orderId,
+        string jobType,
+        CancellationToken cancellationToken)
+    {
+        return await dbContext.ProcessingJobs.AnyAsync(j =>
+            j.OrderId == orderId &&
+            j.JobType == jobType &&
+            (j.Status == "Queued" || j.Status == "Processing" || j.Status == "Completed"),
+            cancellationToken);
+    }
+
+    private static ProcessingJob CreateRecoveryJob(int orderId, string jobType, DateTime now)
+    {
+        return new ProcessingJob
+        {
+            OrderId = orderId,
+            JobType = jobType,
+            Status = "Queued",
+            AttemptCount = 0,
+            MaxAttempts = 3,
+            CreatedAt = now
+        };
+    }
+
     private static async Task CreateNotificationAsync(
         AppDbContext dbContext,
         ProcessingJob job,
@@ -235,6 +322,32 @@ public class JobProcessingService : BackgroundService
             $$"""{"notificationId":{{notification.NotificationId}},"orderId":{{order.OrderId}},"notificationType":"{{notificationType}}","recipientEmail":"{{recipientEmail}}"}""",
             $"{notificationType} notification simulated by background job."
         );
+    }
+
+    private static async Task<bool> RequiredApprovalDocumentsExistAsync(
+        AppDbContext dbContext,
+        int orderId,
+        CancellationToken cancellationToken)
+    {
+        var requiredDocumentTypes = new List<string> { "DeliveryNote" };
+
+        var requiresSdsBundle = await dbContext.OrderItems
+            .Where(i => i.OrderId == orderId && i.DeletedAt == null)
+            .AnyAsync(i => i.Product.RequiresSds || i.Product.IsRestricted, cancellationToken);
+
+        if (requiresSdsBundle)
+        {
+            requiredDocumentTypes.Add("SafetyDataSheetBundle");
+        }
+
+        var generatedDocumentTypes = await dbContext.Documents
+            .Where(d => d.OrderId == orderId)
+            .Where(d => requiredDocumentTypes.Contains(d.DocumentType))
+            .Select(d => d.DocumentType)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return requiredDocumentTypes.All(generatedDocumentTypes.Contains);
     }
 
     private static async Task PushToLogisticsProviderAsync(

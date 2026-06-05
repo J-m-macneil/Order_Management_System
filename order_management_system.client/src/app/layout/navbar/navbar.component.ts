@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,18 +9,13 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent {
-  isDarkMode = signal(false);
   currentRole = signal('User');
   userName = signal('User');
 
-  constructor(private authService: AuthService) {
-    const savedDarkMode = localStorage.getItem('darkMode');
-
-    if (savedDarkMode === 'true') {
-      this.isDarkMode.set(true);
-      document.documentElement.classList.add('dark');
-    }
-
+  constructor(
+    private authService: AuthService,
+    public themeService: ThemeService
+  ) {
     this.loadUserFromToken();
   }
 
@@ -32,16 +28,7 @@ export class NavbarComponent {
   }
 
   toggleDarkMode(): void {
-    const newDarkMode = !this.isDarkMode();
-    this.isDarkMode.set(newDarkMode);
-
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    localStorage.setItem('darkMode', newDarkMode.toString());
+    this.themeService.toggleDarkMode();
   }
 
   getUserInitials(): string {

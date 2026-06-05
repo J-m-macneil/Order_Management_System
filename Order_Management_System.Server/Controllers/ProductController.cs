@@ -1,4 +1,5 @@
-﻿using Application.Features.Products.Commands.CreateProduct;
+using Application.Features.Products.Commands.CreateProduct;
+using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProducts;
@@ -49,6 +50,17 @@ public class ProductController : ControllerBase
         {
             ProductId = id,
             Data = command
+        });
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _mediator.Send(new DeleteProductCommand
+        {
+            ProductId = id
         });
 
         return NoContent();

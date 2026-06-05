@@ -21,7 +21,17 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const payload = this.getTokenPayload();
+
+    if (!payload) {
+      return false;
+    }
+
+    if (!payload.exp) {
+      return true;
+    }
+
+    return payload.exp * 1000 > Date.now();
   }
 
   private getTokenPayload(): any | null {
