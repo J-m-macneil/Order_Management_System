@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 
@@ -10,6 +10,8 @@ import { UnitOfMeasure } from "../models/unit-of-measure.model";
 import { HazardClass } from "../models/hazard-class.model";
 import { ProductList } from "../models/product-list.model";
 import { SafetyDataSheet, CreateSafetyDataSheetRequest, UpdateSafetyDataSheetRequest } from "../models/safety-data-sheet-model";
+import { PaginationQuery } from "../models/pagination-query.model";
+import { PagedResult } from "../models/paged-result.model";
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +21,12 @@ export class ProductsService {
 
   constructor(private http: HttpClient) { }
 
-  getAll(): Observable<ProductList[]> {
-    return this.http.get<ProductList[]>(this.baseUrl);
+  getAll(query: PaginationQuery): Observable<PagedResult<ProductList>> {
+    const params = new HttpParams()
+      .set('pageNumber', query.pageNumber)
+      .set('pageSize', query.pageSize);
+
+    return this.http.get<PagedResult<ProductList>>(this.baseUrl, { params });
   }
 
   getById(id: number): Observable<Product> {

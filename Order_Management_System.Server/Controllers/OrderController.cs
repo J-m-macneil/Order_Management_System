@@ -35,9 +35,9 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] GetOrdersQuery query, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetOrdersQuery());
+        var result = await _mediator.Send(query, ct);
         return Ok(result);
     }
 

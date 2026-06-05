@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CreateCustomerRequest } from '../models/create-customer.model';
@@ -6,6 +6,8 @@ import { Customer } from '../models/customer.model';
 import { UpdateCustomerRequest } from '../models/update-customer.model';
 import { Address, CreateAddressRequest, UpdateAddressRequest } from '../models/address.model';
 import { CreateCustomerContactRequest, CustomerContact, UpdateCustomerContactRequest } from '../models/customer-contact.model';
+import { PagedResult } from '../models/paged-result.model';
+import { PaginationQuery } from '../models/pagination-query.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +17,12 @@ export class CustomersService {
 
   constructor(private http: HttpClient) { }
 
-  getAll(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(this.baseUrl);
+  getAll(query: PaginationQuery): Observable<PagedResult<Customer>> {
+    const params = new HttpParams()
+      .set('pageNumber', query.pageNumber)
+      .set('pageSize', query.pageSize);
+
+    return this.http.get<PagedResult<Customer>>(this.baseUrl, { params });
   }
 
   getById(id: number): Observable<Customer> {

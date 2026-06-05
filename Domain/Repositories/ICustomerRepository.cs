@@ -10,6 +10,10 @@ public interface ICustomerRepository
 
     Task<List<Customer>> GetAllAsync(CancellationToken ct);
 
+    Task<int> CountActiveAsync(CancellationToken ct);
+
+    Task<List<Customer>> GetPagedAsync(int skip, int take, CancellationToken ct);
+
     Task UpdateAsync(Customer customer, CancellationToken ct);
 
     Task DeleteAsync(Customer customer, CancellationToken ct);

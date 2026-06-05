@@ -15,6 +15,14 @@ export class CustomersComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
+  pageNumber = 1;
+  pageSize = 25;
+  totalCount = 0;
+  totalPages = 0;
+  hasPreviousPage = false;
+  hasNextPage = false;
+  pageSizeOptions = [25, 50, 100];
+
   searchTerm = '';
   industryFilter = '';
   paymentTermsFilter = '';
@@ -37,9 +45,18 @@ export class CustomersComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.customersService.getAll().subscribe({
+    this.customersService.getAll({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize
+    }).subscribe({
       next: (data) => {
-        this.customers = data;
+        this.customers = data.items;
+        this.pageNumber = data.pageNumber;
+        this.pageSize = data.pageSize;
+        this.totalCount = data.totalCount;
+        this.totalPages = data.totalPages;
+        this.hasPreviousPage = data.hasPreviousPage;
+        this.hasNextPage = data.hasNextPage;
         this.initialiseCustomerDashboard();
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -132,5 +149,33 @@ export class CustomersComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  goToPreviousPage(): void {
+    if (!this.hasPreviousPage) {
+      return;
+    }
+
+    this.pageNumber--;
+    this.loadCustomers();
+  }
+
+  goToNextPage(): void {
+    if (!this.hasNextPage) {
+      return;
+    }
+
+    this.pageNumber++;
+    this.loadCustomers();
+  }
+
+  onPageSizeChange(value: number): void {
+    if (!this.pageSizeOptions.includes(value)) {
+      return;
+    }
+
+    this.pageSize = value;
+    this.pageNumber = 1;
+    this.loadCustomers();
   }
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Orders;
+﻿using Domain.Entities;
+using Domain.Entities.Orders;
 
 namespace Domain.Repositories;
 
@@ -13,4 +14,11 @@ public interface IOrderRepository
     Task<List<OrderStatus>> GetAllStatusesAsync(CancellationToken ct);
 
     Task SaveChangesAsync(CancellationToken ct);
+
+    Task<int> CountActiveAsync(CancellationToken ct);
+
+    Task<List<Order>> GetPagedAsync(
+        int skip,
+        int take,
+        CancellationToken ct);
 }

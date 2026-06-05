@@ -1,10 +1,11 @@
-﻿using Application.Features.Customers.DTOs;
+using Application.Common.Models;
+using Application.Features.Customers.DTOs;
 using Domain.Repositories;
 using MediatR;
 
 namespace Application.Features.Customers.Queries.GetCustomers;
 
-public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, List<CustomerDto>>
+public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, PagedResult<CustomerDto>>
 {
     private readonly ICustomerRepository _repo;
 
@@ -13,11 +14,16 @@ public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, List<
         _repo = repo;
     }
 
-    public async Task<List<CustomerDto>> Handle(GetCustomersQuery request, CancellationToken ct)
+    public async Task<PagedResult<CustomerDto>> Handle(GetCustomersQuery request, CancellationToken ct)
     {
-        var customers = await _repo.GetAllAsync(ct);
+        var totalCount = await _repo.CountActiveAsync(ct);
 
-        return customers.Select(x => new CustomerDto
+        var customers = await _repo.GetPagedAsync(
+            request.Skip,
+            request.PageSize,
+            ct);
+
+        var items = customers.Select(x => new CustomerDto
         {
             CustomerId = x.CustomerId,
             AccountNumber = x.AccountNumber,
@@ -34,5 +40,13 @@ public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, List<
             IsActive = x.IsActive,
             CreatedAt = x.CreatedAt
         }).ToList();
+
+        return new PagedResult<CustomerDto>
+        {
+            Items = items,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount
+        };
     }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { OrdersService } from '../../core/services/orders.service';
 import { Order } from '../../core/models/order.model';
 
@@ -11,13 +11,23 @@ import { Order } from '../../core/models/order.model';
 export class OrdersComponent implements OnInit {
   orders: Order[] = [];
   filteredOrders: Order[] = [];
-  isLoading = signal(false);
-  showFilters = signal(false);
+
+  pageNumber = 1;
+  pageSize = 25;
+  totalCount = 0;
+  totalPages = 0;
+  hasPreviousPage = false;
+  hasNextPage = false;
+  pageSizeOptions = [25, 50, 100];
+
+  isLoading = false;
   errorMessage = '';
 
   searchTerm = '';
   priorityFilter = '';
   statusFilter = '';
+
+  private filtersVisible = false;
 
   orderStatuses = [
     { id: 1, name: 'Draft' },
@@ -72,26 +82,44 @@ export class OrdersComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.isLoading.set(true);
+    this.isLoading = true;
     this.errorMessage = '';
 
-    this.ordersService.getOrders().subscribe({
+    this.ordersService.getOrders({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize
+    })
+    .subscribe({
       next: (data) => {
-        this.orders = data;
-        this.applyFilters();
-        this.isLoading.set(false);
+        this.orders = data.items;
+        this.pageNumber = data.pageNumber;
+        this.pageSize = data.pageSize;
+        this.totalCount = data.totalCount;
+        this.totalPages = data.totalPages;
+        this.hasPreviousPage = data.hasPreviousPage;
+        this.hasNextPage = data.hasNextPage;
+        this.initialiseOrdersList();
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Failed to load orders.';
-        this.isLoading.set(false);
+        this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
   }
 
+  showFilters(): boolean {
+    return this.filtersVisible;
+  }
+
   toggleFilters(): void {
-    this.showFilters.update(value => !value);
+    this.filtersVisible = !this.filtersVisible;
+  }
+
+  private initialiseOrdersList(): void {
+    this.applyFilters();
   }
 
   filterByStatus(statusId: number | ''): void {
@@ -150,5 +178,33 @@ export class OrdersComponent implements OnInit {
 
   getOrderStatusId(order: Order): number {
     return order.orderStatusId;
+  }
+
+  goToPreviousPage(): void {
+    if (!this.hasPreviousPage) {
+      return;
+    }
+
+    this.pageNumber--;
+    this.loadOrders();
+  }
+
+  goToNextPage(): void {
+    if (!this.hasNextPage) {
+      return;
+    }
+
+    this.pageNumber++;
+    this.loadOrders();
+  }
+
+  onPageSizeChange(value: number): void {
+    if (!this.pageSizeOptions.includes(value)) {
+      return;
+    }
+
+    this.pageSize = value;
+    this.pageNumber = 1;
+    this.loadOrders();
   }
 }

@@ -1,11 +1,11 @@
-﻿using Application.Features.Products.DTOs;
+﻿using Application.Common.Models;
 using Domain.Repositories;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProducts;
 
 public class GetProductsQueryHandler
-    : IRequestHandler<GetProductsQuery, List<ProductListDto>>
+    : IRequestHandler<GetProductsQuery, PagedResult<ProductListDto>>
 {
     private readonly IProductRepository _repo;
 
@@ -14,11 +14,16 @@ public class GetProductsQueryHandler
         _repo = repo;
     }
 
-    public async Task<List<ProductListDto>> Handle(GetProductsQuery request, CancellationToken ct)
+    public async Task<PagedResult<ProductListDto>> Handle(GetProductsQuery request, CancellationToken ct)
     {
-        var products = await _repo.GetAllAsync(ct);
+        var totalCount = await _repo.CountActiveAsync(ct);
 
-        return products.Select(x => new ProductListDto
+        var products = await _repo.GetPagedAsync(
+         request.Skip,
+         request.PageSize,
+         ct);
+
+        var items = products.Select(x => new ProductListDto
         {
             ProductId = x.ProductId,
             SKU = x.SKU,
@@ -32,5 +37,13 @@ public class GetProductsQueryHandler
             IsRestricted = x.IsRestricted,
             IsActive = x.IsActive
         }).ToList();
+
+        return new PagedResult<ProductListDto>
+        {
+            Items = items,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount,
+        };
     }
 }

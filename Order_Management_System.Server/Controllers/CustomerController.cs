@@ -24,9 +24,9 @@ public class CustomersController : ControllerBase
 
     // GET ALL
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] GetCustomersQuery query, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetCustomersQuery());
+        var result = await _mediator.Send(query, ct);
         return Ok(result);
     }
 

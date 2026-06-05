@@ -18,6 +18,8 @@ import { ProductList } from '../../../core/models/product-list.model';
 })
 export class OrderCreateComponent implements OnInit {
   orderForm!: FormGroup;
+  private readonly customerLookupPageSize = 100;
+  private readonly productLookupPageSize = 100;
 
   customers: Customer[] = [];
   billingAddresses: Address[] = [];
@@ -91,9 +93,12 @@ export class OrderCreateComponent implements OnInit {
   }
 
   loadCustomers(): void {
-    this.customersService.getAll().subscribe({
+    this.customersService.getAll({
+      pageNumber: 1,
+      pageSize: this.customerLookupPageSize
+    }).subscribe({
       next: (data) => {
-        this.customers = data;
+        this.customers = data.items;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -104,9 +109,12 @@ export class OrderCreateComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.productsService.getAll().subscribe({
+    this.productsService.getAll({
+      pageNumber: 1,
+      pageSize: this.productLookupPageSize
+    }).subscribe({
       next: (data) => {
-        this.products = data;
+        this.products = data.items;
         this.cdr.detectChanges();
       },
       error: (err) => {

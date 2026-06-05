@@ -45,6 +45,32 @@ public class ProductRepository : IProductRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<int> CountActiveAsync(CancellationToken ct)
+    {
+        return await _db.Products
+            .AsNoTracking()
+            .Where(x => x.IsActive && x.DeletedAt == null)
+            .CountAsync(ct);
+    }
+
+    public async Task<List<Product>> GetPagedAsync(
+        int skip,
+        int take,
+        CancellationToken ct)
+    {
+        return await _db.Products
+            .AsNoTracking()
+            .Include(x => x.ProductCategory)
+            .Include(x => x.UnitOfMeasure)
+            .Include(x => x.HazardClass)
+            .Where(x => x.IsActive && x.DeletedAt == null)
+            .OrderBy(x => x.ProductName)
+            .ThenBy(x => x.ProductId)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(ct);
+    }
+
     public Task SaveChangesAsync(CancellationToken ct)
         => _db.SaveChangesAsync(ct);
 }

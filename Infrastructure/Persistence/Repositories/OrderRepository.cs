@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Orders;
+﻿using Domain.Entities;
+using Domain.Entities.Orders;
 using Domain.Entities.Status;
 using Domain.Repositories;
 using Infrastructure.Persistence.Context;
@@ -60,6 +61,35 @@ public class OrderRepository : IOrderRepository
     {
         return await _db.OrderStatuses
             .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public async Task<int> CountActiveAsync(CancellationToken ct)
+    {
+        return await _db.Orders
+            .AsNoTracking()
+            .Where(x => x.DeletedAt == null)
+            .CountAsync(ct);
+    }
+
+    public async Task<List<Order>> GetPagedAsync(
+        int skip,
+        int take,
+        CancellationToken ct)
+    {
+        return await _db.Orders
+            .AsNoTracking()
+            .Include(o => o.Customer)
+            .Include(o => o.OrderStatus)
+            .Include(o => o.Warehouse)
+            .Include(o => o.Carrier)
+            .Include(o => o.Project)
+            .Include(o => o.OrderItems)
+            .Where(x => x.DeletedAt == null)
+            .OrderByDescending(o => o.CreatedAt)
+            .ThenByDescending(o => o.OrderId)
+            .Skip(skip)
+            .Take(take)
             .ToListAsync(ct);
     }
 

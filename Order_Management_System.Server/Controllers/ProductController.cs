@@ -22,9 +22,9 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get([FromQuery] GetProductsQuery query, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetProductsQuery());
+        var result = await _mediator.Send(query, ct);
         return Ok(result);
     }
 

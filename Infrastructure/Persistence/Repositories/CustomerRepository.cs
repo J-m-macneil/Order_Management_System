@@ -38,6 +38,26 @@ public class CustomerRepository : ICustomerRepository
             .ToListAsync(ct);
     }
 
+    public async Task<int> CountActiveAsync(CancellationToken ct)
+    {
+        return await _db.Customers
+            .AsNoTracking()
+            .Where(c => c.DeletedAt == null)
+            .CountAsync(ct);
+    }
+
+    public async Task<List<Customer>> GetPagedAsync(int skip, int take, CancellationToken ct)
+    {
+        return await _db.Customers
+            .AsNoTracking()
+            .Where(c => c.DeletedAt == null)
+            .OrderBy(c => c.CompanyName)
+            .ThenBy(c => c.CustomerId)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(ct);
+    }
+
     public async Task UpdateAsync(Customer customer, CancellationToken ct)
     {
         _db.Customers.Update(customer);

@@ -1,10 +1,12 @@
-﻿using Application.Features.Orders.DTOs;
+﻿using Application.Common.Models;
+using Application.Features.Orders.DTOs;
 using Domain.Repositories;
 using MediatR;
 
 namespace Application.Features.Orders.Queries.GetOrders;
 
-public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, List<OrderDto>>
+public class GetOrdersQueryHandler 
+    : IRequestHandler<GetOrdersQuery, PagedResult<OrderDto>>
 {
     private readonly IOrderRepository _repo;
 
@@ -13,11 +15,16 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, List<OrderD
         _repo = repo;
     }
 
-    public async Task<List<OrderDto>> Handle(GetOrdersQuery request, CancellationToken ct)
+    public async Task<PagedResult<OrderDto>> Handle(GetOrdersQuery request, CancellationToken ct)
     {
-        var orders = await _repo.GetAllAsync(ct);
+        var totalCount = await _repo.CountActiveAsync(ct);
 
-        return orders.Select(o => new OrderDto
+        var orders = await _repo.GetPagedAsync(
+         request.Skip,
+         request.PageSize,
+         ct);
+
+        var items = orders.Select(o => new OrderDto
         {
             OrderId = o.OrderId,
             OrderNumber = o.OrderNumber,
@@ -59,5 +66,13 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, List<OrderD
 
             IsPriorityOrder = o.IsPriorityOrder
         }).ToList();
+
+        return new PagedResult<OrderDto>
+        {
+            Items = items,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount,
+        };
     }
 }

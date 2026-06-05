@@ -1,6 +1,6 @@
-﻿using Application.Features.Products.DTOs;
+﻿using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProducts;
 
-public class GetProductsQuery : IRequest<List<ProductListDto>> { }
+public class GetProductsQuery : PaginationQuery, IRequest<PagedResult<ProductListDto>> { }

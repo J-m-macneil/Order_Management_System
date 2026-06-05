@@ -9,4 +9,9 @@ public interface IProductRepository
     Task AddAsync(Product product, CancellationToken ct);
     Task UpdateAsync(Product product, CancellationToken ct);
     Task SaveChangesAsync(CancellationToken ct);
+    Task<int> CountActiveAsync(CancellationToken ct);
+    Task<List<Product>> GetPagedAsync(
+        int skip,
+        int take,
+        CancellationToken ct);
 }

@@ -12,6 +12,14 @@ export class ProductsComponent implements OnInit {
   products: ProductList[] = [];
   filteredProducts: ProductList[] = [];
 
+  pageNumber = 1;
+  pageSize = 25;
+  totalCount = 0;
+  totalPages = 0;
+  hasPreviousPage = false;
+  hasNextPage = false;
+  pageSizeOptions = [25, 50, 100];
+
   isLoading = false;
   errorMessage = '';
 
@@ -41,9 +49,19 @@ export class ProductsComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.productsService.getAll().subscribe({
+    this.productsService.getAll({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize
+    })
+    .subscribe({
       next: (data) => {
-        this.products = data;
+        this.products = data.items;
+        this.pageNumber = data.pageNumber;
+        this.pageSize = data.pageSize;
+        this.totalCount = data.totalCount;
+        this.totalPages = data.totalPages;
+        this.hasPreviousPage = data.hasPreviousPage;
+        this.hasNextPage = data.hasNextPage;
         this.initialiseProductDashboard();
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -153,5 +171,33 @@ export class ProductsComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  goToPreviousPage(): void {
+    if (!this.hasPreviousPage) {
+      return;
+    }
+
+    this.pageNumber--;
+    this.loadProducts();
+  }
+
+  goToNextPage(): void {
+    if (!this.hasNextPage) {
+      return;
+    }
+
+    this.pageNumber++;
+    this.loadProducts();
+  }
+
+  onPageSizeChange(value: number): void {
+    if (!this.pageSizeOptions.includes(value)) {
+      return;
+    }
+
+    this.pageSize = value;
+    this.pageNumber = 1;
+    this.loadProducts();
   }
 }
