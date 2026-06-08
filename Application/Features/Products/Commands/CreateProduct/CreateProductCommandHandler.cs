@@ -1,4 +1,5 @@
 using Application.Features.Products.DTOs;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Repositories;
 using MediatR;
@@ -8,10 +9,14 @@ namespace Application.Features.Products.Commands.CreateProduct;
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, ProductDto>
 {
     private readonly IProductRepository _repo;
+    private readonly IAuditService _audit;
 
-    public CreateProductCommandHandler(IProductRepository repo)
+    public CreateProductCommandHandler(
+        IProductRepository repo,
+        IAuditService audit)
     {
         _repo = repo;
+        _audit = audit;
     }
 
     public async Task<ProductDto> Handle(CreateProductCommand request, CancellationToken ct)
@@ -37,6 +42,15 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
         await _repo.AddAsync(product, ct);
 
+        await _audit.LogAsync(
+            "Product",
+            product.ProductId,
+            "Created",
+            null,
+            CreateSnapshot(product),
+            $"Product created: {product.ProductName}.",
+            ct);
+
         return new ProductDto
         {
             ProductId = product.ProductId,
@@ -54,6 +68,28 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             RequiresSds = product.RequiresSds,
             IsRestricted = product.IsRestricted,
             IsActive = product.IsActive
+        };
+    }
+
+    private static object CreateSnapshot(Product product)
+    {
+        return new
+        {
+            product.ProductId,
+            product.SKU,
+            product.ProductName,
+            product.Description,
+            product.ProductCategoryId,
+            product.UnitOfMeasureId,
+            product.PackSize,
+            product.BasePrice,
+            product.Currency,
+            product.HazardClassId,
+            product.UNNumber,
+            product.StorageRequirement,
+            product.RequiresSds,
+            product.IsRestricted,
+            product.IsActive
         };
     }
 }

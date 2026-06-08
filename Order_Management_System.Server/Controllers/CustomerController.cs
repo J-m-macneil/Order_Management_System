@@ -3,6 +3,7 @@ using Application.Features.Customers.Commands.UpdateCustomer;
 using Application.Features.Customers.DTOs;
 using Application.Features.Customers.Queries.GetCustomers;
 using Application.Features.Customers.Queries.GetCustomerById;
+using Application.Features.Customers.Queries.GetCustomerSummary;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,13 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] GetCustomersQuery query, CancellationToken ct)
     {
         var result = await _mediator.Send(query, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetCustomerSummaryQuery(), ct);
         return Ok(result);
     }
 

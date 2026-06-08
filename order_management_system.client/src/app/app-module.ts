@@ -25,6 +25,7 @@ import { OrderDetailComponent } from './features/orders/order-detail/order-detai
 import { InputModalComponent } from './features/input-modal/input-modal.component';
 import { ProcessingJobsPanelComponent } from './features/processing-jobs-panel/processing-jobs-panel.component';
 import { OrderDocumentsPanelComponent } from './features/orders/order-documents-panel/order-documents-panel.component';
+import { AuditLogsComponent } from './features/audit-logs/audit-logs.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { OrderDocumentsPanelComponent } from './features/orders/order-documents-
     LoginComponent,
     InputModalComponent,
     ProcessingJobsPanelComponent,
-    OrderDocumentsPanelComponent
+    OrderDocumentsPanelComponent,
+    AuditLogsComponent
   ],
   imports: [
     BrowserModule,

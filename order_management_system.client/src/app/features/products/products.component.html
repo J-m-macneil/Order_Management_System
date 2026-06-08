@@ -56,16 +56,16 @@
 
       <span>Filters</span>
 
-      <span *ngIf="activeFilter || restrictedFilter || hazardousFilter"
+      <span *ngIf="activeFilter || restrictedFilter || hazardousFilter || categoryFilter || hazardClassFilter"
             class="ml-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
-        {{ (activeFilter ? 1 : 0) + (restrictedFilter ? 1 : 0) + (hazardousFilter ? 1 : 0) }}
+        {{ (activeFilter ? 1 : 0) + (restrictedFilter ? 1 : 0) + (hazardousFilter ? 1 : 0) + (categoryFilter ? 1 : 0) + (hazardClassFilter ? 1 : 0) }}
       </span>
     </button>
   </div>
 
   <!-- Filter Panel -->
   <div *ngIf="showFilters()"
-       class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-4 gap-2">
+       class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
 
     <!-- Status -->
     <div>
@@ -91,6 +91,32 @@
       </select>
     </div>
 
+    <!-- Category -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Category</label>
+      <select [(ngModel)]="categoryFilter"
+              (change)="applyFilters()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+        <option [ngValue]="null">All categories</option>
+        <option *ngFor="let category of categories" [ngValue]="category.productCategoryId">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Hazard Class -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hazard Class</label>
+      <select [(ngModel)]="hazardClassFilter"
+              (change)="applyFilters()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+        <option [ngValue]="null">All hazard classes</option>
+        <option *ngFor="let hazardClass of hazardClasses" [ngValue]="hazardClass.hazardClassId">
+          {{ hazardClass.name }}
+        </option>
+      </select>
+    </div>
+
     <!-- Hazardous -->
     <div>
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hazardous</label>
@@ -104,9 +130,9 @@
     </div>
 
     <!-- Clear Filters -->
-    <div class="flex items-end">
+    <div class="flex items-end lg:col-span-3">
       <button type="button"
-              (click)="activeFilter = ''; restrictedFilter = ''; hazardousFilter = ''; applyFilters()"
+              (click)="clearFilters()"
               class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors whitespace-nowrap">
         Clear Filters
       </button>
@@ -166,7 +192,7 @@
             {{ product.packSize || '—' }}
           </td>
           <td class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white">
-            {{ product.basePrice | currency: 'USD' }}
+            {{ product.basePrice | currency: 'GBP' }}
           </td>
           <td class="px-6 py-4 text-center">
             <span *ngIf="product.isRestricted" class="inline-flex px-2 py-1 rounded-md bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-medium">

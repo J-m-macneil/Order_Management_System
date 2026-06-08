@@ -16,12 +16,25 @@ public class GetProductsQueryHandler
 
     public async Task<PagedResult<ProductListDto>> Handle(GetProductsQuery request, CancellationToken ct)
     {
-        var totalCount = await _repo.CountActiveAsync(ct);
+        var totalCount = await _repo.CountActiveAsync(
+            request.SearchTerm,
+            request.IsActive,
+            request.IsRestricted,
+            request.IsHazardous,
+            request.ProductCategoryId,
+            request.HazardClassId,
+            ct);
 
         var products = await _repo.GetPagedAsync(
-         request.Skip,
-         request.PageSize,
-         ct);
+            request.Skip,
+            request.PageSize,
+            request.SearchTerm,
+            request.IsActive,
+            request.IsRestricted,
+            request.IsHazardous,
+            request.ProductCategoryId,
+            request.HazardClassId,
+            ct);
 
         var items = products.Select(x => new ProductListDto
         {

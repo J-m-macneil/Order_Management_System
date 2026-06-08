@@ -1,0 +1,245 @@
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AuditLog } from '../../core/models/audit-log.model';
+import { AuditLogsService } from '../../core/services/audit-logs.service';
+
+@Component({
+  selector: 'app-audit-logs',
+  standalone: false,
+  templateUrl: './audit-logs.component.html',
+  styleUrls: ['./audit-logs.component.css']
+})
+export class AuditLogsComponent implements OnInit {
+  logs: AuditLog[] = [];
+  selectedLog: AuditLog | null = null;
+
+  pageNumber = 1;
+  pageSize = 25;
+  totalCount = 0;
+  totalPages = 0;
+  hasPreviousPage = false;
+  hasNextPage = false;
+  pageSizeOptions = [25, 50, 100];
+
+  entityTypes = ['Order', 'Customer', 'Product', 'ProcessingJob', 'Document', 'Notification'];
+  actionTypes = [
+    'Created',
+    'Updated',
+    'Deleted',
+    'Generated',
+    'Sent',
+    'Completed',
+    'Failed',
+    'RetryQueued',
+    'StatusChanged'
+  ];
+
+  searchTerm = '';
+  entityType = '';
+  action = '';
+  entityId: number | null = null;
+  performedByUserId: number | null = null;
+  from = '';
+  to = '';
+
+  isLoading = false;
+  errorMessage = '';
+  filtersVisible = false;
+
+  constructor(
+    private auditLogsService: AuditLogsService,
+    private cdr: ChangeDetectorRef
+  ) { }
+
+  ngOnInit(): void {
+    this.loadAuditLogs();
+  }
+
+  loadAuditLogs(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.auditLogsService.getAuditLogs({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm.trim() || undefined,
+      entityType: this.entityType || undefined,
+      action: this.action.trim() || undefined,
+      entityId: this.entityId,
+      performedByUserId: this.performedByUserId,
+      from: this.from || undefined,
+      to: this.to || undefined
+    }).subscribe({
+      next: (result) => {
+        this.logs = result.items;
+        this.pageNumber = result.pageNumber;
+        this.pageSize = result.pageSize;
+        this.totalCount = result.totalCount;
+        this.totalPages = result.totalPages;
+        this.hasPreviousPage = result.hasPreviousPage;
+        this.hasNextPage = result.hasNextPage;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.logs = [];
+        this.errorMessage = 'Failed to load audit logs.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  applyFilters(): void {
+    this.pageNumber = 1;
+    this.selectedLog = null;
+    this.loadAuditLogs();
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.entityType = '';
+    this.action = '';
+    this.entityId = null;
+    this.performedByUserId = null;
+    this.from = '';
+    this.to = '';
+    this.applyFilters();
+  }
+
+  toggleFilters(): void {
+    this.filtersVisible = !this.filtersVisible;
+  }
+
+  selectLog(log: AuditLog): void {
+    this.selectedLog = this.selectedLog?.auditLogId === log.auditLogId
+      ? null
+      : log;
+  }
+
+  goToPreviousPage(): void {
+    if (!this.hasPreviousPage) {
+      return;
+    }
+
+    this.pageNumber--;
+    this.loadAuditLogs();
+  }
+
+  goToNextPage(): void {
+    if (!this.hasNextPage) {
+      return;
+    }
+
+    this.pageNumber++;
+    this.loadAuditLogs();
+  }
+
+  onPageSizeChange(value: number): void {
+    if (!this.pageSizeOptions.includes(value)) {
+      return;
+    }
+
+    this.pageSize = value;
+    this.pageNumber = 1;
+    this.loadAuditLogs();
+  }
+
+  formatJson(value?: string | null): string {
+    if (!value) {
+      return 'None';
+    }
+
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch {
+      return value;
+    }
+  }
+
+  getEventLabel(log: AuditLog): string {
+    if (log.action.startsWith('StatusChanged:')) {
+      const status = log.action.split(':')[1] || 'updated';
+      const readableStatus = this.formatEntityName(status);
+
+      if (log.entityType === 'Order' && status === 'Approved') {
+        return 'Order approved';
+      }
+
+      if (log.entityType === 'Order' && (status === 'AwaitingDispatch' || status === 'Awaiting Dispatch')) {
+        return 'Order awaiting dispatch';
+      }
+
+      return `${this.formatEntityName(log.entityType)} moved to ${readableStatus}`;
+    }
+
+    switch (log.action) {
+      case 'Created':
+        return `${this.formatEntityName(log.entityType)} created`;
+      case 'Updated':
+        return `${this.formatEntityName(log.entityType)} updated`;
+      case 'Deleted':
+        return `${this.formatEntityName(log.entityType)} deleted`;
+      case 'Generated':
+        return `${this.formatEntityName(log.entityType)} generated`;
+      case 'Sent':
+        return `${this.formatEntityName(log.entityType)} sent`;
+      case 'Completed':
+        return `${this.formatEntityName(log.entityType)} completed`;
+      case 'Failed':
+        return `${this.formatEntityName(log.entityType)} failed`;
+      case 'RetryQueued':
+        return `${this.formatEntityName(log.entityType)} retry queued`;
+      default:
+        return `${this.formatEntityName(log.entityType)} ${log.action}`;
+    }
+  }
+
+  getActorLabel(log: AuditLog): string {
+    if (log.performedByUserName && log.performedByUserId) {
+      return `${log.performedByUserName} (#${log.performedByUserId})`;
+    }
+
+    return log.performedByUserName
+      || (log.performedByUserId ? `User #${log.performedByUserId}` : 'System');
+  }
+
+  getActionClass(log: AuditLog): string {
+    if (this.isFailedAction(log)) {
+      return 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+    }
+
+    if (!log.performedByUserId) {
+      return 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400';
+    }
+
+    if (log.action === 'Deleted') {
+      return 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400';
+    }
+
+    return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+  }
+
+  getEntityClass(entityType: string): string {
+    switch (entityType) {
+      case 'Order':
+        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+      case 'Customer':
+        return 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400';
+      case 'Product':
+        return 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400';
+      case 'ProcessingJob':
+        return 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400';
+      default:
+        return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+    }
+  }
+
+  private isFailedAction(log: AuditLog): boolean {
+    return log.action.toLowerCase().includes('failed')
+      || (log.notes?.toLowerCase().includes('failed') ?? false);
+  }
+
+  private formatEntityName(entityType: string): string {
+    return entityType.replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+}

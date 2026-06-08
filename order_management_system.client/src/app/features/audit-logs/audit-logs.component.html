@@ -1,0 +1,246 @@
+<div class="mb-8 flex items-center justify-between">
+  <div>
+    <h1 class="text-3xl font-light text-slate-900 dark:text-white">Audit Logs</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">Investigate system activity, user changes, and workflow events</p>
+  </div>
+</div>
+
+<div class="mb-6">
+  <div class="flex flex-col sm:flex-row gap-3">
+    <div class="relative flex-1">
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="24"
+             height="24"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="#ffffff"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+          <path d="M21 21l-6 -6" />
+        </svg>
+      </span>
+      <input type="text"
+             [(ngModel)]="searchTerm"
+             (keyup.enter)="applyFilters()"
+             placeholder="Search audit logs by event, user, notes, or record type..."
+             class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all" />
+    </div>
+
+    <button type="button"
+            (click)="toggleFilters()"
+            class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="20"
+           height="20"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
+      </svg>
+
+      <span>Filters</span>
+
+      <span *ngIf="searchTerm || entityType || action || entityId || performedByUserId || from || to"
+            class="ml-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
+        {{ (searchTerm ? 1 : 0) + (entityType ? 1 : 0) + (action ? 1 : 0) + (entityId ? 1 : 0) + (performedByUserId ? 1 : 0) + (from ? 1 : 0) + (to ? 1 : 0) }}
+      </span>
+    </button>
+  </div>
+
+  <div *ngIf="filtersVisible"
+       class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-6 gap-2">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Entity</label>
+      <select [(ngModel)]="entityType"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+        <option value="">All entities</option>
+        <option *ngFor="let type of entityTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Action Type</label>
+      <select [(ngModel)]="action"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+        <option value="">All actions</option>
+        <option *ngFor="let type of actionTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Entity ID</label>
+      <input type="number"
+             [(ngModel)]="entityId"
+             class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">From</label>
+      <input type="date"
+             [(ngModel)]="from"
+             class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">To</label>
+      <input type="date"
+             [(ngModel)]="to"
+             class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">User ID</label>
+      <input type="number"
+             [(ngModel)]="performedByUserId"
+             class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+    </div>
+
+    <div class="sm:col-span-3 xl:col-span-6 flex gap-2">
+      <button type="button"
+              (click)="applyFilters()"
+              class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors whitespace-nowrap">
+        Apply
+      </button>
+
+      <button type="button"
+              (click)="clearFilters()"
+              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors whitespace-nowrap">
+        Clear
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">Loading audit logs...</p>
+</div>
+
+<div *ngIf="errorMessage && !isLoading" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+</div>
+
+<div *ngIf="!isLoading && !errorMessage" class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+        <tr>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Event</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Record</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Actor</th>
+          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Time</th>
+          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Details</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        <ng-container *ngFor="let log of logs">
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex flex-wrap items-center gap-2">
+                <span [class]="'inline-flex px-2 py-1 rounded-md text-xs font-medium ' + getActionClass(log)">
+                  {{ log.action }}
+                </span>
+                <span class="text-slate-900 dark:text-white font-medium">{{ getEventLabel(log) }}</span>
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+                {{ log.notes || 'No notes recorded' }}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getEntityClass(log.entityType)">
+                {{ log.entityType }} #{{ log.entityId }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+              {{ getActorLabel(log) }}
+            </td>
+            <td class="px-6 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+              {{ log.performedAt | date: 'MMM d, yyyy h:mm a' }}
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button type="button"
+                      (click)="selectLog(log)"
+                      class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium">
+                {{ selectedLog?.auditLogId === log.auditLogId ? 'Hide' : 'View' }}
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="selectedLog?.auditLogId === log.auditLogId" class="bg-slate-50 dark:bg-slate-900/60">
+            <td colspan="5" class="px-6 py-5">
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Entity</p>
+                  <p class="text-sm text-slate-900 dark:text-white mt-1">{{ log.entityType }} #{{ log.entityId }}</p>
+                </div>
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Actor</p>
+                  <p class="text-sm text-slate-900 dark:text-white mt-1">{{ getActorLabel(log) }}</p>
+                </div>
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Recorded</p>
+                  <p class="text-sm text-slate-900 dark:text-white mt-1">{{ log.performedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium mb-2">Old Values JSON</p>
+                  <pre class="audit-json">{{ formatJson(log.oldValuesJson) }}</pre>
+                </div>
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium mb-2">New Values JSON</p>
+                  <pre class="audit-json">{{ formatJson(log.newValuesJson) }}</pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="logs.length === 0" class="text-center py-12">
+    <p class="text-slate-500 dark:text-slate-400">No audit logs found.</p>
+  </div>
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+    <div class="text-sm text-slate-600 dark:text-slate-400">
+      Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
+      <span *ngIf="totalCount">({{ totalCount }} logs)</span>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+        Page size
+        <select [(ngModel)]="pageSize"
+                (ngModelChange)="onPageSizeChange($event)"
+                class="px-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+          <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
+        </select>
+      </label>
+
+      <button type="button"
+              (click)="goToPreviousPage()"
+              [disabled]="!hasPreviousPage"
+              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        Previous
+      </button>
+
+      <button type="button"
+              (click)="goToNextPage()"
+              [disabled]="!hasNextPage"
+              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        Next
+      </button>
+    </div>
+  </div>
+</div>

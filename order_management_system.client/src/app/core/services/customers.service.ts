@@ -8,6 +8,7 @@ import { Address, CreateAddressRequest, UpdateAddressRequest } from '../models/a
 import { CreateCustomerContactRequest, CustomerContact, UpdateCustomerContactRequest } from '../models/customer-contact.model';
 import { PagedResult } from '../models/paged-result.model';
 import { PaginationQuery } from '../models/pagination-query.model';
+import { CustomerSummary } from '../models/customer-summary.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,12 +18,37 @@ export class CustomersService {
 
   constructor(private http: HttpClient) { }
 
-  getAll(query: PaginationQuery): Observable<PagedResult<Customer>> {
-    const params = new HttpParams()
+  getAll(query: PaginationQuery & {
+    searchTerm?: string;
+    industryType?: string;
+    paymentTermsDays?: number | null;
+    isActive?: boolean | null;
+  }): Observable<PagedResult<Customer>> {
+    let params = new HttpParams()
       .set('pageNumber', query.pageNumber)
       .set('pageSize', query.pageSize);
 
+    if (query.searchTerm) {
+      params = params.set('searchTerm', query.searchTerm);
+    }
+
+    if (query.industryType) {
+      params = params.set('industryType', query.industryType);
+    }
+
+    if (query.paymentTermsDays) {
+      params = params.set('paymentTermsDays', query.paymentTermsDays);
+    }
+
+    if (query.isActive !== undefined && query.isActive !== null) {
+      params = params.set('isActive', query.isActive);
+    }
+
     return this.http.get<PagedResult<Customer>>(this.baseUrl, { params });
+  }
+
+  getSummary(): Observable<CustomerSummary> {
+    return this.http.get<CustomerSummary>(`${this.baseUrl}/summary`);
   }
 
   getById(id: number): Observable<Customer> {

@@ -46,6 +46,7 @@ public static class Program
 
         // Core Services
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+        builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddScoped<ICarrierRepository, CarrierRepository>();
         builder.Services.AddScoped<IAddressRepository, AddressRepository>();
@@ -71,6 +72,7 @@ public static class Program
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IPricingService, PricingService>();
         builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
+        builder.Services.AddScoped<IAuditService, AuditService>();
 
         builder.Services.AddScoped<IProcessingJobQueueService, ProcessingJobQueueService>();
         builder.Services.AddScoped<IOrderDocumentGenerator, OrderDocumentGenerator>();

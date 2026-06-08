@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ProductList } from '../../core/models/product-list.model';
 import { ProductsService } from '../../core/services/products.service';
+import { ProductCategory } from '../../core/models/product-category.model';
+import { HazardClass } from '../../core/models/hazard-class.model';
 
 @Component({
   selector: 'app-products',
@@ -27,10 +29,14 @@ export class ProductsComponent implements OnInit {
   activeFilter = '';
   restrictedFilter = '';
   hazardousFilter = '';
+  categoryFilter: number | null = null;
+  hazardClassFilter: number | null = null;
 
   private filtersVisible = false;
 
   stats: { label: string; value: string | number; color: string }[] = [];
+  categories: ProductCategory[] = [];
+  hazardClasses: HazardClass[] = [];
 
   private isHazardous(product: ProductList): boolean {
     return product.hazardClassName?.toLowerCase() !== 'non-hazardous';
@@ -42,7 +48,55 @@ export class ProductsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadSummary();
+    this.loadFilterOptions();
     this.loadProducts();
+  }
+
+  loadFilterOptions(): void {
+    this.productsService.getProductCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.productsService.getHazardClasses().subscribe({
+      next: (hazardClasses) => {
+        this.hazardClasses = hazardClasses;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadSummary(): void {
+    this.productsService.getSummary().subscribe({
+      next: (summary) => {
+        this.stats = [
+          {
+            label: 'Total Products',
+            value: summary.totalProducts,
+            color: ''
+          },
+          {
+            label: 'Active Products',
+            value: summary.activeProducts,
+            color: 'text-emerald-600 dark:text-emerald-400'
+          },
+          {
+            label: 'Restricted',
+            value: summary.restrictedProducts,
+            color: 'text-red-600 dark:text-red-400'
+          },
+          {
+            label: 'Hazardous',
+            value: summary.hazardousProducts,
+            color: 'text-amber-600 dark:text-amber-400'
+          }
+        ];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   loadProducts(): void {
@@ -51,7 +105,13 @@ export class ProductsComponent implements OnInit {
 
     this.productsService.getAll({
       pageNumber: this.pageNumber,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm.trim() || undefined,
+      isActive: this.getActiveFilterValue(),
+      isRestricted: this.getRestrictedFilterValue(),
+      isHazardous: this.getHazardousFilterValue(),
+      productCategoryId: this.categoryFilter,
+      hazardClassId: this.hazardClassFilter
     })
     .subscribe({
       next: (data) => {
@@ -84,76 +144,21 @@ export class ProductsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    const term = this.searchTerm.toLowerCase().trim();
-
-    this.filteredProducts = this.products.filter(product => {
-      const matchesSearch =
-        !term ||
-        product.sku?.toLowerCase().includes(term) ||
-        product.productName?.toLowerCase().includes(term) ||
-        product.packSize?.toLowerCase().includes(term) ||
-        product.productCategoryName?.toLowerCase().includes(term) ||
-        product.unitOfMeasureName?.toLowerCase().includes(term) ||
-        product.hazardClassName?.toLowerCase().includes(term);
-
-      const matchesActive =
-        !this.activeFilter ||
-        (this.activeFilter === 'active' && product.isActive) ||
-        (this.activeFilter === 'inactive' && !product.isActive);
-
-      const matchesRestricted =
-        !this.restrictedFilter ||
-        (this.restrictedFilter === 'restricted' && product.isRestricted) ||
-        (this.restrictedFilter === 'unrestricted' && !product.isRestricted);
-
-      const isHazardous =
-        product.hazardClassName?.toLowerCase() !== 'non-hazardous';
-
-      const matchesHazardous =
-        !this.hazardousFilter ||
-        (this.hazardousFilter === 'hazardous' && isHazardous) ||
-        (this.hazardousFilter === 'nonhazardous' && !isHazardous);
-
-      return matchesSearch && matchesActive && matchesRestricted && matchesHazardous;
-    });
+    this.pageNumber = 1;
+    this.loadProducts();
   }
 
-  private initialiseProductDashboard(): void {
-    this.updateStats();
+  clearFilters(): void {
+    this.activeFilter = '';
+    this.restrictedFilter = '';
+    this.hazardousFilter = '';
+    this.categoryFilter = null;
+    this.hazardClassFilter = null;
     this.applyFilters();
   }
 
-  private updateStats(): void {
-    const activeProducts = this.products.filter(p => p.isActive).length;
-
-    const restrictedProducts = this.products.filter(p => p.isRestricted).length;
-
-    const hazardousProducts = this.products.filter(p =>
-      p.hazardClassName?.toLowerCase() !== 'non-hazardous'
-    ).length;
-
-    this.stats = [
-      {
-        label: 'Total Products',
-        value: this.products.length,
-        color: ''
-      },
-      {
-        label: 'Active Products',
-        value: activeProducts,
-        color: 'text-emerald-600 dark:text-emerald-400'
-      },
-      {
-        label: 'Restricted',
-        value: restrictedProducts,
-        color: 'text-red-600 dark:text-red-400'
-      },
-      {
-        label: 'Hazardous',
-        value: hazardousProducts,
-        color: 'text-amber-600 dark:text-amber-400'
-      }
-    ];
+  private initialiseProductDashboard(): void {
+    this.filteredProducts = this.products;
   }
 
   deleteProduct(id: number): void {
@@ -163,6 +168,7 @@ export class ProductsComponent implements OnInit {
 
     this.productsService.delete(id).subscribe({
       next: () => {
+        this.loadSummary();
         this.loadProducts();
       },
       error: (err) => {
@@ -199,5 +205,41 @@ export class ProductsComponent implements OnInit {
     this.pageSize = value;
     this.pageNumber = 1;
     this.loadProducts();
+  }
+
+  private getActiveFilterValue(): boolean | null {
+    if (this.activeFilter === 'active') {
+      return true;
+    }
+
+    if (this.activeFilter === 'inactive') {
+      return false;
+    }
+
+    return null;
+  }
+
+  private getRestrictedFilterValue(): boolean | null {
+    if (this.restrictedFilter === 'restricted') {
+      return true;
+    }
+
+    if (this.restrictedFilter === 'unrestricted') {
+      return false;
+    }
+
+    return null;
+  }
+
+  private getHazardousFilterValue(): boolean | null {
+    if (this.hazardousFilter === 'hazardous') {
+      return true;
+    }
+
+    if (this.hazardousFilter === 'nonhazardous') {
+      return false;
+    }
+
+    return null;
   }
 }

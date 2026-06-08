@@ -9,9 +9,26 @@ public interface IProductRepository
     Task AddAsync(Product product, CancellationToken ct);
     Task UpdateAsync(Product product, CancellationToken ct);
     Task SaveChangesAsync(CancellationToken ct);
-    Task<int> CountActiveAsync(CancellationToken ct);
+    Task<int> CountActiveAsync(
+        string? searchTerm,
+        bool? isActive,
+        bool? isRestricted,
+        bool? isHazardous,
+        int? productCategoryId,
+        int? hazardClassId,
+        CancellationToken ct);
+
+    Task<(int TotalProducts, int ActiveProducts, int RestrictedProducts, int HazardousProducts)> GetSummaryAsync(
+        CancellationToken ct);
+
     Task<List<Product>> GetPagedAsync(
         int skip,
         int take,
+        string? searchTerm,
+        bool? isActive,
+        bool? isRestricted,
+        bool? isHazardous,
+        int? productCategoryId,
+        int? hazardClassId,
         CancellationToken ct);
 }

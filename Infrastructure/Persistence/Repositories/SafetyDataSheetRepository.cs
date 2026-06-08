@@ -22,11 +22,11 @@ public class SafetyDataSheetRepository : ISafetyDataSheetRepository
             .ToListAsync(ct);
     }
 
-    public async Task<SafetyDataSheet?> GetByIdAsync(int id, int productId, CancellationToken ct)
+    public async Task<SafetyDataSheet?> GetByIdAsync(int productId, int safetyDataSheetId, CancellationToken ct)
     {
         return await _db.SafetyDataSheets
             .FirstOrDefaultAsync(x =>
-                x.SafetyDataSheetId == id &&
+                x.SafetyDataSheetId == safetyDataSheetId &&
                 x.ProductId == productId &&
                 x.DeletedAt == null, ct);
     }

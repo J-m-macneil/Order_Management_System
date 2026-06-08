@@ -16,11 +16,20 @@ public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, Paged
 
     public async Task<PagedResult<CustomerDto>> Handle(GetCustomersQuery request, CancellationToken ct)
     {
-        var totalCount = await _repo.CountActiveAsync(ct);
+        var totalCount = await _repo.CountActiveAsync(
+            request.SearchTerm,
+            request.IndustryType,
+            request.PaymentTermsDays,
+            request.IsActive,
+            ct);
 
         var customers = await _repo.GetPagedAsync(
             request.Skip,
             request.PageSize,
+            request.SearchTerm,
+            request.IndustryType,
+            request.PaymentTermsDays,
+            request.IsActive,
             ct);
 
         var items = customers.Select(x => new CustomerDto

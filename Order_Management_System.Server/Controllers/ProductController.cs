@@ -1,6 +1,7 @@
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
+using Application.Features.Products.Queries.GetProductSummary;
 using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProducts;
 using MediatR;
@@ -25,6 +26,13 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Get([FromQuery] GetProductsQuery query, CancellationToken ct)
     {
         var result = await _mediator.Send(query, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetProductSummaryQuery(), ct);
         return Ok(result);
     }
 

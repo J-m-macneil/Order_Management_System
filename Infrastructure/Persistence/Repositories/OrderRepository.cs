@@ -64,28 +64,56 @@ public class OrderRepository : IOrderRepository
             .ToListAsync(ct);
     }
 
-    public async Task<int> CountActiveAsync(CancellationToken ct)
+    public async Task<int> CountActiveAsync(
+        string? searchTerm,
+        int? orderStatusId,
+        bool? isPriorityOrder,
+        DateTime? requestedDeliveryFrom,
+        DateTime? requestedDeliveryTo,
+        DateTime? createdFrom,
+        DateTime? createdTo,
+        CancellationToken ct)
     {
-        return await _db.Orders
-            .AsNoTracking()
-            .Where(x => x.DeletedAt == null)
+        return await ApplyFilters(
+                _db.Orders.AsNoTracking(),
+                searchTerm,
+                orderStatusId,
+                isPriorityOrder,
+                requestedDeliveryFrom,
+                requestedDeliveryTo,
+                createdFrom,
+                createdTo)
             .CountAsync(ct);
     }
 
     public async Task<List<Order>> GetPagedAsync(
         int skip,
         int take,
+        string? searchTerm,
+        int? orderStatusId,
+        bool? isPriorityOrder,
+        DateTime? requestedDeliveryFrom,
+        DateTime? requestedDeliveryTo,
+        DateTime? createdFrom,
+        DateTime? createdTo,
         CancellationToken ct)
     {
-        return await _db.Orders
-            .AsNoTracking()
-            .Include(o => o.Customer)
-            .Include(o => o.OrderStatus)
-            .Include(o => o.Warehouse)
-            .Include(o => o.Carrier)
-            .Include(o => o.Project)
-            .Include(o => o.OrderItems)
-            .Where(x => x.DeletedAt == null)
+        return await ApplyFilters(
+                _db.Orders
+                    .AsNoTracking()
+                    .Include(o => o.Customer)
+                    .Include(o => o.OrderStatus)
+                    .Include(o => o.Warehouse)
+                    .Include(o => o.Carrier)
+                    .Include(o => o.Project)
+                    .Include(o => o.OrderItems),
+                searchTerm,
+                orderStatusId,
+                isPriorityOrder,
+                requestedDeliveryFrom,
+                requestedDeliveryTo,
+                createdFrom,
+                createdTo)
             .OrderByDescending(o => o.CreatedAt)
             .ThenByDescending(o => o.OrderId)
             .Skip(skip)
@@ -96,5 +124,61 @@ public class OrderRepository : IOrderRepository
     public async Task SaveChangesAsync(CancellationToken ct)
     {
         await _db.SaveChangesAsync(ct);
+    }
+
+    private static IQueryable<Order> ApplyFilters(
+        IQueryable<Order> query,
+        string? searchTerm,
+        int? orderStatusId,
+        bool? isPriorityOrder,
+        DateTime? requestedDeliveryFrom,
+        DateTime? requestedDeliveryTo,
+        DateTime? createdFrom,
+        DateTime? createdTo)
+    {
+        query = query.Where(x => x.DeletedAt == null);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim();
+
+            query = query.Where(o =>
+                o.OrderNumber.Contains(term) ||
+                (o.Customer != null && o.Customer.CompanyName.Contains(term)) ||
+                o.CustomerId.ToString().Contains(term) ||
+                (o.PurchaseOrderReference != null && o.PurchaseOrderReference.Contains(term)));
+        }
+
+        if (orderStatusId.HasValue)
+        {
+            query = query.Where(o => o.OrderStatusId == orderStatusId.Value);
+        }
+
+        if (isPriorityOrder.HasValue)
+        {
+            query = query.Where(o => o.IsPriorityOrder == isPriorityOrder.Value);
+        }
+
+        if (requestedDeliveryFrom.HasValue)
+        {
+            query = query.Where(o => o.RequestedDeliveryDate >= requestedDeliveryFrom.Value);
+        }
+
+        if (requestedDeliveryTo.HasValue)
+        {
+            query = query.Where(o => o.RequestedDeliveryDate <= requestedDeliveryTo.Value);
+        }
+
+        if (createdFrom.HasValue)
+        {
+            query = query.Where(o => o.CreatedAt >= createdFrom.Value);
+        }
+
+        if (createdTo.HasValue)
+        {
+            query = query.Where(o => o.CreatedAt <= createdTo.Value);
+        }
+
+        return query;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Application.Features.Orders.Commands.CreateOrder;
+using Application.Features.Orders.Commands.CreateOrder;
+using Application.Interfaces;
 using Domain.Entities.Orders;
 using Domain.Repositories;
 using MediatR;
@@ -6,10 +7,14 @@ using MediatR;
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int>
 {
     private readonly IOrderRepository _orders;
+    private readonly IAuditService _audit;
 
-    public CreateOrderCommandHandler(IOrderRepository orders)
+    public CreateOrderCommandHandler(
+        IOrderRepository orders,
+        IAuditService audit)
     {
         _orders = orders;
+        _audit = audit;
     }
 
     public async Task<int> Handle(CreateOrderCommand dto, CancellationToken ct)
@@ -22,8 +27,12 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
             BillingAddressId = dto.BillingAddressId,
             WarehouseId = dto.WarehouseId,
             CarrierId = dto.CarrierId,
+            ProjectId = dto.ProjectId,
             CreatedByUserId = dto.CreatedByUserId,
             RequestedDeliveryDate = dto.RequestedDeliveryDate,
+            PurchaseOrderReference = dto.PurchaseOrderReference,
+            SpecialInstructions = dto.SpecialInstructions,
+            InternalNotes = dto.InternalNotes,
             IsPriorityOrder = dto.IsPriorityOrder,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -53,6 +62,23 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         order.TotalAmount = order.Subtotal - order.DiscountAmount + order.TaxAmount;
 
         await _orders.AddAsync(order, ct);
+
+        await _audit.LogAsync(
+            "Order",
+            order.OrderId,
+            "Created",
+            null,
+            new
+            {
+                order.OrderId,
+                order.OrderNumber,
+                order.CustomerId,
+                order.OrderStatusId,
+                order.TotalAmount,
+                itemCount = order.OrderItems.Count
+            },
+            $"Order created: {order.OrderNumber}.",
+            ct);
 
         return order.OrderId;
     }

@@ -1,0 +1,19 @@
+.audit-json {
+  max-height: 20rem;
+  overflow: auto;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(226 232 240);
+  background: rgb(248 250 252);
+  padding: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgb(15 23 42);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:host-context(.dark) .audit-json {
+  border-color: rgb(51 65 85);
+  background: rgb(15 23 42);
+  color: rgb(226 232 240);
+}

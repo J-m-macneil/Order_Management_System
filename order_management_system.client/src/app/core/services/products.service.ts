@@ -12,6 +12,7 @@ import { ProductList } from "../models/product-list.model";
 import { SafetyDataSheet, CreateSafetyDataSheetRequest, UpdateSafetyDataSheetRequest } from "../models/safety-data-sheet-model";
 import { PaginationQuery } from "../models/pagination-query.model";
 import { PagedResult } from "../models/paged-result.model";
+import { ProductSummary } from "../models/product-summary.model";
 
 @Injectable({
   providedIn: 'root'
@@ -21,12 +22,47 @@ export class ProductsService {
 
   constructor(private http: HttpClient) { }
 
-  getAll(query: PaginationQuery): Observable<PagedResult<ProductList>> {
-    const params = new HttpParams()
+  getAll(query: PaginationQuery & {
+    searchTerm?: string;
+    isActive?: boolean | null;
+    isRestricted?: boolean | null;
+    isHazardous?: boolean | null;
+    productCategoryId?: number | null;
+    hazardClassId?: number | null;
+  }): Observable<PagedResult<ProductList>> {
+    let params = new HttpParams()
       .set('pageNumber', query.pageNumber)
       .set('pageSize', query.pageSize);
 
+    if (query.searchTerm) {
+      params = params.set('searchTerm', query.searchTerm);
+    }
+
+    if (query.isActive !== undefined && query.isActive !== null) {
+      params = params.set('isActive', query.isActive);
+    }
+
+    if (query.isRestricted !== undefined && query.isRestricted !== null) {
+      params = params.set('isRestricted', query.isRestricted);
+    }
+
+    if (query.isHazardous !== undefined && query.isHazardous !== null) {
+      params = params.set('isHazardous', query.isHazardous);
+    }
+
+    if (query.productCategoryId) {
+      params = params.set('productCategoryId', query.productCategoryId);
+    }
+
+    if (query.hazardClassId) {
+      params = params.set('hazardClassId', query.hazardClassId);
+    }
+
     return this.http.get<PagedResult<ProductList>>(this.baseUrl, { params });
+  }
+
+  getSummary(): Observable<ProductSummary> {
+    return this.http.get<ProductSummary>(`${this.baseUrl}/summary`);
   }
 
   getById(id: number): Observable<Product> {

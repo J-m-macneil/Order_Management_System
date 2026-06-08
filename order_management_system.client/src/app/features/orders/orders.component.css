@@ -2,18 +2,3 @@
   @apply bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg p-6 hover:shadow-sm transition-shadow;
 }
 
-.status-pill {
-  @apply inline-flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors;
-}
-
-  .status-pill span {
-    @apply text-sm font-semibold text-slate-500 dark:text-slate-400;
-  }
-
-.status-pill-active {
-  @apply border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400;
-}
-
-  .status-pill-active span {
-    @apply text-blue-700 dark:text-blue-300;
-  }

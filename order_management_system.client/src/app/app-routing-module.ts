@@ -12,6 +12,7 @@ import { AdminComponent } from './features/admin/admin.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { OrderCreateComponent } from './features/orders/order-create/order-create.component';
 import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
+import { AuditLogsComponent } from './features/audit-logs/audit-logs.component';
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
@@ -36,6 +37,7 @@ const routes: Routes = [
 
       { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
       { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] },
+      { path: 'admin/audit', component: AuditLogsComponent, canActivate: [AuthGuard, AdminGuard] },
 
       { path: 'orders/create', component: OrderCreateComponent, canActivate: [AuthGuard] },
       { path: 'orders/:id', component: OrderDetailComponent, canActivate: [AuthGuard] }

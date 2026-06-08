@@ -17,12 +17,27 @@ public class GetOrdersQueryHandler
 
     public async Task<PagedResult<OrderDto>> Handle(GetOrdersQuery request, CancellationToken ct)
     {
-        var totalCount = await _repo.CountActiveAsync(ct);
+        var totalCount = await _repo.CountActiveAsync(
+            request.SearchTerm,
+            request.OrderStatusId,
+            request.IsPriorityOrder,
+            request.RequestedDeliveryFrom,
+            request.RequestedDeliveryTo,
+            request.CreatedFrom,
+            request.CreatedTo,
+            ct);
 
         var orders = await _repo.GetPagedAsync(
-         request.Skip,
-         request.PageSize,
-         ct);
+            request.Skip,
+            request.PageSize,
+            request.SearchTerm,
+            request.OrderStatusId,
+            request.IsPriorityOrder,
+            request.RequestedDeliveryFrom,
+            request.RequestedDeliveryTo,
+            request.CreatedFrom,
+            request.CreatedTo,
+            ct);
 
         var items = orders.Select(o => new OrderDto
         {

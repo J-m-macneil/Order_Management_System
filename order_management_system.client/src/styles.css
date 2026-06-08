@@ -33,6 +33,16 @@ select {
   background-size: 1rem;
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) saturate(100%) invert(20%) sepia(12%) saturate(1524%) hue-rotate(176deg) brightness(94%) contrast(91%);
+}
+
+html.dark input[type="date"]::-webkit-calendar-picker-indicator,
+html.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

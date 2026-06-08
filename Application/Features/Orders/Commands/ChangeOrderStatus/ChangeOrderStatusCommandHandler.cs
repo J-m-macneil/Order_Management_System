@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
+using Application.Interfaces;
 using Domain.Enums;
 using Domain.Repositories;
 using Domain.Rules;
@@ -12,15 +13,18 @@ public class ChangeOrderStatusCommandHandler
     private readonly IOrderRepository _repo;
     private readonly ICurrentUserService _currentUser;
     private readonly IProcessingJobQueueService _jobQueue;
+    private readonly IAuditService _audit;
 
     public ChangeOrderStatusCommandHandler(
         IOrderRepository repo,
         ICurrentUserService currentUser,
-        IProcessingJobQueueService jobQueue)
+        IProcessingJobQueueService jobQueue,
+        IAuditService audit)
     {
         _repo = repo;
         _currentUser = currentUser;
         _jobQueue = jobQueue;
+        _audit = audit;
     }
 
     public async Task<bool> Handle(
@@ -48,6 +52,24 @@ public class ChangeOrderStatusCommandHandler
         order.ChangeStatus(request.StatusId, userId, request.Reason);
 
         await _repo.SaveChangesAsync(ct);
+
+        await _audit.LogAsync(
+            "Order",
+            order.OrderId,
+            $"StatusChanged:{toStatus}",
+            new
+            {
+                statusId = (int)fromStatus,
+                status = fromStatus.ToString()
+            },
+            new
+            {
+                statusId = (int)toStatus,
+                status = toStatus.ToString(),
+                reason = request.Reason
+            },
+            $"Order status changed from {fromStatus} to {toStatus}.",
+            ct);
 
         if (toStatus == OrderStatusEnum.Submitted)
         {

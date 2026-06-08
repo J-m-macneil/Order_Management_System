@@ -26,6 +26,7 @@ export class CustomersComponent implements OnInit {
   searchTerm = '';
   industryFilter = '';
   paymentTermsFilter = '';
+  activeFilter = '';
 
   private filtersVisible = false;
 
@@ -38,7 +39,33 @@ export class CustomersComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadSummary();
     this.loadCustomers();
+  }
+
+  loadSummary(): void {
+    this.customersService.getSummary().subscribe({
+      next: (summary) => {
+        this.stats = [
+          {
+            label: 'Total Customers',
+            value: summary.totalCustomers,
+            color: ''
+          },
+          {
+            label: 'Active',
+            value: summary.activeCustomers,
+            color: 'text-emerald-600 dark:text-emerald-400'
+          },
+          {
+            label: 'Inactive',
+            value: summary.inactiveCustomers,
+            color: 'text-red-600 dark:text-red-400'
+          }
+        ];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   loadCustomers(): void {
@@ -47,7 +74,11 @@ export class CustomersComponent implements OnInit {
 
     this.customersService.getAll({
       pageNumber: this.pageNumber,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm.trim() || undefined,
+      industryType: this.industryFilter || undefined,
+      paymentTermsDays: this.paymentTermsFilter ? Number(this.paymentTermsFilter) : null,
+      isActive: this.getActiveFilterValue()
     }).subscribe({
       next: (data) => {
         this.customers = data.items;
@@ -78,30 +109,20 @@ export class CustomersComponent implements OnInit {
   }
 
   applyFilters(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    this.pageNumber = 1;
+    this.loadCustomers();
+  }
 
-    this.filteredCustomers = this.customers.filter(customer => {
-      const matchesSearch =
-        !term ||
-        customer.accountNumber?.toLowerCase().includes(term) ||
-        customer.companyName?.toLowerCase().includes(term) ||
-        customer.industryType?.toLowerCase().includes(term) ||
-        customer.mainContactName?.toLowerCase().includes(term) ||
-        customer.mainContactEmail?.toLowerCase().includes(term);
-
-      const matchesIndustry =
-        !this.industryFilter ||
-        customer.industryType === this.industryFilter;
-
-      const matchesPaymentTerms =
-        !this.paymentTermsFilter ||
-        customer.paymentTermsDays?.toString() === this.paymentTermsFilter;
-
-      return matchesSearch && matchesIndustry && matchesPaymentTerms;
-    });
+  clearFilters(): void {
+    this.industryFilter = '';
+    this.paymentTermsFilter = '';
+    this.activeFilter = '';
+    this.applyFilters();
   }
 
   private initialiseCustomerDashboard(): void {
+    this.filteredCustomers = this.customers;
+
     this.industries = Array.from(
       new Set(
         this.customers
@@ -109,32 +130,18 @@ export class CustomersComponent implements OnInit {
           .filter((industry): industry is string => !!industry)
       )
     );
-
-    this.updateStats();
-    this.applyFilters();
   }
 
-  private updateStats(): void {
-    const activeCustomers = this.customers.filter(customer => customer.isActive).length;
-    const inactiveCustomers = this.customers.filter(customer => !customer.isActive).length;
+  private getActiveFilterValue(): boolean | null {
+    if (this.activeFilter === 'active') {
+      return true;
+    }
 
-    this.stats = [
-      {
-        label: 'Total Customers',
-        value: this.customers.length,
-        color: ''
-      },
-      {
-        label: 'Active',
-        value: activeCustomers,
-        color: 'text-emerald-600 dark:text-emerald-400'
-      },
-      {
-        label: 'Inactive',
-        value: inactiveCustomers,
-        color: 'text-red-600 dark:text-red-400'
-      }
-    ];
+    if (this.activeFilter === 'inactive') {
+      return false;
+    }
+
+    return null;
   }
 
   deleteCustomer(id: number): void {
@@ -143,7 +150,10 @@ export class CustomersComponent implements OnInit {
     }
 
     this.customersService.delete(id).subscribe({
-      next: () => this.loadCustomers(),
+      next: () => {
+        this.loadSummary();
+        this.loadCustomers();
+      },
       error: () => {
         this.errorMessage = 'Failed to delete customer.';
         this.cdr.detectChanges();

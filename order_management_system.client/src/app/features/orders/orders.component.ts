@@ -26,6 +26,10 @@ export class OrdersComponent implements OnInit {
   searchTerm = '';
   priorityFilter = '';
   statusFilter = '';
+  requestedDeliveryFrom = '';
+  requestedDeliveryTo = '';
+  createdFrom = '';
+  createdTo = '';
 
   private filtersVisible = false;
 
@@ -87,7 +91,14 @@ export class OrdersComponent implements OnInit {
 
     this.ordersService.getOrders({
       pageNumber: this.pageNumber,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm.trim() || undefined,
+      orderStatusId: this.statusFilter ? Number(this.statusFilter) : null,
+      isPriorityOrder: this.getPriorityFilterValue(),
+      requestedDeliveryFrom: this.requestedDeliveryFrom || undefined,
+      requestedDeliveryTo: this.requestedDeliveryTo || undefined,
+      createdFrom: this.createdFrom || undefined,
+      createdTo: this.createdTo || undefined
     })
     .subscribe({
       next: (data) => {
@@ -119,41 +130,22 @@ export class OrdersComponent implements OnInit {
   }
 
   private initialiseOrdersList(): void {
-    this.applyFilters();
-  }
-
-  filterByStatus(statusId: number | ''): void {
-    this.statusFilter = statusId === '' ? '' : statusId.toString();
-    this.applyFilters();
-  }
-
-  getStatusCount(statusId: number): number {
-    return this.orders.filter(order => order.orderStatusId === statusId).length;
+    this.filteredOrders = this.orders;
   }
 
   applyFilters(): void {
-    const term = this.searchTerm.trim().toLowerCase();
+    this.pageNumber = 1;
+    this.loadOrders();
+  }
 
-    this.filteredOrders = this.orders.filter(order => {
-      const matchesSearch =
-        !term ||
-        order.orderNumber?.toLowerCase().includes(term) ||
-        order.customerName?.toLowerCase().includes(term) ||
-        order.customerId?.toString().includes(term);
-
-      const matchesPriority =
-        !this.priorityFilter ||
-        (this.priorityFilter === 'priority' && order.isPriorityOrder) ||
-        (this.priorityFilter === 'standard' && !order.isPriorityOrder);
-
-      const matchesStatus =
-        !this.statusFilter ||
-        order.orderStatusId?.toString() === this.statusFilter;
-
-      return matchesSearch && matchesPriority && matchesStatus;
-    });
-
-    this.cdr.detectChanges();
+  clearFilters(): void {
+    this.priorityFilter = '';
+    this.statusFilter = '';
+    this.requestedDeliveryFrom = '';
+    this.requestedDeliveryTo = '';
+    this.createdFrom = '';
+    this.createdTo = '';
+    this.applyFilters();
   }
 
   formatCurrency(value: number): string {
@@ -178,6 +170,18 @@ export class OrdersComponent implements OnInit {
 
   getOrderStatusId(order: Order): number {
     return order.orderStatusId;
+  }
+
+  private getPriorityFilterValue(): boolean | null {
+    if (this.priorityFilter === 'priority') {
+      return true;
+    }
+
+    if (this.priorityFilter === 'standard') {
+      return false;
+    }
+
+    return null;
   }
 
   goToPreviousPage(): void {

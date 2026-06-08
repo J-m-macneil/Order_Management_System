@@ -21,10 +21,46 @@ export class OrdersService {
 
   constructor(private http: HttpClient) { }
 
-  getOrders(query: PaginationQuery): Observable<PagedResult<Order>> {
-    const params = new HttpParams()
+  getOrders(query: PaginationQuery & {
+    searchTerm?: string;
+    orderStatusId?: number | null;
+    isPriorityOrder?: boolean | null;
+    requestedDeliveryFrom?: string;
+    requestedDeliveryTo?: string;
+    createdFrom?: string;
+    createdTo?: string;
+  }): Observable<PagedResult<Order>> {
+    let params = new HttpParams()
       .set('pageNumber', query.pageNumber)
       .set('pageSize', query.pageSize);
+
+    if (query.searchTerm) {
+      params = params.set('searchTerm', query.searchTerm);
+    }
+
+    if (query.orderStatusId) {
+      params = params.set('orderStatusId', query.orderStatusId);
+    }
+
+    if (query.isPriorityOrder !== undefined && query.isPriorityOrder !== null) {
+      params = params.set('isPriorityOrder', query.isPriorityOrder);
+    }
+
+    if (query.requestedDeliveryFrom) {
+      params = params.set('requestedDeliveryFrom', query.requestedDeliveryFrom);
+    }
+
+    if (query.requestedDeliveryTo) {
+      params = params.set('requestedDeliveryTo', query.requestedDeliveryTo);
+    }
+
+    if (query.createdFrom) {
+      params = params.set('createdFrom', query.createdFrom);
+    }
+
+    if (query.createdTo) {
+      params = params.set('createdTo', query.createdTo);
+    }
 
     return this.http.get<PagedResult<Order>>(this.baseUrl, { params });
   }

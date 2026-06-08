@@ -15,10 +15,25 @@ public interface IOrderRepository
 
     Task SaveChangesAsync(CancellationToken ct);
 
-    Task<int> CountActiveAsync(CancellationToken ct);
+    Task<int> CountActiveAsync(
+        string? searchTerm,
+        int? orderStatusId,
+        bool? isPriorityOrder,
+        DateTime? requestedDeliveryFrom,
+        DateTime? requestedDeliveryTo,
+        DateTime? createdFrom,
+        DateTime? createdTo,
+        CancellationToken ct);
 
     Task<List<Order>> GetPagedAsync(
         int skip,
         int take,
+        string? searchTerm,
+        int? orderStatusId,
+        bool? isPriorityOrder,
+        DateTime? requestedDeliveryFrom,
+        DateTime? requestedDeliveryTo,
+        DateTime? createdFrom,
+        DateTime? createdTo,
         CancellationToken ct);
 }
