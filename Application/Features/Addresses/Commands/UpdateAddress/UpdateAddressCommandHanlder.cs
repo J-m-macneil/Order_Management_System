@@ -1,3 +1,5 @@
+using Application.Interfaces;
+using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
 
@@ -6,10 +8,14 @@ namespace Application.Features.Addresses.Commands.UpdateAddress;
 public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand, Unit>
 {
     private readonly IAddressRepository _repo;
+    private readonly IAuditService _audit;
 
-    public UpdateAddressCommandHanlder(IAddressRepository repo)
+    public UpdateAddressCommandHanlder(
+        IAddressRepository repo,
+        IAuditService audit)
     {
         _repo = repo;
+        _audit = audit;
     }
 
     public async Task<Unit> Handle(UpdateAddressCommand request, CancellationToken ct)
@@ -18,6 +24,8 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
 
         if (address == null)
             throw new Exception("Address not found");
+
+        var oldValues = CreateSnapshot(address);
 
         address.AddressType = request.AddressType;
         address.SiteName = request.SiteName;
@@ -34,6 +42,38 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
 
         await _repo.SaveChangesAsync(ct);
 
+        await _audit.LogAsync(
+            "Address",
+            address.AddressId,
+            "Updated",
+            oldValues,
+            CreateSnapshot(address),
+            $"Address updated for customer #{address.CustomerId}: {address.SiteName}.",
+            ct);
+
         return Unit.Value;
+    }
+
+    private static object CreateSnapshot(Address address)
+    {
+        return new
+        {
+            address.AddressId,
+            address.CustomerId,
+            address.AddressType,
+            address.SiteName,
+            address.Line1,
+            address.Line2,
+            address.City,
+            address.County,
+            address.Postcode,
+            address.Country,
+            address.ContactName,
+            address.ContactPhone,
+            address.DeliveryInstructions,
+            address.IsPrimary,
+            address.IsActive,
+            address.DeletedAt
+        };
     }
 }

@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="Application.UnitTests/Application.UnitTests.csproj" Id="6ae69e74-d32c-434e-893a-6edb10d2b218" />
+    <Project Path="Domain.UnitTests/Domain.UnitTests.csproj" Id="4d88efad-76e3-4cff-978b-07eef6b8b893" />
+    <Project Path="Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj" Id="5e02f976-16f0-4efb-89be-23c65af28cff" />
+  </Folder>
   <Project Path="Application/Application.csproj" Id="1c127635-93f2-4a4d-b848-39aff38896ba" />
   <Project Path="Domain/Domain.csproj" Id="26fe62e7-612a-4e9b-bc66-970f39a5a1db" />
   <Project Path="Infrastructure/Infrastructure.csproj" Id="df258e72-0a12-46c9-9840-7d4c8ed74fc3" />

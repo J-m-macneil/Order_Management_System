@@ -3,13 +3,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Address, CreateAddressRequest } from '../../../core/models/address.model';
 import { CreateCustomerRequest } from '../../../core/models/create-customer.model';
-import { CustomerContact, CreateCustomerContactRequest } from '../../../core/models/customer-contact.model';
+import { CustomerContact, CreateCustomerContactRequest, UpdateCustomerContactRequest } from '../../../core/models/customer-contact.model';
 import { Customer } from '../../../core/models/customer.model';
 import { UpdateCustomerRequest } from '../../../core/models/update-customer.model';
 import { CustomersService } from '../../../core/services/customers.service';
 import { PricingTier } from '../../../core/models/pricing-tier.model';
 import { PricingService } from '../../../core/services/pricing.service';
-import { forkJoin, map, Observable, switchMap } from 'rxjs';
+import { forkJoin, map, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-customer-form',
@@ -27,10 +27,15 @@ export class CustomerFormComponent implements OnInit {
   customerId: number | null = null;
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
   addresses: Address[] = [];
 
   contactForm!: FormGroup;
   contacts: CustomerContact[] = [];
+  isContactFormOpen = false;
+  editingContactId: number | null = null;
+  isAddressFormOpen = false;
+  editingAddressId: number | null = null;
   pricingTiers: PricingTier[] = [];
 
   constructor(
@@ -47,9 +52,9 @@ export class CustomerFormComponent implements OnInit {
       accountNumber: ['', Validators.required],
       companyName: ['', Validators.required],
       industryType: ['', Validators.required],
-      mainContactName: ['', Validators.required],
-      mainContactEmail: ['', [Validators.required, Validators.email]],
-      mainContactPhone: ['', Validators.required],
+      mainContactName: [''],
+      mainContactEmail: [''],
+      mainContactPhone: [''],
       billingAddressId: [null],
       defaultDeliveryAddressId: [null],
       pricingTierId: [1, Validators.required],
@@ -207,6 +212,36 @@ export class CustomerFormComponent implements OnInit {
     };
   }
 
+  private buildCurrentCustomerUpdateRequest(): UpdateCustomerRequest {
+    return this.buildCustomerRequest(
+      this.form.value,
+      this.form.value.billingAddressId,
+      this.form.value.defaultDeliveryAddressId
+    ) as UpdateCustomerRequest;
+  }
+
+  private buildContactRequest(isPrimary = false): CreateCustomerContactRequest {
+    const value = this.contactForm.value;
+
+    return {
+      name: value.name,
+      jobTitle: value.jobTitle,
+      email: value.email,
+      phone: value.phone,
+      isPrimary: isPrimary || value.isPrimary
+    };
+  }
+
+  private applyPrimaryContactToCustomerForm(): void {
+    const value = this.contactForm.value;
+
+    this.form.patchValue({
+      mainContactName: value.name,
+      mainContactEmail: value.email,
+      mainContactPhone: value.phone
+    });
+  }
+
   private patchAddressForm(target: FormGroup, address: Address | null, fallbackType: 'Billing' | 'DeliverySite'): void {
     target.patchValue({
       addressType: address?.addressType ?? fallbackType,
@@ -248,23 +283,33 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
-  private saveAddress(
-    customerId: number,
-    source: FormGroup,
-    addressType: 'Billing' | 'DeliverySite',
-    addressId: number | null
-  ): Observable<number> {
-    const request = this.buildAddressRequest(source, addressType);
-
-    if (addressId) {
-      return this.customersService.updateAddress(customerId, addressId, request).pipe(
-        map(() => addressId)
-      );
+  saveCustomerDetails(): void {
+    if (!this.customerId) {
+      return;
     }
 
-    return this.customersService.createAddress(customerId, request).pipe(
-      map(address => address.addressId)
-    );
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.customersService.update(this.customerId, this.buildCurrentCustomerUpdateRequest()).subscribe({
+      next: () => {
+        this.successMessage = 'Customer details saved.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to update customer', err);
+        this.errorMessage = 'Failed to update customer.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   deleteAddress(addressId: number): void {
@@ -333,24 +378,16 @@ export class CustomerFormComponent implements OnInit {
       return;
     }
 
-    const request: CreateCustomerContactRequest = {
-      name: this.contactForm.value.name,
-      jobTitle: this.contactForm.value.jobTitle,
-      email: this.contactForm.value.email,
-      phone: this.contactForm.value.phone,
-      isPrimary: this.contactForm.value.isPrimary
-    };
+    const request = this.buildContactRequest();
+
+    if (this.editingContactId) {
+      this.updateContact(request);
+      return;
+    }
 
     this.customersService.createContact(this.customerId, request).subscribe({
       next: () => {
-        this.contactForm.reset({
-          name: '',
-          jobTitle: '',
-          email: '',
-          phone: '',
-          isPrimary: false
-        });
-
+        this.resetContactForm();
         this.getCustomerContacts(this.customerId!);
         this.cdr.detectChanges();
       },
@@ -359,6 +396,130 @@ export class CustomerFormComponent implements OnInit {
         this.errorMessage = 'Failed to create contact.';
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  openContactForm(): void {
+    this.isContactFormOpen = true;
+    this.resetContactForm(false);
+  }
+
+  setBillingAddress(address: Address): void {
+    if (!this.customerId) {
+      return;
+    }
+
+    const defaultDeliveryAddressId = this.form.value.deliverySameAsBilling
+      ? address.addressId
+      : this.form.value.defaultDeliveryAddressId;
+
+    this.updateCustomerAddressReferences(
+      address.addressId,
+      defaultDeliveryAddressId,
+      'Billing address selected.'
+    );
+  }
+
+  setDefaultDeliveryAddress(address: Address): void {
+    if (!this.customerId) {
+      return;
+    }
+
+    this.updateCustomerAddressReferences(
+      this.form.value.billingAddressId,
+      address.addressId,
+      'Default delivery address selected.'
+    );
+  }
+
+  private updateCustomerAddressReferences(
+    billingAddressId: number | null,
+    defaultDeliveryAddressId: number | null,
+    successMessage: string
+  ): void {
+    if (!this.customerId) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const updateRequest = this.buildCustomerRequest(
+      this.form.value,
+      billingAddressId,
+      defaultDeliveryAddressId
+    ) as UpdateCustomerRequest;
+
+    this.customersService.update(this.customerId, updateRequest).subscribe({
+      next: () => {
+        this.form.patchValue({
+          billingAddressId,
+          defaultDeliveryAddressId,
+          deliverySameAsBilling: !!billingAddressId && billingAddressId === defaultDeliveryAddressId
+        });
+        this.successMessage = successMessage;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to update customer address references', err);
+        this.errorMessage = 'Failed to update customer address selection.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  editContact(contact: CustomerContact): void {
+    this.isContactFormOpen = true;
+    this.editingContactId = contact.customerContactId;
+
+    this.contactForm.patchValue({
+      name: contact.name,
+      jobTitle: contact.jobTitle ?? '',
+      email: contact.email,
+      phone: contact.phone ?? '',
+      isPrimary: contact.isPrimary
+    });
+  }
+
+  cancelContactEdit(): void {
+    this.resetContactForm();
+  }
+
+  private updateContact(request: UpdateCustomerContactRequest): void {
+    if (!this.customerId || !this.editingContactId) {
+      return;
+    }
+
+    this.customersService.updateContact(this.customerId, this.editingContactId, request).subscribe({
+      next: () => {
+        this.resetContactForm();
+        this.getCustomerContacts(this.customerId!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to update contact', err);
+        this.errorMessage = 'Failed to update contact.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private resetContactForm(closeForm = true): void {
+    this.editingContactId = null;
+
+    if (closeForm) {
+      this.isContactFormOpen = false;
+    }
+
+    this.contactForm.reset({
+      name: '',
+      jobTitle: '',
+      email: '',
+      phone: '',
+      isPrimary: false
     });
   }
 
@@ -384,7 +545,53 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
-  createAddress(): void {
+  openAddressForm(addressType: 'Billing' | 'DeliverySite' | 'WarehousePartner' = 'DeliverySite'): void {
+    this.isAddressFormOpen = true;
+    this.editingAddressId = null;
+
+    this.addressForm.reset({
+      addressType,
+      siteName: '',
+      line1: '',
+      line2: '',
+      city: '',
+      county: '',
+      postcode: '',
+      country: 'United Kingdom',
+      contactName: '',
+      contactPhone: '',
+      deliveryInstructions: '',
+      isPrimary: false
+    });
+  }
+
+  editAddress(address: Address): void {
+    this.isAddressFormOpen = true;
+    this.editingAddressId = address.addressId;
+    this.patchAddressForm(this.addressForm, address, address.addressType === 'Billing' ? 'Billing' : 'DeliverySite');
+  }
+
+  cancelAddressEdit(): void {
+    this.isAddressFormOpen = false;
+    this.editingAddressId = null;
+
+    this.addressForm.reset({
+      addressType: '',
+      siteName: '',
+      line1: '',
+      line2: '',
+      city: '',
+      county: '',
+      postcode: '',
+      country: 'United Kingdom',
+      contactName: '',
+      contactPhone: '',
+      deliveryInstructions: '',
+      isPrimary: false
+    });
+  }
+
+  saveAddressRecord(): void {
     if (!this.customerId) {
       return;
     }
@@ -409,29 +616,22 @@ export class CustomerFormComponent implements OnInit {
       isPrimary: this.addressForm.value.isPrimary
     };
 
-    this.customersService.createAddress(this.customerId, request).subscribe({
-      next: () => {
-        this.addressForm.reset({
-          addressType: '',
-          siteName: '',
-          line1: '',
-          line2: '',
-          city: '',
-          county: '',
-          postcode: '',
-          country: 'United Kingdom',
-          contactName: '',
-          contactPhone: '',
-          deliveryInstructions: '',
-          isPrimary: false
-        });
+    const save$ = this.editingAddressId
+      ? this.customersService.updateAddress(this.customerId, this.editingAddressId, request).pipe(
+          map(() => ({ addressId: this.editingAddressId! }))
+        )
+      : this.customersService.createAddress(this.customerId, request);
 
+    save$.subscribe({
+      next: () => {
+        this.successMessage = this.editingAddressId ? 'Address updated.' : 'Address added.';
+        this.cancelAddressEdit();
         this.getCustomerAddresses(this.customerId!);
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Failed to create address', err);
-        this.errorMessage = 'Failed to create address.';
+        console.error('Failed to save address', err);
+        this.errorMessage = 'Failed to save address.';
         this.cdr.detectChanges();
       }
     });
@@ -443,67 +643,18 @@ export class CustomerFormComponent implements OnInit {
       return;
     }
 
+    if (!this.isEditMode && this.contactForm.invalid) {
+      this.contactForm.markAllAsTouched();
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
     const formValue = this.form.value;
 
     if (this.isEditMode && this.customerId !== null) {
-      const deliverySameAsBilling = formValue.deliverySameAsBilling;
-
-      if (this.billingAddressForm.invalid || (!deliverySameAsBilling && this.deliveryAddressForm.invalid)) {
-        this.billingAddressForm.markAllAsTouched();
-
-        if (!deliverySameAsBilling) {
-          this.deliveryAddressForm.markAllAsTouched();
-        }
-
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return;
-      }
-
-      const billingAddressId = formValue.billingAddressId;
-      const deliveryAddressId = formValue.defaultDeliveryAddressId;
-
-      this.saveAddress(this.customerId, this.billingAddressForm, 'Billing', billingAddressId).pipe(
-        switchMap((savedBillingAddressId) => {
-          if (deliverySameAsBilling) {
-            const updateRequest = this.buildCustomerRequest(
-              formValue,
-              savedBillingAddressId,
-              savedBillingAddressId
-            ) as UpdateCustomerRequest;
-
-            return this.customersService.update(this.customerId!, updateRequest);
-          }
-
-          return this.saveAddress(
-            this.customerId!,
-            this.deliveryAddressForm,
-            'DeliverySite',
-            deliveryAddressId === savedBillingAddressId ? null : deliveryAddressId
-          ).pipe(
-            switchMap((savedDeliveryAddressId) => {
-              const updateRequest = this.buildCustomerRequest(
-                formValue,
-                savedBillingAddressId,
-                savedDeliveryAddressId
-              ) as UpdateCustomerRequest;
-
-              return this.customersService.update(this.customerId!, updateRequest);
-            })
-          );
-        })
-      ).subscribe({
-        next: () => this.router.navigate(['/customers']),
-        error: (err) => {
-          console.error('Failed to update customer', err);
-          this.errorMessage = 'Failed to update customer.';
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        }
-      });
+      this.saveCustomerDetails();
     } else {
       const deliverySameAsBilling = formValue.deliverySameAsBilling;
 
@@ -519,7 +670,10 @@ export class CustomerFormComponent implements OnInit {
         return;
       }
 
-      const createRequest = this.buildCustomerRequest(formValue, null, null);
+      this.applyPrimaryContactToCustomerForm();
+      const primaryContactRequest = this.buildContactRequest(true);
+      const createFormValue = this.form.value;
+      const createRequest = this.buildCustomerRequest(createFormValue, null, null);
 
       this.customersService.create(createRequest).pipe(
         switchMap((customer) => {
@@ -529,12 +683,15 @@ export class CustomerFormComponent implements OnInit {
             return this.customersService.createAddress(customer.customerId, billingRequest).pipe(
               switchMap((billingAddress) => {
                 const updateRequest = this.buildCustomerRequest(
-                  formValue,
+                  createFormValue,
                   billingAddress.addressId,
                   billingAddress.addressId
                 ) as UpdateCustomerRequest;
 
-                return this.customersService.update(customer.customerId, updateRequest);
+                return forkJoin({
+                  contact: this.customersService.createContact(customer.customerId, primaryContactRequest),
+                  customer: this.customersService.update(customer.customerId, updateRequest)
+                });
               })
             );
           }
@@ -547,12 +704,15 @@ export class CustomerFormComponent implements OnInit {
           }).pipe(
             switchMap(({ billingAddress, deliveryAddress }) => {
               const updateRequest = this.buildCustomerRequest(
-                formValue,
+                createFormValue,
                 billingAddress.addressId,
                 deliveryAddress.addressId
               ) as UpdateCustomerRequest;
 
-              return this.customersService.update(customer.customerId, updateRequest);
+              return forkJoin({
+                contact: this.customersService.createContact(customer.customerId, primaryContactRequest),
+                customer: this.customersService.update(customer.customerId, updateRequest)
+              });
             })
           );
         })

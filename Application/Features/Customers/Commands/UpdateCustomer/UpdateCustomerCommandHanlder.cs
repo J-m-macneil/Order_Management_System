@@ -30,9 +30,6 @@ public class UpdateCustomerCommandHanlder : IRequestHandler<UpdateCustomerComman
         customer.AccountNumber = request.AccountNumber;
         customer.CompanyName = request.CompanyName;
         customer.IndustryType = request.IndustryType;
-        customer.MainContactName = request.MainContactName;
-        customer.MainContactEmail = request.MainContactEmail;
-        customer.MainContactPhone = request.MainContactPhone;
         customer.BillingAddressId = request.BillingAddressId;
         customer.DefaultDeliveryAddressId = request.DefaultDeliveryAddressId;
         customer.PricingTierId = request.PricingTierId;

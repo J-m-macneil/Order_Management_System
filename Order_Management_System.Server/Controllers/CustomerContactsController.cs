@@ -62,6 +62,7 @@ public class CustomerContactsController : ControllerBase
         await _mediator.Send(new UpdateCustomerContactCommand
         {
             CustomerId = customerId,
+            CustomerContactId = contactId,
             Name = dto.Name,
             JobTitle = dto.JobTitle,
             Email = dto.Email,

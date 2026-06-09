@@ -35,6 +35,28 @@ public class CustomerContactRepository : ICustomerContactRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task ClearPrimaryForCustomerAsync(int customerId, int? excludingContactId, CancellationToken ct)
+    {
+        var query = _db.CustomerContacts
+            .Where(x =>
+                x.CustomerId == customerId &&
+                x.IsPrimary &&
+                x.IsActive &&
+                x.DeletedAt == null);
+
+        if (excludingContactId.HasValue)
+        {
+            query = query.Where(x => x.CustomerContactId != excludingContactId.Value);
+        }
+
+        var contacts = await query.ToListAsync(ct);
+
+        foreach (var contact in contacts)
+        {
+            contact.IsPrimary = false;
+        }
+    }
+
     public async Task SaveChangesAsync(CancellationToken ct)
     {
         await _db.SaveChangesAsync(ct);

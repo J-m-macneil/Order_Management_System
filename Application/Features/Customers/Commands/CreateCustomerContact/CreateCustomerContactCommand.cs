@@ -1,9 +1,11 @@
-﻿namespace Application.Features.Customers.Commands.CreateCustomerContact;
+using Application.Features.Customers.DTOs;
+using MediatR;
 
-public class CreateCustomerContactCommand
+namespace Application.Features.Customers.Commands.CreateCustomerContact;
+
+public class CreateCustomerContactCommand : IRequest<CustomerContactDto>
 {
     public int CustomerId { get; set; }
-
     public string Name { get; set; } = string.Empty;
     public string? JobTitle { get; set; }
     public string Email { get; set; } = string.Empty;

@@ -8,13 +8,16 @@ namespace Application.Features.Customers.Commands.DeleteCustomerContact
     public class DeleteCustomerContactCommandHandler : IRequestHandler<DeleteCustomerContactCommand>
     {
         private readonly ICustomerContactRepository _repo;
+        private readonly ICustomerRepository _customers;
         private readonly IAuditService _audit;
 
         public DeleteCustomerContactCommandHandler(
             ICustomerContactRepository repo,
+            ICustomerRepository customers,
             IAuditService audit)
         {
             _repo = repo;
+            _customers = customers;
             _audit = audit;
         }
 
@@ -29,11 +32,18 @@ namespace Application.Features.Customers.Commands.DeleteCustomerContact
                 return;
 
             var oldValues = CreateSnapshot(contact);
+            var wasPrimary = contact.IsPrimary;
 
             contact.IsActive = false;
+            contact.IsPrimary = false;
             contact.DeletedAt = DateTime.UtcNow;
 
             await _repo.SaveChangesAsync(ct);
+
+            if (wasPrimary)
+            {
+                await ClearCustomerMainContactAsync(contact.CustomerId, ct);
+            }
 
             await _audit.LogAsync(
                 "CustomerContact",
@@ -59,6 +69,22 @@ namespace Application.Features.Customers.Commands.DeleteCustomerContact
                 contact.IsActive,
                 contact.DeletedAt
             };
+        }
+
+        private async Task ClearCustomerMainContactAsync(int customerId, CancellationToken ct)
+        {
+            var customer = await _customers.GetByIdAsync(customerId, ct);
+
+            if (customer == null)
+            {
+                return;
+            }
+
+            customer.MainContactName = string.Empty;
+            customer.MainContactEmail = string.Empty;
+            customer.MainContactPhone = string.Empty;
+
+            await _customers.UpdateAsync(customer, ct);
         }
     }
 }
