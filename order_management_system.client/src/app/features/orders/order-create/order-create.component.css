@@ -1,3 +1,8 @@
 .form-card {
   @apply bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg p-6;
 }
+
+:host-context(.dark) .form-card {
+  background: #111214;
+  border-color: rgba(255, 255, 255, 0.08);
+}

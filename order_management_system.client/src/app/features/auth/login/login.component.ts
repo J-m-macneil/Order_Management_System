@@ -3,6 +3,7 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class LoginComponent {
     private fb: FormBuilder,
     private http: HttpClient,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {
     this.loginForm = this.fb.group({
       usernameOrEmail: ['', [Validators.required]],

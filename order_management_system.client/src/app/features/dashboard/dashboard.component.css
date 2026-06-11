@@ -159,9 +159,14 @@
 }
 
 .status-dot {
-  width: 0.6rem;
-  height: 0.6rem;
+  width: 0.7rem;
+  height: 0.7rem;
   border-radius: 999px;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.85);
+}
+
+:host-context(.dark) .status-dot {
+  box-shadow: 0 0 0 2px #16181b;
 }
 
 .status-row strong,

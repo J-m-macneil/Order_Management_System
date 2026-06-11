@@ -64,7 +64,9 @@
       </svg>
     </button>
 
-    <div class="user-avatar" [title]="userName() + ' - ' + currentRole()">
+    <div class="user-avatar"
+         [title]="userName() + ' - ' + currentRole()"
+         [attr.aria-label]="userName() + ' - ' + currentRole()">
       {{ getUserInitials() }}
     </div>
   </div>

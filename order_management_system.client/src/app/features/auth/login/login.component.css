@@ -1,1 +1,15 @@
-/* Styles are applied via Tailwind classes in the template */
+.login-logo {
+  display: block;
+  width: 11rem;
+  height: auto;
+  margin: 0 auto;
+}
+
+:host-context(.dark) .login-page {
+  background: #0a0a0b;
+}
+
+:host-context(.dark) .login-card {
+  background: #111214;
+  border-color: rgba(255, 255, 255, 0.08);
+}

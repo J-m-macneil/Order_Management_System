@@ -61,7 +61,11 @@ export class AuthService {
   getUserFullName(): string | null {
     const payload = this.getTokenPayload();
 
-    return payload?.fullName || null;
+    return (
+      payload?.fullName ||
+      this.getUsername() ||
+      null
+    );
   }
 
   getUsername(): string | null {

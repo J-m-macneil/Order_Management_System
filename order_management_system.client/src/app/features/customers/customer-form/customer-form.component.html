@@ -1,8 +1,8 @@
 <!-- Page Header -->
 <div class="mb-8 flex items-center justify-between">
   <div>
-    <h1 class="text-3xl font-light text-slate-900 dark:text-white">
-      {{ isEditMode ? 'Edit Customer' : 'Create Customer' }}
+    <h1 class="brand-page-title">
+      {{ isEditMode ? 'Edit Customer' : 'Create Customer' }}<span class="brand-page-dot" aria-hidden="true">.</span>
     </h1>
     <p class="text-slate-500 dark:text-slate-400 mt-2">
       {{ isEditMode ? 'Update customer details' : 'Create a new customer account' }}
@@ -244,7 +244,7 @@
 
         <button type="button"
                 (click)="openAddressForm()"
-                class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                class="app-primary-button px-4 py-2">
           Add Address
         </button>
       </div>
@@ -368,7 +368,7 @@
           <button type="button"
                   (click)="saveAddressRecord()"
                   [disabled]="isLoading"
-                  class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 transition-colors">
+                  class="app-primary-button px-4 py-2 disabled:opacity-60">
             {{ editingAddressId ? 'Save Address' : 'Add Address' }}
           </button>
 
@@ -391,7 +391,7 @@
 
         <button type="button"
                 (click)="openContactForm()"
-                class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                class="app-primary-button px-4 py-2">
           Add Contact
         </button>
       </div>
@@ -468,7 +468,7 @@
         <div class="flex gap-2 sm:col-span-2">
           <button type="button"
                   (click)="createContact()"
-                  class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                  class="app-primary-button px-4 py-2">
             {{ editingContactId ? 'Update Contact' : 'Add Contact' }}
           </button>
 
@@ -513,7 +513,7 @@
 
       <button type="submit"
               [disabled]="isLoading"
-              class="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+              class="app-primary-button w-full px-4 py-2">
         {{ isEditMode ? 'Save Customer' : 'Create Customer' }}
       </button>
 

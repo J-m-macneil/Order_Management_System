@@ -1,32 +1,22 @@
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+<div class="login-page min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
   <div class="w-full max-w-md">
 
     <!-- Logo and Branding -->
     <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2">
-        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xl font-semibold">
-          C
-        </div>
-
-        <div class="text-left">
-          <div class="text-2xl font-medium text-slate-900 dark:text-white">
-            ChemFlow
-          </div>
-          <div class="text-xs text-slate-500 dark:text-slate-400 leading-none">
-            Chemical OMS
-          </div>
-        </div>
-      </div>
+      <img class="login-logo" [src]="themeService.isDarkMode() ? 'login-logo-dark.svg' : 'login-logo-light.svg'" alt="ChemFlow" />
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">
+        Order Management System
+      </p>
     </div>
 
     <!-- Login Card -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 p-8 shadow-sm">
+    <div class="login-card bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 p-8 shadow-sm">
       <div class="mb-6">
         <h1 class="text-2xl font-medium text-slate-900 dark:text-white">
           Sign in
         </h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Access your chemical order management system
+          Access your order management system
         </p>
       </div>
 
@@ -79,7 +69,7 @@
         <!-- Submit Button -->
         <button type="submit"
                 [disabled]="isLoading"
-                class="w-full mt-6 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center">
+                class="app-primary-button w-full mt-6 px-4 py-2.5">
           {{ isLoading ? 'Signing in...' : 'Sign in' }}
         </button>
 

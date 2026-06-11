@@ -82,18 +82,18 @@ export class DashboardComponent implements OnInit {
 
   getStatusColor(status: string): string {
     const colors: Record<string, string> = {
-      'Draft': 'bg-slate-200 dark:bg-slate-700',
-      'Submitted': 'bg-blue-200 dark:bg-blue-900/30',
-      'Pending Review': 'bg-purple-200 dark:bg-purple-900/30',
-      'Approved': 'bg-emerald-200 dark:bg-emerald-900/30',
-      'In Processing': 'bg-amber-200 dark:bg-amber-900/30',
-      'Awaiting Dispatch': 'bg-orange-200 dark:bg-orange-900/30',
-      'Completed': 'bg-green-200 dark:bg-green-900/30',
-      'Failed': 'bg-red-200 dark:bg-red-900/30',
-      'Cancelled': 'bg-slate-300 dark:bg-slate-600'
+      'Draft': 'bg-slate-300 dark:bg-slate-400',
+      'Submitted': 'bg-blue-300 dark:bg-blue-400',
+      'Pending Review': 'bg-violet-300 dark:bg-violet-400',
+      'Approved': 'bg-emerald-300 dark:bg-emerald-400',
+      'In Processing': 'bg-amber-300 dark:bg-amber-400',
+      'Awaiting Dispatch': 'bg-orange-300 dark:bg-orange-400',
+      'Completed': 'bg-teal-300 dark:bg-teal-400',
+      'Failed': 'bg-red-300 dark:bg-red-400',
+      'Cancelled': 'bg-zinc-300 dark:bg-zinc-400'
     };
 
-    return colors[status] || 'bg-slate-200 dark:bg-slate-700';
+    return colors[status] || 'bg-slate-300 dark:bg-slate-400';
   }
 
   getCustomerColor(index: number): string {

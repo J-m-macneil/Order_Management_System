@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&family=Pliant:wght@500&display=swap&text=WelcomeBack.');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&family=Pliant:wght@500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,6 +10,117 @@
 
 html.dark {
   --surface-border: #334155;
+}
+
+html.dark .dark\:bg-slate-800,
+html.dark .dark\:bg-slate-800\/50 {
+  background-color: #111214;
+}
+
+html.dark .dark\:bg-slate-900 {
+  background-color: #101113;
+}
+
+html.dark .dark\:bg-slate-900\/20,
+html.dark .dark\:bg-slate-900\/60 {
+  background-color: #101113;
+}
+
+html.dark .dark\:bg-slate-700,
+html.dark .dark\:bg-slate-700\/50 {
+  background-color: #16181b;
+}
+
+html.dark .dark\:hover\:bg-slate-700\/50:hover,
+html.dark .dark\:hover\:bg-slate-600:hover {
+  background-color: #202327;
+}
+
+html.dark .dark\:border-slate-700,
+html.dark .dark\:border-slate-700\/50 {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .dark\:divide-slate-700 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .dark\:bg-blue-900\/20 {
+  background-color: rgba(28, 168, 254, 0.12);
+}
+
+html.dark .dark\:text-blue-400 {
+  color: #7dd3fc;
+}
+
+html.dark .dark\:text-slate-300,
+html.dark .dark\:text-slate-400 {
+  color: #b8b8b8;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color: #f8fafc;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #f8fafc;
+}
+
+html.dark .dark\:placeholder-slate-500::placeholder {
+  color: #f8fafc;
+}
+
+.brand-page-title {
+  color: #0f172a;
+  font-family: "Pliant", "Baloo 2", "Nunito", system-ui, sans-serif;
+  font-size: 2.25rem;
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+html.dark .brand-page-title {
+  color: #f8fafc;
+}
+
+.brand-page-dot {
+  color: #1ca8fe;
+  font-family: "Fredoka", "Baloo 2", "Nunito", system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.app-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 500;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.app-primary-button:hover {
+  background: #1d4ed8;
+}
+
+.app-primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+html.dark .app-primary-button {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #202327;
+  color: #f8fafc;
+}
+
+html.dark .app-primary-button:hover {
+  background: #2a2d31;
 }
 
 /* Base global styles */
@@ -64,7 +175,7 @@ html.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 html.dark ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #101113;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -77,11 +188,15 @@ html.dark ::-webkit-scrollbar-track {
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #17191c;
 }
 
 html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #202327;
+}
+
+html.dark {
+  scrollbar-color: #17191c #101113;
 }
 
 /* Transitions */

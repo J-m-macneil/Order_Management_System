@@ -13,7 +13,7 @@
 }
 
 :host-context(.dark) .audit-json {
-  border-color: rgb(51 65 85);
-  background: rgb(15 23 42);
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #101113;
   color: rgb(226 232 240);
 }
