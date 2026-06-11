@@ -1,7 +1,109 @@
-.nav-tab {
-  @apply flex items-center justify-start gap-2 px-4 py-2 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors whitespace-nowrap;
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+  padding: 1rem 0.75rem;
+  border-right: 1px solid #dbeafe;
+  background: #eaf6fb;
 }
 
-  .nav-tab.nav-active {
-    @apply bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white;
+:host-context(.dark) .sidebar {
+  border-right-color: rgba(255,255,255,0.08);
+  background: #101113;
+}
+
+.user-avatar {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 999px;
+  color: white;
+  font-weight: 800;
+}
+
+.brand-logo {
+  display: grid;
+  width: 2.5rem;
+  min-height: 2.5rem;
+  place-items: center;
+}
+
+.brand-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.nav-icons {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: auto;
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.nav-icon {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #334155;
+  background: #ffffff;
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+button.nav-icon {
+  cursor: pointer;
+}
+
+.nav-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.nav-icon:hover,
+.nav-icon.nav-active {
+  color: #0f766e;
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+:host-context(.dark) .nav-icon {
+  color: #9ca3af;
+  background: #16181b;
+}
+
+  :host-context(.dark) .nav-icon:hover,
+  :host-context(.dark) .nav-icon.nav-active {
+    color: #f3f4f6;
+    background: #202327;
   }
+
+.user-avatar {
+  background: #172554;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    flex-direction: row;
+    justify-content: space-between;
+    border-right: 0;
+    border-bottom: 1px solid #dbeafe;
+  }
+
+  .nav-icons,
+  .sidebar-footer {
+    display: flex;
+    margin-top: 0;
+  }
+}

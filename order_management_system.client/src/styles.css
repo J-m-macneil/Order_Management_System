@@ -1,6 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&family=Pliant:wght@500&display=swap&text=WelcomeBack.');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --surface-border: #3f3f46;
+}
+
+html.dark {
+  --surface-border: #334155;
+}
 
 /* Base global styles */
 html {

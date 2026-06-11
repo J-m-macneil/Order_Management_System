@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { OrderByStatus, RecentFailure, PriorityOrder } from '../../core/models/dashboard.models';
+import { MetricCard, OrderByStatus, RecentFailure, PriorityOrder, TopCustomer } from '../../core/models/dashboard.models';
 
 @Component({
   selector: 'app-dashboard',
