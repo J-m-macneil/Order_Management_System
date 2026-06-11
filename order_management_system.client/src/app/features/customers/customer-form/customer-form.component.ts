@@ -484,6 +484,33 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
+  setPrimaryContact(contact: CustomerContact): void {
+    if (!this.customerId || contact.isPrimary) {
+      return;
+    }
+
+    const request: UpdateCustomerContactRequest = {
+      name: contact.name,
+      jobTitle: contact.jobTitle,
+      email: contact.email,
+      phone: contact.phone,
+      isPrimary: true
+    };
+
+    this.customersService.updateContact(this.customerId, contact.customerContactId, request).subscribe({
+      next: () => {
+        this.resetContactForm();
+        this.getCustomerContacts(this.customerId!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to set primary contact', err);
+        this.errorMessage = 'Failed to set primary contact.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   cancelContactEdit(): void {
     this.resetContactForm();
   }

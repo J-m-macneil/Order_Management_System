@@ -29,7 +29,9 @@ public class GetAuditLogSummaryQueryHandler : IRequestHandler<GetAuditLogSummary
         {
             LatestActivityText = summary.LatestActivity == null
                 ? "No activity"
-                : GetEventLabel(summary.LatestActivity.EntityType, summary.LatestActivity.Action),
+                : GetEventLabel(
+                    summary.LatestActivity.EntityType,
+                    summary.LatestActivity.Action),
             LatestActivityTime = summary.LatestActivity?.PerformedAt,
             FailedActionCount = summary.FailedActionCount,
             SystemActionCount = summary.SystemActionCount
@@ -77,4 +79,5 @@ public class GetAuditLogSummaryQueryHandler : IRequestHandler<GetAuditLogSummary
                 ? $" {character}"
                 : character.ToString()));
     }
+
 }

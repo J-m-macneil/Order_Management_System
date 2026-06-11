@@ -1,11 +1,14 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { HazardClass } from '../../../core/models/hazard-class.model';
 import { ProductCategory } from '../../../core/models/product-category.model';
 import { Product } from '../../../core/models/product.model';
+import { AuditLog } from '../../../core/models/audit-log.model';
 import { SafetyDataSheet, CreateSafetyDataSheetRequest } from '../../../core/models/safety-data-sheet-model';
 import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
+import { AuditLogsService } from '../../../core/services/audit-logs.service';
 import { ProductsService } from '../../../core/services/products.service';
 
 @Component({
@@ -21,6 +24,7 @@ export class ProductFormComponent implements OnInit {
   productId: number | null = null;
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
 
   productCategories: ProductCategory[] = [];
   unitsOfMeasure: UnitOfMeasure[] = [];
@@ -28,10 +32,14 @@ export class ProductFormComponent implements OnInit {
 
   sdsForm!: FormGroup;
   safetyDataSheets: SafetyDataSheet[] = [];
+  isSdsFormOpen = false;
+  auditLogs: AuditLog[] = [];
+  auditUnavailable = false;
 
   constructor(
     private fb: FormBuilder,
     private productsService: ProductsService,
+    private auditLogsService: AuditLogsService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -74,6 +82,7 @@ export class ProductFormComponent implements OnInit {
       this.productId = id;
       this.loadProduct(id);
       this.loadSafetyDataSheets(id);
+      this.loadProductAuditHistory(id);
     }
   }
 
@@ -182,15 +191,7 @@ export class ProductFormComponent implements OnInit {
 
     this.productsService.createSafetyDataSheet(this.productId, request).subscribe({
       next: () => {
-        this.sdsForm.reset({
-          fileName: '',
-          filePath: '',
-          version: '',
-          effectiveDate: '',
-          uploadedAt: '',
-          uploadedByUserId: 1
-        });
-
+        this.cancelSdsForm();
         this.loadSafetyDataSheets(this.productId!);
         this.cdr.detectChanges();
       },
@@ -199,6 +200,81 @@ export class ProductFormComponent implements OnInit {
         this.errorMessage = 'Failed to create SDS.';
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  loadProductAuditHistory(productId: number): void {
+    forkJoin([
+      this.auditLogsService.getAuditLogs({
+        pageNumber: 1,
+        pageSize: 10,
+        entityType: 'Product',
+        entityId: productId
+      }),
+      this.auditLogsService.getAuditLogs({
+        pageNumber: 1,
+        pageSize: 10,
+        searchTerm: `product #${productId}`,
+        entityType: 'SafetyDataSheet'
+      })
+    ]).subscribe({
+      next: ([productResult, sdsResult]) => {
+        this.auditLogs = [...productResult.items, ...sdsResult.items]
+          .sort((a, b) => new Date(b.performedAt).getTime() - new Date(a.performedAt).getTime())
+          .slice(0, 10);
+        this.auditUnavailable = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load product audit history', err);
+        this.auditLogs = [];
+        this.auditUnavailable = true;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getAuditEventLabel(log: AuditLog): string {
+    if (log.changeSummary) {
+      return log.entityType === 'SafetyDataSheet'
+        ? 'SDS changed'
+        : 'Product changed';
+    }
+
+    if (log.entityType === 'SafetyDataSheet') {
+      return `SDS ${log.action.toLowerCase()}`;
+    }
+
+    return `Product ${log.action.toLowerCase()}`;
+  }
+
+  getAuditDescription(log: AuditLog): string {
+    return log.changeSummary || log.notes || 'No audit note recorded';
+  }
+
+  openSdsForm(): void {
+    this.isSdsFormOpen = true;
+
+    this.sdsForm.reset({
+      fileName: '',
+      filePath: '',
+      version: '',
+      effectiveDate: '',
+      uploadedAt: '',
+      uploadedByUserId: 1
+    });
+  }
+
+  cancelSdsForm(): void {
+    this.isSdsFormOpen = false;
+
+    this.sdsForm.reset({
+      fileName: '',
+      filePath: '',
+      version: '',
+      effectiveDate: '',
+      uploadedAt: '',
+      uploadedByUserId: 1
     });
   }
 
@@ -232,13 +308,19 @@ export class ProductFormComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.successMessage = '';
     this.cdr.detectChanges();
 
     const formValue = this.form.value;
 
     if (this.isEditMode && this.productId !== null) {
       this.productsService.update(this.productId, formValue).subscribe({
-        next: () => this.router.navigate(['/products']),
+        next: () => {
+          this.successMessage = 'Product saved.';
+          this.isLoading = false;
+          this.loadProductAuditHistory(this.productId!);
+          this.cdr.detectChanges();
+        },
         error: (err) => {
           console.error('Failed to update product', err);
           this.errorMessage = 'Failed to update product.';

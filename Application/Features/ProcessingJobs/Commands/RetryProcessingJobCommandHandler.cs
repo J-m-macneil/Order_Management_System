@@ -8,13 +8,16 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
 {
     private readonly IProcessingJobRepository _repo;
     private readonly IAuditService _audit;
+    private readonly IAuditChangeFormatter _changeFormatter;
 
     public RetryProcessingJobCommandHandler(
         IProcessingJobRepository repo,
-        IAuditService audit)
+        IAuditService audit,
+        IAuditChangeFormatter changeFormatter)
     {
         _repo = repo;
         _audit = audit;
+        _changeFormatter = changeFormatter;
     }
 
     public async Task Handle(RetryProcessingJobCommand request, CancellationToken ct)
@@ -37,13 +40,19 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
 
         await _repo.SaveChangesAsync(ct);
 
+        var newValues = CreateSnapshot(job);
+        var changes = _changeFormatter.GetChanges(oldValues, newValues);
+
         await _audit.LogAsync(
             "ProcessingJob",
             job.ProcessingJobId,
             "RetryQueued",
             oldValues,
-            CreateSnapshot(job),
-            $"Processing job retry queued: {job.JobType} for order #{job.OrderId}.",
+            newValues,
+            _changeFormatter.CreateUpdateNote(
+                "Processing job",
+                $"{job.JobType} for order #{job.OrderId}",
+                changes),
             ct);
     }
 

@@ -1,4 +1,9 @@
-﻿public class CreateSafetyDataSheetCommand
+using Application.Features.Products.DTOs;
+using MediatR;
+
+namespace Application.Features.Products.Commands.CreateSafetyDataSheet;
+
+public class CreateSafetyDataSheetCommand : IRequest<SafetyDataSheetDto>
 {
     public int ProductId { get; set; }
 

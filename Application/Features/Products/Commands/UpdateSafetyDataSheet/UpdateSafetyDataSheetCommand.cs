@@ -1,6 +1,8 @@
-﻿namespace Application.Features.Products.Commands.UpdateSafetyDataSheet;
+using MediatR;
 
-public class UpdateSafetyDataSheetCommand
+namespace Application.Features.Products.Commands.UpdateSafetyDataSheet;
+
+public class UpdateSafetyDataSheetCommand : IRequest<Unit>
 {
     public int ProductId { get; set; }
     public int SafetyDataSheetId { get; set; }

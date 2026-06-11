@@ -1,4 +1,5 @@
 using Application.Features.Customers.Commands.UpdateCustomer;
+using Application.Common.Services;
 using Application.Interfaces;
 using Domain.Entities.Customers;
 using Domain.Repositories;
@@ -17,7 +18,7 @@ public class UpdateCustomerCommandHandlerTests
         var repo = Substitute.For<ICustomerRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateCustomerCommandHanlder(repo, audit);
+        var handler = new UpdateCustomerCommandHanlder(repo, audit, new AuditChangeFormatter());
         var existingCustomer = CreateExistingCustomer();
         var command = CreateValidCommand();
 
@@ -67,7 +68,7 @@ public class UpdateCustomerCommandHandlerTests
         var repo = Substitute.For<ICustomerRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateCustomerCommandHanlder(repo, audit);
+        var handler = new UpdateCustomerCommandHanlder(repo, audit, new AuditChangeFormatter());
         var command = CreateValidCommand();
 
         repo.GetByIdAsync(command.CustomerId, Arg.Any<CancellationToken>())

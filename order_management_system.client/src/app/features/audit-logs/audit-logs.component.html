@@ -151,7 +151,7 @@
                 <span class="text-slate-900 dark:text-white font-medium">{{ getEventLabel(log) }}</span>
               </div>
               <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-                {{ log.notes || 'No notes recorded' }}
+                {{ getAuditDescription(log) }}
               </div>
             </td>
             <td class="px-6 py-4">
@@ -189,6 +189,11 @@
                   <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Recorded</p>
                   <p class="text-sm text-slate-900 dark:text-white mt-1">{{ log.performedAt | date: 'MMM d, yyyy h:mm a' }}</p>
                 </div>
+              </div>
+
+              <div *ngIf="log.changeSummary" class="mb-5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium mb-2">Changes</p>
+                <p class="text-sm text-slate-900 dark:text-white">{{ log.changeSummary }}</p>
               </div>
 
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

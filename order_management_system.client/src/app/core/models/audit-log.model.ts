@@ -9,4 +9,5 @@ export interface AuditLog {
   oldValuesJson?: string | null;
   newValuesJson?: string | null;
   notes?: string | null;
+  changeSummary?: string | null;
 }

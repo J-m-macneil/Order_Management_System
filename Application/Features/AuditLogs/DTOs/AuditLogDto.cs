@@ -12,4 +12,5 @@ public class AuditLogDto
     public string? OldValuesJson { get; set; }
     public string? NewValuesJson { get; set; }
     public string? Notes { get; set; }
+    public string? ChangeSummary { get; set; }
 }

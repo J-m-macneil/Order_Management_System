@@ -11,15 +11,18 @@ public class UpdateCustomerContactCommandHandler
     private readonly ICustomerContactRepository _repo;
     private readonly ICustomerRepository _customers;
     private readonly IAuditService _audit;
+    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateCustomerContactCommandHandler(
         ICustomerContactRepository repo,
         ICustomerRepository customers,
-        IAuditService audit)
+        IAuditService audit,
+        IAuditChangeFormatter changeFormatter)
     {
         _repo = repo;
         _customers = customers;
         _audit = audit;
+        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateCustomerContactCommand request, CancellationToken ct)
@@ -60,13 +63,19 @@ public class UpdateCustomerContactCommandHandler
             await ClearCustomerMainContactAsync(contact.CustomerId, ct);
         }
 
+        var newValues = CreateSnapshot(contact);
+        var changes = _changeFormatter.GetChanges(oldValues, newValues);
+
         await _audit.LogAsync(
             "CustomerContact",
             contact.CustomerContactId,
             "Updated",
             oldValues,
-            CreateSnapshot(contact),
-            $"Customer contact updated for customer #{contact.CustomerId}: {contact.Name}.",
+            newValues,
+            _changeFormatter.CreateUpdateNote(
+                "Customer contact",
+                $"{contact.Name} for customer #{contact.CustomerId}",
+                changes),
             ct);
 
         return Unit.Value;

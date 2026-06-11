@@ -5,7 +5,7 @@ using Infrastructure.Persistence.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.IntegrationTests.Persistence.Repositories;
+namespace Infrastructure.IntegrationTests.Persistence.Repositories.Customers;
 
 public class CustomerContactRepositoryTests
 {

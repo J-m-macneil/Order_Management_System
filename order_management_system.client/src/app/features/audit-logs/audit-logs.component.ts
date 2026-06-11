@@ -157,6 +157,10 @@ export class AuditLogsComponent implements OnInit {
   }
 
   getEventLabel(log: AuditLog): string {
+    if (log.changeSummary && log.action === 'Updated') {
+      return `${this.formatEntityName(log.entityType)} changed`;
+    }
+
     if (log.action.startsWith('StatusChanged:')) {
       const status = log.action.split(':')[1] || 'updated';
       const readableStatus = this.formatEntityName(status);
@@ -201,6 +205,10 @@ export class AuditLogsComponent implements OnInit {
 
     return log.performedByUserName
       || (log.performedByUserId ? `User #${log.performedByUserId}` : 'System');
+  }
+
+  getAuditDescription(log: AuditLog): string {
+    return log.changeSummary || log.notes || 'No notes recorded';
   }
 
   getActionClass(log: AuditLog): string {

@@ -9,13 +9,16 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductRequest,
 {
     private readonly IProductRepository _repo;
     private readonly IAuditService _audit;
+    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateProductCommandHandler(
         IProductRepository repo,
-        IAuditService audit)
+        IAuditService audit,
+        IAuditChangeFormatter changeFormatter)
     {
         _repo = repo;
         _audit = audit;
+        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateProductRequest request, CancellationToken ct)
@@ -45,13 +48,16 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductRequest,
 
         await _repo.SaveChangesAsync(ct);
 
+        var newValues = CreateSnapshot(product);
+        var changes = _changeFormatter.GetChanges(oldValues, newValues);
+
         await _audit.LogAsync(
             "Product",
             product.ProductId,
             "Updated",
             oldValues,
-            CreateSnapshot(product),
-            $"Product updated: {product.ProductName}.",
+            newValues,
+            _changeFormatter.CreateUpdateNote("Product", product.ProductName, changes),
             ct);
 
         return Unit.Value;
@@ -77,4 +83,5 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductRequest,
             product.IsActive
         };
     }
+
 }

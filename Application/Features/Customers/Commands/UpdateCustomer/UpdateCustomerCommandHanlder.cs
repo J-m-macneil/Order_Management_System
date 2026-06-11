@@ -9,13 +9,16 @@ public class UpdateCustomerCommandHanlder : IRequestHandler<UpdateCustomerComman
 {
     private readonly ICustomerRepository _repo;
     private readonly IAuditService _audit;
+    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateCustomerCommandHanlder(
         ICustomerRepository repo,
-        IAuditService audit)
+        IAuditService audit,
+        IAuditChangeFormatter changeFormatter)
     {
         _repo = repo;
         _audit = audit;
+        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateCustomerCommand request, CancellationToken ct)
@@ -39,13 +42,16 @@ public class UpdateCustomerCommandHanlder : IRequestHandler<UpdateCustomerComman
 
         await _repo.UpdateAsync(customer, ct);
 
+        var newValues = CreateSnapshot(customer);
+        var changes = _changeFormatter.GetChanges(oldValues, newValues);
+
         await _audit.LogAsync(
             "Customer",
             customer.CustomerId,
             "Updated",
             oldValues,
-            CreateSnapshot(customer),
-            $"Customer updated: {customer.CompanyName}.",
+            newValues,
+            _changeFormatter.CreateUpdateNote("Customer", customer.CompanyName, changes),
             ct);
 
         return Unit.Value;

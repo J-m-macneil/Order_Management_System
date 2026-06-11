@@ -4,7 +4,7 @@ using Infrastructure.Persistence.Context;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.IntegrationTests.Persistence.Repositories;
+namespace Infrastructure.IntegrationTests.Persistence.Repositories.Customers;
 
 public class AddressRepositoryTests
 {

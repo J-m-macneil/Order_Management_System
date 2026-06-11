@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Features.AuditLogs.DTOs;
+using Application.Interfaces;
 using Domain.Repositories;
 using MediatR;
 
@@ -9,10 +10,14 @@ public class GetAuditLogsQueryHandler
     : IRequestHandler<GetAuditLogsQuery, PagedResult<AuditLogDto>>
 {
     private readonly IAuditLogRepository _repo;
+    private readonly IAuditChangeFormatter _changeFormatter;
 
-    public GetAuditLogsQueryHandler(IAuditLogRepository repo)
+    public GetAuditLogsQueryHandler(
+        IAuditLogRepository repo,
+        IAuditChangeFormatter changeFormatter)
     {
         _repo = repo;
+        _changeFormatter = changeFormatter;
     }
 
     public async Task<PagedResult<AuditLogDto>> Handle(
@@ -52,7 +57,8 @@ public class GetAuditLogsQueryHandler
             PerformedAt = x.PerformedAt,
             OldValuesJson = x.OldValuesJson,
             NewValuesJson = x.NewValuesJson,
-            Notes = x.Notes
+            Notes = x.Notes,
+            ChangeSummary = _changeFormatter.CreateChangeSummary(x.OldValuesJson, x.NewValuesJson)
         }).ToList();
 
         return new PagedResult<AuditLogDto>
