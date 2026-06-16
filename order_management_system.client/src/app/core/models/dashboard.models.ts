@@ -21,6 +21,7 @@ export interface TopCustomer {
 }
 
 export interface RecentFailure {
+  orderId: number;
   orderNumber: string;
   customer: string;
   reason: string;
@@ -28,6 +29,7 @@ export interface RecentFailure {
 }
 
 export interface PriorityOrder {
+  orderId: number;
   orderNumber: string;
   customer: string;
   priority: string;

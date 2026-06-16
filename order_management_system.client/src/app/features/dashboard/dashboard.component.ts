@@ -55,6 +55,7 @@ export class DashboardComponent implements OnInit {
         }));
 
         this.recentFailures = data.recentFailures.map(x => ({
+          orderId: x.orderId,
           orderNumber: x.orderNumber,
           customer: x.customer,
           reason: x.reason,
@@ -62,6 +63,7 @@ export class DashboardComponent implements OnInit {
         }));
 
         this.priorityOrders = data.priorityOrders.map(x => ({
+          orderId: x.orderId,
           orderNumber: x.orderNumber,
           customer: x.customer,
           priority: x.priority,

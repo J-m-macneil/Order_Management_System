@@ -8,13 +8,13 @@
 <div class="mb-6">
   <div class="flex flex-col sm:flex-row gap-3">
     <div class="relative flex-1">
-      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+      <span class="app-search-icon absolute left-4 top-1/2 -translate-y-1/2">
         <svg xmlns="http://www.w3.org/2000/svg"
              width="24"
              height="24"
              viewBox="0 0 24 24"
              fill="none"
-             stroke="#ffffff"
+             stroke="currentColor"
              stroke-width="2"
              stroke-linecap="round"
              stroke-linejoin="round">
@@ -25,14 +25,14 @@
       </span>
       <input type="text"
              [(ngModel)]="searchTerm"
-             (keyup.enter)="applyFilters()"
+             (input)="applyFilters()"
              placeholder="Search audit logs by event, user, notes, or record type..."
              class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all" />
     </div>
 
     <button type="button"
             (click)="toggleFilters()"
-            class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+            class="app-secondary-button gap-2 px-4 py-3">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="20"
            height="20"
@@ -60,6 +60,7 @@
     <div>
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Entity</label>
       <select [(ngModel)]="entityType"
+              (change)="applyFilters()"
               class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
         <option value="">All entities</option>
         <option *ngFor="let type of entityTypes" [value]="type">{{ type }}</option>
@@ -69,6 +70,7 @@
     <div>
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Action Type</label>
       <select [(ngModel)]="action"
+              (change)="applyFilters()"
               class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
         <option value="">All actions</option>
         <option *ngFor="let type of actionTypes" [value]="type">{{ type }}</option>
@@ -79,6 +81,7 @@
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Entity ID</label>
       <input type="number"
              [(ngModel)]="entityId"
+             (input)="applyFilters()"
              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
     </div>
 
@@ -86,6 +89,7 @@
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">From</label>
       <input type="date"
              [(ngModel)]="from"
+             (change)="applyFilters()"
              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
     </div>
 
@@ -93,6 +97,7 @@
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">To</label>
       <input type="date"
              [(ngModel)]="to"
+             (change)="applyFilters()"
              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
     </div>
 
@@ -100,19 +105,14 @@
       <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">User ID</label>
       <input type="number"
              [(ngModel)]="performedByUserId"
+             (input)="applyFilters()"
              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
     </div>
 
     <div class="sm:col-span-3 xl:col-span-6 flex gap-2">
       <button type="button"
-              (click)="applyFilters()"
-              class="app-primary-button px-4 py-2 whitespace-nowrap">
-        Apply
-      </button>
-
-      <button type="button"
               (click)="clearFilters()"
-              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors whitespace-nowrap">
+              class="app-secondary-button px-4 py-2 whitespace-nowrap">
         Clear
       </button>
     </div>
@@ -168,7 +168,7 @@
             <td class="px-6 py-4 text-center">
               <button type="button"
                       (click)="selectLog(log)"
-                      class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium">
+                      class="app-link-button text-xs">
                 {{ selectedLog?.auditLogId === log.auditLogId ? 'Hide' : 'View' }}
               </button>
             </td>
@@ -236,15 +236,23 @@
       <button type="button"
               (click)="goToPreviousPage()"
               [disabled]="!hasPreviousPage"
-              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-        Previous
+              class="app-pagination-button"
+              aria-label="Previous page">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path d="M12 5L7 10L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M7.5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
       </button>
 
       <button type="button"
               (click)="goToNextPage()"
               [disabled]="!hasNextPage"
-              class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-        Next
+              class="app-pagination-button"
+              aria-label="Next page">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path d="M8 5L13 10L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M12.5 10H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
       </button>
     </div>
   </div>

@@ -31,7 +31,7 @@
 .welcome-back {
   color: #0f172a;
   font-family: "Pliant", "Baloo 2", "Nunito", system-ui, sans-serif;
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 500;
 }
 
@@ -67,15 +67,15 @@
 
 .metric-card,
 .dashboard-card {
-  /*border: 1px solid var(--surface-border);*/
-  border-radius: 12px;
-  background: rgb(255 255 255 / 0.92);
-  box-shadow: none;
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  background: var(--app-surface);
+  box-shadow: var(--app-panel-shadow);
 }
 
 :host-context(.dark) .metric-card,
 :host-context(.dark) .dashboard-card {
-  background: #111214;
+  background: var(--app-surface);
 }
 
 .metric-card {
@@ -130,14 +130,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border-radius: 12px;
-  background: rgb(248 250 252);
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+  background: var(--app-muted-surface);
   padding: 0.75rem;
 }
 
 :host-context(.dark) .status-row,
 :host-context(.dark) .customer-row {
-  background: #16181b;
+  background: var(--app-secondary-surface);
+  border-color: var(--app-border);
 }
 
 .status-row div,
@@ -149,8 +151,9 @@
 
 .status-row span,
 .customer-summary span {
-  color: rgb(71 85 105);
+  color: #1f2737;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 :host-context(.dark) .status-row span,
@@ -166,7 +169,7 @@
 }
 
 :host-context(.dark) .status-dot {
-  box-shadow: 0 0 0 2px #16181b;
+  box-shadow: 0 0 0 2px #2b2f34;
 }
 
 .status-row strong,
@@ -199,26 +202,27 @@
 
 .alert-panel th {
   padding: 0.75rem 0.5rem;
-  color: rgb(100 116 139);
+  color: var(--app-heading);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   text-align: left;
   text-transform: uppercase;
 }
 
 .alert-panel td {
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--app-border);
   padding: 0.8rem 0.5rem;
-  color: rgb(71 85 105);
+  color: var(--app-text);
+  font-weight: 500;
 }
 
 :host-context(.dark) .alert-panel th {
-  color: rgb(148 163 184);
+  color: var(--app-muted-text);
 }
 
 :host-context(.dark) .alert-panel td {
-  border-color: rgb(51 65 85);
-  color: rgb(203 213 225);
+  border-color: var(--app-border);
+  color: var(--app-text);
 }
 
 .failure-badge,
@@ -261,13 +265,9 @@
 
 @media (max-width: 700px) {
   .stats-strip,
-  .dashboard-grid {
+  .dashboard-grid,
+  .status-list {
     grid-template-columns: 1fr;
   }
 }
 
-:host-context(.dark) .metric-card,
-:host-context(.dark) .dashboard-card {
-  background: #111214;
-  border: 1px solid rgba(255,255,255,0.08);
-}

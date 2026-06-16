@@ -1,8 +1,8 @@
 <!-- Page Header -->
 <div class="dashboard-header">
   <h1 class="dashboard-welcome-heading" aria-label="Welcome Back.">
-    <span class="welcome-solid">Welcome</span>
-    <span class="welcome-back">Back<span class="welcome-dot">.</span></span>
+    <!--<span class="welcome-solid">Welcome</span>-->
+    <span class="welcome-back">Welcome Back<span class="welcome-dot">.</span></span>
   </h1>
   <p>
     Your operational statistics are ready.
@@ -92,7 +92,11 @@
 
         <tbody>
           <tr *ngFor="let failure of recentFailures">
-            <td>{{ failure.orderNumber }}</td>
+            <td>
+              <a [routerLink]="['/orders', failure.orderId]" class="app-link-button">
+                {{ failure.orderNumber }}
+              </a>
+            </td>
             <td>{{ failure.customer }}</td>
             <td>
               <span class="failure-badge">
@@ -123,7 +127,11 @@
 
         <tbody>
           <tr *ngFor="let order of priorityOrders">
-            <td>{{ order.orderNumber }}</td>
+            <td>
+              <a [routerLink]="['/orders', order.orderId]" class="app-link-button">
+                {{ order.orderNumber }}
+              </a>
+            </td>
             <td>{{ order.customer }}</td>
             <td>
               <span [class]="'priority-badge ' + getPriorityColor(order.priority)">

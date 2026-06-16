@@ -8,7 +8,7 @@
       {{ isEditMode ? 'Update product details and safety information' : 'Create a new chemical product' }}
     </p>
   </div>
-  <a routerLink="/products" class="text-blue-600 dark:text-blue-400 hover:underline">
+  <a routerLink="/products" class="app-tertiary-button px-0 py-2">
     ← Back to Products
   </a>
 </div>
@@ -131,7 +131,7 @@
 
         <button type="button"
                 (click)="openSdsForm()"
-                class="app-primary-button px-4 py-2">
+                class="app-secondary-button px-4 py-2">
           Add SDS
         </button>
       </div>
@@ -159,7 +159,7 @@
                 <td class="px-6 py-4 text-center">
                   <button type="button"
                           (click)="deleteSafetyDataSheet(sds.safetyDataSheetId)"
-                          class="text-red-600 dark:text-red-400 hover:underline text-xs font-medium">
+                          class="app-danger-link text-xs">
                     Delete
                   </button>
                 </td>
@@ -208,13 +208,13 @@
           <div class="sm:col-span-2 flex gap-2">
             <button type="button"
                     (click)="createSafetyDataSheet()"
-                    class="app-primary-button px-4 py-2">
+                    class="app-secondary-button px-4 py-2">
               Add SDS
             </button>
 
             <button type="button"
                     (click)="cancelSdsForm()"
-                    class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors">
+                    class="app-secondary-button px-4 py-2">
               Cancel
             </button>
           </div>
@@ -236,7 +236,7 @@
 
           <button type="button"
                   (click)="openSdsForm()"
-                  class="app-primary-button px-4 py-2">
+                  class="app-secondary-button px-4 py-2">
             Add SDS
           </button>
         </div>
@@ -351,7 +351,7 @@
 
         <a *ngIf="!isEditMode"
            routerLink="/products"
-           class="block text-center px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+           class="app-secondary-button w-full px-4 py-2">
           Cancel
         </a>
       </div>

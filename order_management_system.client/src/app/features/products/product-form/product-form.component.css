@@ -3,8 +3,8 @@
 }
 
 :host-context(.dark) .form-card {
-  background: #111214;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: var(--app-surface);
+  border-color: var(--app-border);
 }
 
 .form-label {
@@ -12,21 +12,23 @@
 }
 
 .form-input {
-  @apply w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all;
+  @apply w-full px-4 py-2 border rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all;
+  background: var(--app-field-bg);
+  border-color: var(--app-field-border);
 }
 
 :host-context(.dark) .form-input {
-  background: #101113;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: var(--app-field-bg);
+  border-color: var(--app-field-border);
 }
 
 :host-context(.dark) .form-card .bg-slate-50,
 :host-context(.dark) .form-card .dark\:bg-slate-900\/60 {
-  background: #101113;
+  background: var(--app-secondary-surface);
 }
 
 :host-context(.dark) .form-card .dark\:border-slate-700 {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--app-border);
 }
 
 .empty-state {

@@ -2,7 +2,7 @@
   display: block;
   min-height: 100vh;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #cfdeee 0%, #e4f1f8 48%, #c7d9ea 100%);
+  background: linear-gradient( 135deg, #2563eb 0%, #2563eb 48%, #2563eb 100%);
 }
 
 :host-context(.dark) {
@@ -16,15 +16,15 @@
     max-width: 1500px;
     margin: 0 auto;
     overflow: hidden;
-    border: 1px solid #dbeafe;
+    border: 1px solid #8fa4c0;
     border-radius: 24px;
-    background: #eef8ff;
-    box-shadow: 0 28px 80px rgb(15 23 42 / 0.16);
+    background: #f3f7fb;
+    box-shadow: 0 28px 80px rgb(15 23 42 / 0.24);
   }
 
   :host-context(.dark) .app-shell {
-    border-color: rgba(255,255,255,0.08);
-    background: #17191c;
+    border-color: rgba(255,255,255,0.1);
+    background: #24272b;
   }
 
   .app-content {

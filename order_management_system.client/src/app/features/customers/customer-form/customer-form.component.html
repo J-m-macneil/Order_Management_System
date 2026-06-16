@@ -8,7 +8,7 @@
       {{ isEditMode ? 'Update customer details' : 'Create a new customer account' }}
     </p>
   </div>
-  <a routerLink="/customers" class="text-blue-600 dark:text-blue-400 hover:underline">
+  <a routerLink="/customers" class="app-tertiary-button px-0 py-2">
     ← Back to Customers
   </a>
 </div>
@@ -275,22 +275,22 @@
             <div class="flex flex-wrap gap-2 shrink-0">
               <button type="button"
                       (click)="editAddress(address)"
-                      class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                      class="app-action-button px-3 py-1 text-xs">
                 Edit
               </button>
               <button type="button"
                       (click)="setBillingAddress(address)"
-                      class="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
+                      class="reference-action-button">
                 Set Billing
               </button>
               <button type="button"
                       (click)="setDefaultDeliveryAddress(address)"
-                      class="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
+                      class="reference-action-button delivery">
                 Set Delivery
               </button>
               <button type="button"
                       (click)="deleteAddress(address.addressId)"
-                      class="text-xs font-medium text-red-600 dark:text-red-400 hover:underline">
+                      class="app-danger-link text-xs">
                 Delete
               </button>
             </div>
@@ -374,7 +374,7 @@
 
           <button type="button"
                   (click)="cancelAddressEdit()"
-                  class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors">
+                  class="app-secondary-button px-4 py-2">
             Cancel
           </button>
         </div>
@@ -415,18 +415,18 @@
             <div class="flex items-center gap-2 shrink-0">
               <button type="button"
                       (click)="editContact(contact)"
-                      class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                      class="app-action-button px-3 py-1 text-xs">
                 Edit
               </button>
               <button *ngIf="!contact.isPrimary"
                       type="button"
                       (click)="setPrimaryContact(contact)"
-                      class="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
+                      class="reference-action-button">
                 Set Primary
               </button>
               <button type="button"
                       (click)="deleteContact(contact.customerContactId)"
-                      class="text-xs font-medium text-red-600 dark:text-red-400 hover:underline">
+                      class="app-danger-link text-xs">
                 Delete
               </button>
             </div>
@@ -475,7 +475,7 @@
           <button *ngIf="isContactFormOpen"
                   type="button"
                   (click)="cancelContactEdit()"
-                  class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors">
+                  class="app-secondary-button px-4 py-2">
             Cancel
           </button>
         </div>
@@ -519,7 +519,7 @@
 
       <a routerLink="/customers"
          *ngIf="!isEditMode"
-         class="block mt-3 text-center px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600">
+         class="app-secondary-button mt-3 w-full px-4 py-2">
         Cancel
       </a>
     </div>
