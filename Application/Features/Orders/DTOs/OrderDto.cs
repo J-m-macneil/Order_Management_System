@@ -46,6 +46,7 @@ public class OrderDto
     public string? FailureReason { get; set; }
 
     public bool IsPriorityOrder { get; set; }
+    public int FailedProcessingJobCount { get; set; }
 
     public List<OrderItemDto> Items { get; set; } = new();
 }

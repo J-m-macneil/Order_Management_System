@@ -26,14 +26,11 @@
         </h1>
         <p class="text-slate-500 dark:text-slate-400 mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
       </div>
-      <div class="flex gap-2">
-        <button class="app-action-button px-4 py-2">
-          Actions
-        </button>
-        <button class="app-primary-button px-4 py-2">
-          Edit
-        </button>
-      </div>
+      <a *ngIf="canEditOrder()"
+         [routerLink]="['/orders', currentOrder.orderId, 'edit']"
+         class="app-primary-button px-4 py-2">
+        Edit
+      </a>
     </div>
 
     <!-- Badges -->
@@ -45,6 +42,10 @@
         Priority Order
       </span>
     </div>
+
+    <p class="mt-4 text-sm text-slate-600 dark:text-slate-300">
+      {{ getEditLockMessage() }}
+    </p>
   </div>
 
   <!-- Main Content Grid -->
@@ -176,7 +177,7 @@
                   (click)="changeStatus(status.id)"
                   class="app-status-action-button w-full px-4 py-2 text-white"
                   [ngClass]="getStatusButtonClass(status.name)">
-            Move to {{ status.name }}
+            {{ getStatusActionLabel(status) }}
           </button>
         </div>
 
@@ -297,8 +298,8 @@
 </div>
 
 <app-input-modal *ngIf="showReasonModal"
-                 [title]="'Provide Reason'"
-                 [placeholder]="'Enter reason...'"
+                 [title]="reasonModalTitle"
+                 [placeholder]="reasonModalPlaceholder"
                  [requireInput]="true"
                  (confirm)="onReasonConfirm($event)"
                  (cancel)="onReasonCancel()">

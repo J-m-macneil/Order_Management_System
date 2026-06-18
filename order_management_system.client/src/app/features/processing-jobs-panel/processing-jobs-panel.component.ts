@@ -48,7 +48,7 @@ export class ProcessingJobsPanelComponent implements OnChanges {
   }
 
   canRetryJob(job: ProcessingJob): boolean {
-    return job.status === 'Failed' && job.attemptCount < job.maxAttempts;
+    return job.status === 'Failed';
   }
 
   shouldShowMissingJobsWarning(): boolean {

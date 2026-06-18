@@ -167,9 +167,15 @@
           </td>
           <td class="px-6 py-4 text-slate-900 dark:text-white">{{ order.customerName }}</td>
           <td class="px-6 py-4">
-            <span [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getStatusColor(order.orderStatusId)">
-              {{ statusLabels[order.orderStatusId] }}
-            </span>
+            <div class="flex flex-wrap items-center gap-2">
+              <span [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getStatusColor(order.orderStatusId)">
+                {{ statusLabels[order.orderStatusId] }}
+              </span>
+              <span *ngIf="order.failedProcessingJobCount > 0"
+                    class="inline-flex px-2 py-1 rounded-md text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/50">
+                {{ order.failedProcessingJobCount }} failed job{{ order.failedProcessingJobCount === 1 ? '' : 's' }}
+              </span>
+            </div>
           </td>
           <td class="px-6 py-4">
             <span [class]="'text-xs font-medium ' + getPriorityColor(order.isPriorityOrder)">

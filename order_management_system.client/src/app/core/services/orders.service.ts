@@ -65,8 +65,12 @@ export class OrdersService {
     return this.http.get<PagedResult<Order>>(this.baseUrl, { params });
   }
 
-  createOrder(order: CreateOrder): Observable<Order> {
-    return this.http.post<Order>(this.baseUrl, order);
+  createOrder(order: CreateOrder): Observable<number> {
+    return this.http.post<number>(this.baseUrl, order);
+  }
+
+  updateOrder(orderId: number, order: CreateOrder): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${orderId}`, order);
   }
 
   getOrderById(id: number): Observable<Order> {

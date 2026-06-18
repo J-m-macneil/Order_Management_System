@@ -29,6 +29,7 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.Project)
             .Include(o => o.CreatedByUser)
             .Include(o => o.AssignedToUser)
+            .Include(o => o.ProcessingJobs)
             .Include(o => o.OrderItems)
                 .ThenInclude(i => i.Product)
 
@@ -42,6 +43,11 @@ public class OrderRepository : IOrderRepository
                 .ThenInclude(h => h.ChangedByUser)
 
             .FirstOrDefaultAsync(o => o.OrderId == id, ct);
+    }
+
+    public void RemoveItems(IEnumerable<OrderItem> items)
+    {
+        _db.OrderItems.RemoveRange(items);
     }
 
     public async Task<List<Order>> GetAllAsync(CancellationToken ct)
@@ -106,7 +112,8 @@ public class OrderRepository : IOrderRepository
                     .Include(o => o.Warehouse)
                     .Include(o => o.Carrier)
                     .Include(o => o.Project)
-                    .Include(o => o.OrderItems),
+                    .Include(o => o.OrderItems)
+                    .Include(o => o.ProcessingJobs),
                 searchTerm,
                 orderStatusId,
                 isPriorityOrder,
@@ -149,7 +156,13 @@ public class OrderRepository : IOrderRepository
                 (o.PurchaseOrderReference != null && o.PurchaseOrderReference.Contains(term)));
         }
 
-        if (orderStatusId.HasValue)
+        if (orderStatusId == 8)
+        {
+            query = query.Where(o =>
+                o.OrderStatusId == 8 ||
+                o.ProcessingJobs.Any(j => j.Status == "Failed"));
+        }
+        else if (orderStatusId.HasValue)
         {
             query = query.Where(o => o.OrderStatusId == orderStatusId.Value);
         }

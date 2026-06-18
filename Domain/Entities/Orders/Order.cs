@@ -63,6 +63,7 @@ public class Order
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<OrderStatusHistory> OrderStatusHistory { get; set; } = new List<OrderStatusHistory>();
+    public ICollection<ProcessingJob> ProcessingJobs { get; set; } = new List<ProcessingJob>();
 
     public void ChangeStatus(int newStatusId, int userId, string? reason)
     {
@@ -89,7 +90,7 @@ public class Order
         OrderStatusId = newStatusId;
         UpdatedAt = DateTime.UtcNow;
 
-        if (toStatus == OrderStatusEnum.Cancelled)
+        if (toStatus is OrderStatusEnum.Cancelled or OrderStatusEnum.Failed)
             FailureReason = reason;
     }
 }

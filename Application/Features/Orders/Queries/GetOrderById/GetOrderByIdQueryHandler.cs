@@ -20,6 +20,9 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
         if (order == null)
             throw new KeyNotFoundException($"Order {request.OrderId} not found");
 
+        var failedProcessingJobCount = order.ProcessingJobs.Count(j => j.Status == "Failed");
+        var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : order.OrderStatusId;
+
         return new OrderDto
         {
             OrderId = order.OrderId,
@@ -40,8 +43,8 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             ProjectId = order.ProjectId,
             ProjectName = order.Project?.ProjectName,
 
-            OrderStatusId = order.OrderStatusId,
-            OrderStatusName = order.OrderStatus?.Name,
+            OrderStatusId = effectiveStatusId,
+            OrderStatusName = failedProcessingJobCount > 0 ? "Failed" : order.OrderStatus?.Name,
 
             CreatedByUserId = order.CreatedByUserId,
             AssignedToUserId = order.AssignedToUserId,
@@ -65,6 +68,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             FailureReason = order.FailureReason,
 
             IsPriorityOrder = order.IsPriorityOrder,
+            FailedProcessingJobCount = failedProcessingJobCount,
 
             Items = order.OrderItems?.Select(i => new OrderItemDto
             {

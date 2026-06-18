@@ -40,6 +40,7 @@ const routes: Routes = [
       { path: 'admin/audit', component: AuditLogsComponent, canActivate: [AuthGuard, AdminGuard] },
 
       { path: 'orders/create', component: OrderCreateComponent, canActivate: [AuthGuard] },
+      { path: 'orders/:id/edit', component: OrderCreateComponent, canActivate: [AuthGuard] },
       { path: 'orders/:id', component: OrderDetailComponent, canActivate: [AuthGuard] }
     ]
   },

@@ -62,6 +62,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         order.TotalAmount = order.Subtotal - order.DiscountAmount + order.TaxAmount;
 
         await _orders.AddAsync(order, ct);
+        await _orders.SaveChangesAsync(ct);
 
         await _audit.LogAsync(
             "Order",

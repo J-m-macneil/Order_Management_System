@@ -36,6 +36,7 @@ public class JobProcessingService : BackgroundService
 
                 var now = DateTime.UtcNow;
 
+                await MarkOrdersWithFailedJobsAsync(dbContext, stoppingToken);
                 await EnsureApprovalWorkflowJobsAsync(dbContext, now, stoppingToken);
 
                 var jobs = await dbContext.ProcessingJobs
@@ -108,6 +109,10 @@ public class JobProcessingService : BackgroundService
                     await PushToLogisticsProviderAsync(dbContext, job, cancellationToken);
                     break;
 
+                case "ProcessLogisticsEvent":
+                    await ProcessLogisticsEventAsync(dbContext, job, cancellationToken);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown job type '{job.JobType}'.");
             }
@@ -127,6 +132,8 @@ public class JobProcessingService : BackgroundService
                 $$"""{"status":"Completed","jobType":"{{job.JobType}}"}""",
                 $"Background job completed: {job.JobType}."
             );
+
+            await ResumeFailedOrderAfterSuccessfulJobAsync(dbContext, job, cancellationToken);
 
             await dbContext.SaveChangesAsync(cancellationToken);
         }
@@ -150,6 +157,14 @@ public class JobProcessingService : BackgroundService
                     order.OrderStatusId = 8; // Failed
                     order.FailureReason = $"Background job failed: {job.JobType}. {ex.Message}";
                     order.UpdatedAt = DateTime.UtcNow;
+
+                    AddStatusHistory(
+                        dbContext,
+                        order.OrderId,
+                        oldOrderStatus,
+                        8,
+                        order.CreatedByUserId,
+                        order.FailureReason);
 
                     AddAuditLog(
                         dbContext,
@@ -207,6 +222,35 @@ public class JobProcessingService : BackgroundService
             $$"""{"documentId":{{document.DocumentId}},"orderId":{{job.OrderId}},"documentType":"{{documentType}}"}""",
             $"{documentType} generated as PDF by background job."
         );
+    }
+
+    private static async Task MarkOrdersWithFailedJobsAsync(
+        AppDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        var failedJobs = await dbContext.ProcessingJobs
+            .Include(j => j.Order)
+            .Where(j => j.Status == "Failed")
+            .Where(j => j.Order.OrderStatusId != 8)
+            .ToListAsync(cancellationToken);
+
+        foreach (var job in failedJobs)
+        {
+            var order = job.Order;
+
+            order.FailureReason = $"Background job failed: {job.JobType}. {job.ErrorMessage}";
+
+            MoveOrderStatus(
+                dbContext,
+                order,
+                8,
+                order.FailureReason);
+        }
+
+        if (failedJobs.Count > 0)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
     }
 
     private static async Task EnsureApprovalWorkflowJobsAsync(
@@ -350,6 +394,54 @@ public class JobProcessingService : BackgroundService
         return requiredDocumentTypes.All(generatedDocumentTypes.Contains);
     }
 
+    private static async Task ResumeFailedOrderAfterSuccessfulJobAsync(
+        AppDbContext dbContext,
+        ProcessingJob completedJob,
+        CancellationToken cancellationToken)
+    {
+        if (completedJob.JobType == "PushToLogisticsProvider")
+            return;
+
+        var order = await dbContext.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(o => o.OrderId == completedJob.OrderId, cancellationToken);
+
+        if (order == null || order.OrderStatusId != 8)
+            return;
+
+        var hasOtherFailedJobs = await dbContext.ProcessingJobs.AnyAsync(j =>
+            j.OrderId == completedJob.OrderId &&
+            j.ProcessingJobId != completedJob.ProcessingJobId &&
+            j.Status == "Failed",
+            cancellationToken);
+
+        if (hasOtherFailedJobs || !await RequiredApprovalDocumentsExistAsync(dbContext, order.OrderId, cancellationToken))
+            return;
+
+        if (await HasCompletedJobAsync(dbContext, order.OrderId, "PushToLogisticsProvider", cancellationToken))
+        {
+            MoveOrderStatus(
+                dbContext,
+                order,
+                6,
+                "Order recovered to Awaiting Dispatch after failed background work was retried successfully.");
+
+            return;
+        }
+
+        if (!await HasActiveOrCompletedJobAsync(dbContext, order.OrderId, "PushToLogisticsProvider", cancellationToken))
+        {
+            dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, "PushToLogisticsProvider", DateTime.UtcNow));
+        }
+
+        MoveOrderStatus(
+            dbContext,
+            order,
+            5,
+            "Order recovered to In Processing after failed background work was retried successfully.");
+    }
+
     private static async Task PushToLogisticsProviderAsync(
         AppDbContext dbContext,
         ProcessingJob job,
@@ -358,41 +450,99 @@ public class JobProcessingService : BackgroundService
         var order = await dbContext.Orders
             .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);
 
-        var oldStatus = order.OrderStatusId;
-
-        order.OrderStatusId = 5; // In Processing
-        order.UpdatedAt = DateTime.UtcNow;
-
-        AddAuditLog(
+        MoveOrderStatus(
             dbContext,
-            "Order",
-            order.OrderId,
-            "StatusChanged:In Processing",
-            null,
-            $$"""{"statusId":{{oldStatus}}}""",
-            $$"""{"statusId":5,"status":"In Processing"}""",
-            "Order moved to In Processing while background fulfilment work is being completed."
-        );
+            order,
+            5,
+            "Order moved to In Processing while background fulfilment work is being completed.");
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
         await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
 
-        var processingStatus = order.OrderStatusId;
+        MoveOrderStatus(
+            dbContext,
+            order,
+            6,
+            "Order moved to Awaiting Dispatch after simulated logistics provider push.");
+    }
 
-        order.OrderStatusId = 6; // Awaiting Dispatch
+    private static async Task ProcessLogisticsEventAsync(
+        AppDbContext dbContext,
+        ProcessingJob job,
+        CancellationToken cancellationToken)
+    {
+        var order = await dbContext.Orders
+            .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);
+
+        if (job.PayloadJson?.Contains("DELIVERED", StringComparison.OrdinalIgnoreCase) == true &&
+            order.OrderStatusId == 6)
+        {
+            MoveOrderStatus(
+                dbContext,
+                order,
+                7,
+                "Order completed after simulated delivered logistics event.");
+        }
+    }
+
+    private static async Task<bool> HasCompletedJobAsync(
+        AppDbContext dbContext,
+        int orderId,
+        string jobType,
+        CancellationToken cancellationToken)
+    {
+        return await dbContext.ProcessingJobs.AnyAsync(j =>
+            j.OrderId == orderId &&
+            j.JobType == jobType &&
+            j.Status == "Completed",
+            cancellationToken);
+    }
+
+    private static void MoveOrderStatus(
+        AppDbContext dbContext,
+        Domain.Entities.Orders.Order order,
+        int toStatusId,
+        string reason)
+    {
+        var oldStatusId = order.OrderStatusId;
+
+        if (oldStatusId == toStatusId)
+            return;
+
+        order.OrderStatusId = toStatusId;
         order.UpdatedAt = DateTime.UtcNow;
+
+        AddStatusHistory(
+            dbContext,
+            order.OrderId,
+            oldStatusId,
+            toStatusId,
+            order.CreatedByUserId,
+            reason);
 
         AddAuditLog(
             dbContext,
             "Order",
             order.OrderId,
-            "StatusChanged:Awaiting Dispatch",
+            $"StatusChanged:{GetStatusName(toStatusId)}",
             null,
-            $$"""{"statusId":{{processingStatus}}}""",
-            $$"""{"statusId":6,"status":"Awaiting Dispatch"}""",
-            "Order moved to Awaiting Dispatch after simulated logistics provider push."
+            $$"""{"statusId":{{oldStatusId}}}""",
+            $$"""{"statusId":{{toStatusId}},"status":"{{GetStatusName(toStatusId)}}"}""",
+            reason
         );
+    }
+
+    private static string GetStatusName(int statusId)
+    {
+        return statusId switch
+        {
+            5 => "In Processing",
+            6 => "Awaiting Dispatch",
+            7 => "Completed",
+            8 => "Failed",
+            _ => $"Status {statusId}"
+        };
     }
 
     private static void AddAuditLog(
@@ -415,6 +565,25 @@ public class JobProcessingService : BackgroundService
             OldValuesJson = oldValuesJson,
             NewValuesJson = newValuesJson,
             Notes = notes
+        });
+    }
+
+    private static void AddStatusHistory(
+        AppDbContext dbContext,
+        int orderId,
+        int fromStatusId,
+        int toStatusId,
+        int changedByUserId,
+        string? reason)
+    {
+        dbContext.OrderStatusHistories.Add(new Domain.Entities.Status.OrderStatusHistory
+        {
+            OrderId = orderId,
+            FromStatusId = fromStatusId,
+            ToStatusId = toStatusId,
+            ChangedByUserId = changedByUserId,
+            ChangedAt = DateTime.UtcNow,
+            Reason = reason
         });
     }
 

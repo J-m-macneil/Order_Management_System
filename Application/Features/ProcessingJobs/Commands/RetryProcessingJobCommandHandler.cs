@@ -33,10 +33,11 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
         var oldValues = CreateSnapshot(job);
 
         job.Status = "Queued";
+        job.AttemptCount = 0;
         job.NextAttemptAt = DateTime.UtcNow;
+        job.LastRetryAt = DateTime.UtcNow;
         job.ErrorMessage = null;
         job.FailedAt = null;
-        job.AttemptCount = 0;
 
         await _repo.SaveChangesAsync(ct);
 

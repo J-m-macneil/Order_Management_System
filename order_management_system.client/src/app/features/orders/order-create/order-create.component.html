@@ -1,16 +1,28 @@
 <!-- Page Header -->
 <div class="mb-8 flex items-center justify-between">
   <div>
-    <h1 class="brand-page-title">Create Order<span class="brand-page-dot" aria-hidden="true">.</span></h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-2">Fill in the form below to create a new order</p>
+    <h1 class="brand-page-title">{{ isEditMode ? 'Edit Order' : 'Create Order' }}<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2">
+      {{ isEditMode ? 'Update draft order ' + orderNumber : 'Fill in the form below to create a new order' }}
+    </p>
   </div>
-  <a routerLink="/orders" class="app-tertiary-button px-0 py-2">
-    ← Back to Orders
+  <a [routerLink]="isEditMode && orderId ? ['/orders', orderId] : '/orders'"
+     class="app-tertiary-button px-0 py-2">
+    ← {{ isEditMode ? 'Back to Order' : 'Back to Orders' }}
   </a>
 </div>
 
+<div *ngIf="errorMessage"
+     class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+</div>
+
+<div *ngIf="isLoadingOrder" class="text-center py-12">
+  <p class="text-slate-500 dark:text-slate-400">Loading order...</p>
+</div>
+
 <!-- Order Creation Form -->
-<form [formGroup]="orderForm" (ngSubmit)="submit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<form *ngIf="!isLoadingOrder" [formGroup]="orderForm" (ngSubmit)="submit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <!-- Main Content (2 columns) -->
   <div class="lg:col-span-2 space-y-6">
     <!-- Customer Information -->
@@ -340,10 +352,10 @@
           [disabled]="orderForm.invalid"
           class="app-primary-button w-full px-4 py-2"
         >
-          Create Order
+          {{ isEditMode ? 'Save Order' : 'Create Order' }}
         </button>
         <a
-          routerLink="/orders"
+          [routerLink]="isEditMode && orderId ? ['/orders', orderId] : '/orders'"
           class="app-secondary-button w-full px-4 py-2"
         >
           Cancel

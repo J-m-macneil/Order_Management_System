@@ -1155,7 +1155,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasMaxLength(500);
 
             entity.HasOne(x => x.Order)
-                .WithMany()
+                .WithMany(x => x.ProcessingJobs)
                 .HasForeignKey(x => x.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
         });

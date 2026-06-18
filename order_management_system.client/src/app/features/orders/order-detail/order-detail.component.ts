@@ -23,6 +23,8 @@ export class OrderDetailComponent implements OnInit {
 
   showReasonModal = false;
   pendingStatus: OrderStatus | null = null;
+  reasonModalTitle = 'Provide Reason';
+  reasonModalPlaceholder = 'Enter reason...';
 
   private orderId = 0;
 
@@ -102,8 +104,10 @@ export class OrderDetailComponent implements OnInit {
 
     const status = statusId as OrderStatus;
 
-    if (status === OrderStatus.Failed || status === OrderStatus.Cancelled) {
+    if (this.requiresReason(status)) {
       this.pendingStatus = status;
+      this.reasonModalTitle = this.getReasonModalTitle(status);
+      this.reasonModalPlaceholder = this.getReasonModalPlaceholder(status);
       this.showReasonModal = true;
       this.errorMessage = '';
       this.cdr.detectChanges();
@@ -171,5 +175,80 @@ export class OrderDetailComponent implements OnInit {
       default:
         return 'bg-slate-600 hover:bg-slate-700';
     }
+  }
+
+  getStatusActionLabel(status: AllowedStatus): string {
+    if (!this.order) {
+      return `Move to ${status.name}`;
+    }
+
+    if (status.id === OrderStatus.Draft && this.order.orderStatusId === OrderStatus.Submitted) {
+      return 'Withdraw to Draft';
+    }
+
+    if (status.id === OrderStatus.Draft && this.order.orderStatusId === OrderStatus.PendingReview) {
+      return 'Return to Draft';
+    }
+
+    return `Move to ${status.name}`;
+  }
+
+  getEditLockMessage(): string {
+    if (!this.order) {
+      return '';
+    }
+
+    if (this.order.orderStatusId === OrderStatus.Draft) {
+      return 'Draft orders can be edited before submission.';
+    }
+
+    if (this.order.orderStatusId === OrderStatus.Submitted ||
+        this.order.orderStatusId === OrderStatus.PendingReview) {
+      return 'Return this order to Draft before making changes.';
+    }
+
+    return 'This order is locked. Cancel it and create a replacement if changes are required.';
+  }
+
+  canEditOrder(): boolean {
+    return this.order?.orderStatusId === OrderStatus.Draft;
+  }
+
+  private requiresReason(status: OrderStatus): boolean {
+    return status === OrderStatus.Draft ||
+      status === OrderStatus.Failed ||
+      status === OrderStatus.Cancelled;
+  }
+
+  private getReasonModalTitle(status: OrderStatus): string {
+    if (status === OrderStatus.Draft) {
+      return 'Return Order to Draft';
+    }
+
+    if (status === OrderStatus.Cancelled) {
+      return 'Cancel Order';
+    }
+
+    if (status === OrderStatus.Failed) {
+      return 'Fail Order';
+    }
+
+    return 'Provide Reason';
+  }
+
+  private getReasonModalPlaceholder(status: OrderStatus): string {
+    if (status === OrderStatus.Draft) {
+      return 'Explain why this order needs to be changed...';
+    }
+
+    if (status === OrderStatus.Cancelled) {
+      return 'Explain why this order is being cancelled...';
+    }
+
+    if (status === OrderStatus.Failed) {
+      return 'Explain why this order failed...';
+    }
+
+    return 'Enter reason...';
   }
 }

@@ -486,14 +486,6 @@ html.dark ::-webkit-scrollbar-thumb {
   background: #1b1e22;
 }
 
-/*html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #33383e;
-}
-
-html.dark {
-  scrollbar-color: #1b1e22 #24272b;
-}*/
-
 /* Transitions */
 * {
   @apply transition-colors duration-200;

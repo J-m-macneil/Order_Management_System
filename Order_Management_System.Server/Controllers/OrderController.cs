@@ -1,5 +1,6 @@
 ﻿using Application.Features.Orders.Commands.ChangeOrderStatus;
 using Application.Features.Orders.Commands.CreateOrder;
+using Application.Features.Orders.Commands.UpdateOrder;
 using Application.Features.Orders.Queries.GetAllowedStatuses;
 using Application.Features.Orders.Queries.GetOrderById;
 using Application.Features.Orders.Queries.GetOrders;
@@ -25,6 +26,14 @@ public class OrdersController : ControllerBase
     {
         var orderId = await _mediator.Send(command);
         return Ok(orderId);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateOrderCommand command, CancellationToken ct)
+    {
+        command.OrderId = id;
+        await _mediator.Send(command, ct);
+        return NoContent();
     }
 
     [HttpGet("{id}")]

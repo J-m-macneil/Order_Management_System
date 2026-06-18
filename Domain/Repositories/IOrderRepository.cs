@@ -9,6 +9,8 @@ public interface IOrderRepository
 
     Task<Order?> GetByIdAsync(int id, CancellationToken ct);
 
+    void RemoveItems(IEnumerable<OrderItem> items);
+
     Task<List<Order>> GetAllAsync(CancellationToken ct);
 
     Task<List<OrderStatus>> GetAllStatusesAsync(CancellationToken ct);

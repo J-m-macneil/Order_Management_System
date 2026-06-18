@@ -39,47 +39,54 @@ public class GetOrdersQueryHandler
             request.CreatedTo,
             ct);
 
-        var items = orders.Select(o => new OrderDto
+        var items = orders.Select(o =>
         {
-            OrderId = o.OrderId,
-            OrderNumber = o.OrderNumber,
+            var failedProcessingJobCount = o.ProcessingJobs.Count(j => j.Status == "Failed");
+            var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : o.OrderStatusId;
 
-            CustomerId = o.CustomerId,
-            CustomerName = o.Customer?.CompanyName,
+            return new OrderDto
+            {
+                OrderId = o.OrderId,
+                OrderNumber = o.OrderNumber,
 
-            OrderStatusId = o.OrderStatusId,
-            OrderStatusName = o.OrderStatus?.Name,
+                CustomerId = o.CustomerId,
+                CustomerName = o.Customer?.CompanyName,
 
-            WarehouseId = o.WarehouseId,
-            WarehouseName = o.Warehouse?.Name,
+                OrderStatusId = effectiveStatusId,
+                OrderStatusName = failedProcessingJobCount > 0 ? "Failed" : o.OrderStatus?.Name,
 
-            CarrierId = o.CarrierId,
-            CarrierName = o.Carrier?.Name,
+                WarehouseId = o.WarehouseId,
+                WarehouseName = o.Warehouse?.Name,
 
-            ProjectId = o.ProjectId,
+                CarrierId = o.CarrierId,
+                CarrierName = o.Carrier?.Name,
 
-            CreatedByUserId = o.CreatedByUserId,
-            AssignedToUserId = o.AssignedToUserId,
+                ProjectId = o.ProjectId,
 
-            RequestedDeliveryDate = o.RequestedDeliveryDate,
-            SubmittedAt = o.SubmittedAt,
+                CreatedByUserId = o.CreatedByUserId,
+                AssignedToUserId = o.AssignedToUserId,
 
-            CreatedAt = o.CreatedAt,
-            UpdatedAt = o.UpdatedAt,
+                RequestedDeliveryDate = o.RequestedDeliveryDate,
+                SubmittedAt = o.SubmittedAt,
 
-            Currency = o.Currency,
+                CreatedAt = o.CreatedAt,
+                UpdatedAt = o.UpdatedAt,
 
-            Subtotal = o.Subtotal,
-            DiscountAmount = o.DiscountAmount,
-            TaxAmount = o.TaxAmount,
-            TotalAmount = o.TotalAmount,
+                Currency = o.Currency,
 
-            PurchaseOrderReference = o.PurchaseOrderReference,
-            SpecialInstructions = o.SpecialInstructions,
-            InternalNotes = o.InternalNotes,
-            FailureReason = o.FailureReason,
+                Subtotal = o.Subtotal,
+                DiscountAmount = o.DiscountAmount,
+                TaxAmount = o.TaxAmount,
+                TotalAmount = o.TotalAmount,
 
-            IsPriorityOrder = o.IsPriorityOrder
+                PurchaseOrderReference = o.PurchaseOrderReference,
+                SpecialInstructions = o.SpecialInstructions,
+                InternalNotes = o.InternalNotes,
+                FailureReason = o.FailureReason,
+
+                IsPriorityOrder = o.IsPriorityOrder,
+                FailedProcessingJobCount = failedProcessingJobCount
+            };
         }).ToList();
 
         return new PagedResult<OrderDto>

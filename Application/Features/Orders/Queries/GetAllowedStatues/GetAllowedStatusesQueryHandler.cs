@@ -34,10 +34,8 @@ public class GetAllowedStatusesQueryHandler
 
         var currentStatus = (OrderStatusEnum)order.OrderStatusId;
 
-        // collect all allowed transitions across all roles
-        var allowedStatusEnums = roles
-            .SelectMany(role => OrderStatusTransitions.GetAllowed(currentStatus))
-            .Distinct()
+        var allowedStatusEnums = OrderStatusTransitions
+            .GetAllowed(currentStatus, roles)
             .ToList();
 
         var statuses = await _repo.GetAllStatusesAsync(ct);
