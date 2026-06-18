@@ -17,18 +17,24 @@ services:
       start_period: 30s
 
   back-api:
+    build:
+      context: .
+      dockerfile: Order_Management_System.Server/Dockerfile
     image: back-api
     container_name: back-api
     depends_on:
       back-db:
         condition: service_healthy
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_ENVIRONMENT: "Production"
       ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=DevSql_2026_Strong!Pass;TrustServerCertificate=True"
     ports:
       - "8080:8080"
 
   back-client:
+    build:
+      context: ./order_management_system.client
+      dockerfile: Dockerfile
     image: back-client
     container_name: back-client
     depends_on:
