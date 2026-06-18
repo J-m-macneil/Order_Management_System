@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/Solution Items/" />
   <Folder Name="/tests/">
     <Project Path="Application.UnitTests/Application.UnitTests.csproj" Id="6ae69e74-d32c-434e-893a-6edb10d2b218" />
     <Project Path="Domain.UnitTests/Domain.UnitTests.csproj" Id="4d88efad-76e3-4cff-978b-07eef6b8b893" />

@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -8,7 +9,7 @@ import { SystemSetting, UpdateSystemSettingRequest } from '../models/system-sett
   providedIn: 'root'
 })
 export class SystemSettingsService {
-  private readonly baseUrl = 'https://localhost:7233/api/system-settings';
+  private readonly baseUrl = `${apiBaseUrl}/system-settings`;
 
   constructor(private http: HttpClient) { }
 

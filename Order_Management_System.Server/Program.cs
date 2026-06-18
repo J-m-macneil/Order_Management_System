@@ -6,6 +6,7 @@ using Application.Interfaces;
 using Domain.Repositories;
 using Infrastructure.DependencyInjection;
 using Infrastructure.Identity;
+using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -88,7 +89,9 @@ public static class Program
         {
             options.AddPolicy("Frontend", policy =>
             {
-                policy.WithOrigins("https://localhost:53923")
+                policy.WithOrigins(
+                        "https://localhost:53923",
+                        "http://localhost:4200")
                       .AllowAnyHeader()
                       .AllowAnyMethod();
             });
@@ -192,6 +195,9 @@ public static class Program
         // Data seeding
         using (var scope = app.Services.CreateScope())
         {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await dbContext.Database.MigrateAsync();
+
             var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
             await seeder.SeedAsync();
         }

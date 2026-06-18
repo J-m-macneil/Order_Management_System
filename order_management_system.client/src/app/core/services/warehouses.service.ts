@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -6,7 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class WarehousesService {
-  private readonly baseUrl = 'https://localhost:7233/api/warehouses';
+  private readonly baseUrl = `${apiBaseUrl}/warehouses`;
 
   constructor(private http: HttpClient) { }
 

@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../../../core/config/api-url';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -41,7 +42,7 @@ export class LoginComponent {
     this.errorMessage = '';
     this.authService.clearToken();
 
-    this.http.post<any>('https://localhost:7233/api/auth/login', this.loginForm.value)
+    this.http.post<any>(`${apiBaseUrl}/auth/login`, this.loginForm.value)
       .pipe(finalize(() => {
         this.isLoading = false;
       }))

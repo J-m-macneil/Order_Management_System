@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -16,7 +17,7 @@ import { ProductList } from '../models/product-list.model';
   providedIn: 'root'
 })
 export class OrdersService {
-  private readonly baseUrl = 'https://localhost:7233/api/orders';
+  private readonly baseUrl = `${apiBaseUrl}/orders`;
     apiUrl: any;
 
   constructor(private http: HttpClient) { }

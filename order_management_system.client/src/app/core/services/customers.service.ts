@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -14,7 +15,7 @@ import { CustomerSummary } from '../models/customer-summary.model';
   providedIn: 'root'
 })
 export class CustomersService {
-  private readonly baseUrl = 'https://localhost:7233/api/customers';
+  private readonly baseUrl = `${apiBaseUrl}/customers`;
 
   constructor(private http: HttpClient) { }
 

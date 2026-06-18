@@ -529,6 +529,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             entity.HasKey(x => x.AddressId);
 
+            entity.Ignore(x => x.Orders);
+
             entity.Property(x => x.AddressType)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -629,6 +631,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.ToTable("CustomerContacts");
 
             entity.HasKey(x => x.CustomerContactId);
+
+            entity.Ignore(x => x.Orders);
 
             entity.Property(x => x.Name)
                 .IsRequired()

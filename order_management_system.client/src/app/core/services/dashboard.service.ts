@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -37,7 +38,7 @@ export interface DashboardMetricsResponse {
   providedIn: 'root'
 })
 export class DashboardService {
-  private readonly apiUrl = 'https://localhost:7233/api/dashboard';
+  private readonly apiUrl = `${apiBaseUrl}/dashboard`;
 
   constructor(private http: HttpClient) { }
 

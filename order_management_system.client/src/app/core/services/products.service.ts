@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
@@ -18,7 +19,7 @@ import { ProductSummary } from "../models/product-summary.model";
   providedIn: 'root'
 })
 export class ProductsService {
-  private readonly baseUrl = 'https://localhost:7233/api/products';
+  private readonly baseUrl = `${apiBaseUrl}/products`;
 
   constructor(private http: HttpClient) { }
 
@@ -82,15 +83,15 @@ export class ProductsService {
   }
 
   getProductCategories(): Observable<ProductCategory[]> {
-    return this.http.get<ProductCategory[]>('https://localhost:7233/api/product-categories');
+    return this.http.get<ProductCategory[]>(`${apiBaseUrl}/product-categories`);
   }
 
   getUnitsOfMeasure(): Observable<UnitOfMeasure[]> {
-    return this.http.get<UnitOfMeasure[]>('https://localhost:7233/api/unit-of-measures');
+    return this.http.get<UnitOfMeasure[]>(`${apiBaseUrl}/unit-of-measures`);
   }
 
   getHazardClasses(): Observable<HazardClass[]> {
-    return this.http.get<HazardClass[]>('https://localhost:7233/api/hazard-classes');
+    return this.http.get<HazardClass[]>(`${apiBaseUrl}/hazard-classes`);
   }
 
   getSafetyDataSheets(productId: number): Observable<SafetyDataSheet[]> {

@@ -24,7 +24,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Application\Application.csproj" />
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-		<ProjectReference Include="..\order_management_system.client\order_management_system.client.esproj" />
 	</ItemGroup>
 
 	<ItemGroup>

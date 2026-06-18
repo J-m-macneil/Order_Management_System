@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -8,7 +9,7 @@ import { PricingTier } from '../models/pricing-tier.model';
 })
 export class PricingService {
 
-  private readonly apiUrl = 'https://localhost:7233/api/pricing';
+  private readonly apiUrl = `${apiBaseUrl}/pricing`;
 
   constructor(private http: HttpClient) { }
 

@@ -1,0 +1,42 @@
+services:
+  back-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: back-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "DevSql_2026_Strong!Pass"
+    ports:
+      - "14333:1433"
+    volumes:
+      - back-db-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'DevSql_2026_Strong!Pass' -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  back-api:
+    image: back-api
+    container_name: back-api
+    depends_on:
+      back-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=DevSql_2026_Strong!Pass;TrustServerCertificate=True"
+    ports:
+      - "8080:8080"
+
+  back-client:
+    image: back-client
+    container_name: back-client
+    depends_on:
+      - back-api
+    environment:
+      API_BASE_URL: "http://localhost:8080/api"
+    ports:
+      - "4200:80"
+
+volumes:
+  back-db-data:

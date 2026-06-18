@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { OrderDocument } from '../models/order-document.model';
@@ -6,7 +7,7 @@ import { OrderDocument } from '../models/order-document.model';
   providedIn: 'root'
 })
 export class DocumentsService {
-  private readonly apiUrl = 'https://localhost:7233/api/documents';
+  private readonly apiUrl = `${apiBaseUrl}/documents`;
 
   constructor(private http: HttpClient) { }
 

@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -9,7 +10,7 @@ import { Department, Role, User, UserSaveRequest } from '../models/user-manageme
   providedIn: 'root'
 })
 export class UsersService {
-  private readonly baseUrl = 'https://localhost:7233/api/users';
+  private readonly baseUrl = `${apiBaseUrl}/users`;
 
   constructor(private http: HttpClient) { }
 

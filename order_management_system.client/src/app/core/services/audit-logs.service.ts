@@ -1,3 +1,4 @@
+import { apiBaseUrl } from '../config/api-url';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -10,7 +11,7 @@ import { PagedResult } from '../models/paged-result.model';
   providedIn: 'root'
 })
 export class AuditLogsService {
-  private readonly baseUrl = 'https://localhost:7233/api/audit-logs';
+  private readonly baseUrl = `${apiBaseUrl}/audit-logs`;
 
   constructor(private http: HttpClient) { }
 
