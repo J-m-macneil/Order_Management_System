@@ -11,8 +11,12 @@ public class UserDto
     public string LastName { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
 
+    public int RoleId { get; set; }
     public string Role { get; set; } = string.Empty;
+
+    public int DepartmentId { get; set; }
     public string Department { get; set; } = string.Empty;
+    public string? JobTitle { get; set; }
 
     public bool IsActive { get; set; }
 

@@ -1,0 +1,85 @@
+using Application.Features.Users.Commands.CreateUser;
+using Application.Features.Users.Commands.UpdateUser;
+using Application.Features.Users.Queries.GetDepartments;
+using Application.Features.Users.Queries.GetRoles;
+using Application.Features.Users.Queries.GetUserById;
+using Application.Features.Users.Queries.GetUsers;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Server.Controllers;
+
+[ApiController]
+[Route("api/users")]
+[Authorize(Policy = "AdminOnly")]
+public class UsersController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    public UsersController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get([FromQuery] GetUsersQuery query, CancellationToken ct)
+    {
+        var result = await _mediator.Send(query, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetUserByIdQuery { UserId = id }, ct);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetRoles(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetRolesQuery(), ct);
+        return Ok(result);
+    }
+
+    [HttpGet("departments")]
+    public async Task<IActionResult> GetDepartments(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetDepartmentsQuery(), ct);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateUserCommand command, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _mediator.Send(command, ct);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, UpdateUserCommand command, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new UpdateUserRequest
+            {
+                UserId = id,
+                Data = command
+            }, ct);
+
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+}

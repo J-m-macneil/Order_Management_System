@@ -1,6 +1,8 @@
 using Application.Interfaces;
+using Domain.Repositories;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
+using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Seed;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IDataSeeder, Persistence.Seed.DataSeeder>();
 
         return services;

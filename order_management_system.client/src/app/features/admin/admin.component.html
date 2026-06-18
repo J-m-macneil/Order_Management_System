@@ -1,121 +1,327 @@
-<!-- Page Header -->
-<div class="mb-8 flex items-center justify-between">
-  <div>
-    <h1 class="brand-page-title">Admin Panel<span class="brand-page-dot" aria-hidden="true">.</span></h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-2">Manage users and system settings</p>
+<ng-container *ngIf="!showUserForm">
+  <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+      <h1 class="brand-page-title">Admin Panel<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-2">Manage users, access and role assignments</p>
+    </div>
+    <button type="button"
+            class="app-primary-button px-4 py-2"
+            (click)="openCreateForm()">
+      + New User
+    </button>
   </div>
-  <button class="app-primary-button px-4 py-2">
-    + New User
-  </button>
-</div>
 
-<div class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
-        <tr>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            User
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Email
-          </th>
-          <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Role
-          </th>
-          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Status
-          </th>
-          <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-        <tr *ngFor="let user of pagedUsers" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2">
-              <div [class]="'w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ' + user.avatarClass">
-                {{ user.initials }}
+  <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+    <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+  </div>
+
+  <div class="mb-6">
+    <div class="flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <span class="app-search-icon absolute left-4 top-1/2 -translate-y-1/2">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="24"
+               height="24"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2"
+               stroke-linecap="round"
+               stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+            <path d="M21 21l-6 -6" />
+          </svg>
+        </span>
+        <input type="search"
+               [(ngModel)]="searchTerm"
+               (input)="applyFilters()"
+               placeholder="Search users..."
+               class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all" />
+      </div>
+
+      <button type="button"
+              (click)="toggleFilters()"
+              class="app-secondary-button gap-2 px-4 py-3">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="20"
+             height="20"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
+        </svg>
+        <span>Filters</span>
+        <span *ngIf="roleFilter || statusFilter"
+              class="ml-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
+          {{ (roleFilter ? 1 : 0) + (statusFilter ? 1 : 0) }}
+        </span>
+      </button>
+    </div>
+
+    <div *ngIf="showFilters()"
+         class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Role</label>
+        <select [(ngModel)]="roleFilter"
+                (change)="applyFilters()"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+          <option [ngValue]="null">All roles</option>
+          <option *ngFor="let role of roles" [ngValue]="role.roleId">{{ role.name }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Status</label>
+        <select [(ngModel)]="statusFilter"
+                (change)="applyFilters()"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="flex items-end">
+        <button type="button"
+                class="app-secondary-button px-4 py-2 whitespace-nowrap"
+                (click)="clearFilters()">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+          <tr>
+            <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">User</th>
+            <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Email</th>
+            <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Role</th>
+            <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Department</th>
+            <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Status</th>
+            <th class="text-center text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-4 px-6">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+          <tr *ngFor="let user of users" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-800 dark:bg-slate-700 text-white text-xs font-medium">
+                  {{ getInitials(user) }}
+                </div>
+                <div>
+                  <div class="text-slate-900 dark:text-white font-medium">{{ user.fullName }}</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">{{ user.username }}</div>
+                </div>
               </div>
-              <div>
-                <div class="text-slate-900 dark:text-white font-medium">{{ user.name }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">{{ user.username }}</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-slate-600 dark:text-slate-300">{{ user.email }}</td>
-          <td class="px-6 py-4">
-            <span [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + user.roleClass">
-              {{ user.role }}
-            </span>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <span [class]="user.isActive
-              ? 'inline-flex px-2 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium'
-              : 'inline-flex px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium'">
-              {{ user.isActive ? 'Active' : 'Inactive' }}
-            </span>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <div class="flex items-center justify-center gap-2">
-              <button class="app-link-button text-xs">
+            </td>
+            <td class="px-6 py-4 text-slate-600 dark:text-slate-300">{{ user.email }}</td>
+            <td class="px-6 py-4">
+              <span [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getRoleClass(user.role)">
+                {{ user.role }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+              <div>{{ user.department }}</div>
+              <div *ngIf="user.jobTitle" class="text-xs text-slate-500 dark:text-slate-400">{{ user.jobTitle }}</div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span [class]="user.isActive
+                ? 'inline-flex px-2 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium'
+                : 'inline-flex px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium'">
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button type="button"
+                      class="app-link-button text-xs"
+                      (click)="openEditForm(user)">
                 Edit
               </button>
-              <button class="app-danger-link text-xs">
-                Remove
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div *ngIf="pagedUsers.length === 0" class="text-center py-12">
-    <p class="text-slate-500 dark:text-slate-400">No users found.</p>
-  </div>
-
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-4 border-t border-slate-100 dark:border-slate-700">
-    <div class="text-sm text-slate-600 dark:text-slate-400">
-      Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
-      <span *ngIf="totalCount">({{ totalCount }} users)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="flex flex-wrap items-center gap-3">
-      <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-        Page size
-        <select [(ngModel)]="pageSize"
-                (ngModelChange)="onPageSizeChange($event)"
-                class="px-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-          <option *ngFor="let option of pageSizeOptions"
-                  [ngValue]="option">
-            {{ option }}
-          </option>
-        </select>
-      </label>
+    <div *ngIf="isLoading" class="text-center py-12">
+      <p class="text-slate-500 dark:text-slate-400">Loading users...</p>
+    </div>
 
-      <button type="button"
-              (click)="goToPreviousPage()"
-              [disabled]="!hasPreviousPage"
-              class="app-pagination-button"
-              aria-label="Previous page">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path d="M12 5L7 10L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M7.5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
+    <div *ngIf="!isLoading && users.length === 0" class="text-center py-12">
+      <p class="text-slate-500 dark:text-slate-400">No users found.</p>
+    </div>
 
-      <button type="button"
-              (click)="goToNextPage()"
-              [disabled]="!hasNextPage"
-              class="app-pagination-button"
-              aria-label="Next page">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path d="M8 5L13 10L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M12.5 10H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+      <div class="text-sm text-slate-600 dark:text-slate-400">
+        Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
+        <span *ngIf="totalCount">({{ totalCount }} users)</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+          Page size
+          <select [(ngModel)]="pageSize"
+                  (ngModelChange)="onPageSizeChange($event)"
+                  class="px-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </label>
+
+        <button type="button"
+                (click)="goToPreviousPage()"
+                [disabled]="!hasPreviousPage"
+                class="app-pagination-button"
+                aria-label="Previous page">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M12 5L7 10L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7.5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <button type="button"
+                (click)="goToNextPage()"
+                [disabled]="!hasNextPage"
+                class="app-pagination-button"
+                aria-label="Next page">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M8 5L13 10L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M12.5 10H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
-</div>
+</ng-container>
+
+<ng-container *ngIf="showUserForm">
+  <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+      <button type="button"
+              class="app-link-button mb-3"
+              (click)="closeUserForm()">
+        Back to Users
+      </button>
+      <h1 class="brand-page-title">
+        {{ selectedUser ? 'Edit User' : 'Create User' }}<span class="brand-page-dot" aria-hidden="true">.</span>
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-2">
+        {{ selectedUser ? 'Update access, role and account status' : 'Create a new user and assign their role' }}
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
+    <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+  </div>
+
+  <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="form-card p-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">User Details</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="block">
+            <span class="form-label">First name</span>
+            <input type="text" formControlName="firstName" class="form-input" />
+          </label>
+
+          <label class="block">
+            <span class="form-label">Last name</span>
+            <input type="text" formControlName="lastName" class="form-input" />
+          </label>
+
+          <label class="block">
+            <span class="form-label">Email</span>
+            <input type="email" formControlName="email" class="form-input" />
+          </label>
+
+          <label class="block">
+            <span class="form-label">Username</span>
+            <input type="text" formControlName="username" class="form-input" />
+          </label>
+
+          <label class="block">
+            <span class="form-label">
+              {{ selectedUser ? 'New password' : 'Password' }}
+            </span>
+            <input type="password" formControlName="password" autocomplete="new-password" class="form-input" />
+            <span *ngIf="selectedUser" class="block mt-1 text-xs text-slate-500 dark:text-slate-400">Leave blank to keep the current password.</span>
+          </label>
+
+          <label class="block">
+            <span class="form-label">Job title</span>
+            <input type="text" formControlName="jobTitle" class="form-input" />
+          </label>
+        </div>
+      </div>
+
+      <div class="form-card p-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Access Details</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="block">
+            <span class="form-label">Role</span>
+            <select formControlName="roleId" class="form-input">
+              <option [ngValue]="null">Select role</option>
+              <option *ngFor="let role of roles" [ngValue]="role.roleId">{{ role.name }}</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="form-label">Department</span>
+            <select formControlName="departmentId" class="form-input">
+              <option [ngValue]="null">Select department</option>
+              <option *ngFor="let department of departments" [ngValue]="department.departmentId">{{ department.name }}</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="form-card p-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Account Status</h2>
+
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700">
+          <span class="text-sm text-slate-600 dark:text-slate-400">Status</span>
+          <span [class]="userForm.get('isActive')?.value
+            ? 'inline-flex px-3 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium'
+            : 'inline-flex px-3 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium'">
+            {{ userForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+
+        <label class="mt-4 inline-flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+          <input type="checkbox" formControlName="isActive" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+          Active user
+        </label>
+      </div>
+
+      <div class="form-card p-6">
+        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">User Actions</h2>
+
+        <div class="space-y-3">
+          <button type="submit"
+                  class="app-primary-button w-full px-4 py-3"
+                  [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save User' }}
+          </button>
+
+          <button type="button"
+                  class="app-secondary-button w-full px-4 py-3"
+                  (click)="closeUserForm()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</ng-container>

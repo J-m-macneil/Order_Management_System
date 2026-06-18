@@ -1071,13 +1071,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.HasOne(x => x.CreatedByUser)
-                .WithMany()
+                .WithMany(x => x.CreatedOrders)
                 .HasForeignKey(x => x.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             entity.HasOne(x => x.AssignedToUser)
-                .WithMany()
+                .WithMany(x => x.AssignedOrders)
                 .HasForeignKey(x => x.AssignedToUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
