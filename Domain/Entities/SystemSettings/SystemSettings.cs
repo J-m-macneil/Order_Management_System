@@ -1,4 +1,6 @@
-﻿public class SystemSetting
+namespace Domain.Entities.SystemSettings;
+
+public class SystemSetting
 {
     public int SystemSettingId { get; set; }
 

@@ -2,12 +2,29 @@
   <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
     <div>
       <h1 class="brand-page-title">Admin Panel<span class="brand-page-dot" aria-hidden="true">.</span></h1>
-      <p class="text-slate-500 dark:text-slate-400 mt-2">Manage users, access and role assignments</p>
+      <p class="text-slate-500 dark:text-slate-400 mt-2">Manage users, access, roles and system configuration</p>
     </div>
     <button type="button"
+            *ngIf="activeSection === 'users'"
             class="app-primary-button px-4 py-2"
             (click)="openCreateForm()">
       + New User
+    </button>
+  </div>
+
+  <div class="mb-6 flex flex-wrap gap-3">
+    <button type="button"
+            class="admin-tab-button"
+            [class.admin-tab-active]="activeSection === 'users'"
+            (click)="showUsersSection()">
+      Users
+    </button>
+
+    <button type="button"
+            class="admin-tab-button"
+            [class.admin-tab-active]="activeSection === 'settings'"
+            (click)="showSettingsSection()">
+      System Settings
     </button>
   </div>
 
@@ -15,7 +32,11 @@
     <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
   </div>
 
-  <div class="mb-6">
+  <div *ngIf="settingsMessage && activeSection === 'settings'" class="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded-lg">
+    <p class="text-emerald-700 dark:text-emerald-300">{{ settingsMessage }}</p>
+  </div>
+
+  <div *ngIf="activeSection === 'users'" class="mb-6">
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <span class="app-search-icon absolute left-4 top-1/2 -translate-y-1/2">
@@ -96,7 +117,7 @@
     </div>
   </div>
 
-  <div class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
+  <div *ngIf="activeSection === 'users'" class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
@@ -198,6 +219,74 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <div *ngIf="activeSection === 'settings'" class="space-y-6">
+    <div *ngIf="isLoadingSettings" class="text-center py-12">
+      <p class="text-slate-500 dark:text-slate-400">Loading system settings...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoadingSettings">
+      <div *ngFor="let group of getSettingGroups()" class="form-card p-6">
+        <div class="mb-6">
+          <h2 class="text-lg font-medium text-slate-900 dark:text-white">{{ group }}</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Controlled settings used by the application workflow.</p>
+        </div>
+
+        <div class="divide-y divide-slate-100 dark:divide-slate-700">
+          <div *ngFor="let setting of getSettingsByGroup(group)" class="py-5 first:pt-0 last:pb-0">
+            <div class="grid grid-cols-1 xl:grid-cols-[1fr_18rem_auto] gap-4 xl:items-center">
+              <div>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
+                  {{ formatSettingName(setting.settingKey) }}
+                </h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ setting.description }}</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">{{ setting.settingKey }} · {{ setting.dataType }}</p>
+              </div>
+
+              <div>
+                <label class="sr-only" [for]="'setting-' + setting.systemSettingId">
+                  {{ formatSettingName(setting.settingKey) }}
+                </label>
+
+                <label *ngIf="isBooleanSetting(setting)"
+                       class="inline-flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                  <input [id]="'setting-' + setting.systemSettingId"
+                         type="checkbox"
+                         class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                         [checked]="settingValues[setting.systemSettingId] === 'true'"
+                         (change)="setBooleanSetting(setting, $any($event.target).checked)" />
+                  {{ settingValues[setting.systemSettingId] === 'true' ? 'Enabled' : 'Disabled' }}
+                </label>
+
+                <input *ngIf="!isBooleanSetting(setting)"
+                       [id]="'setting-' + setting.systemSettingId"
+                       [type]="setting.dataType === 'integer' || setting.dataType === 'decimal' ? 'number' : 'text'"
+                       [step]="setting.dataType === 'decimal' ? '0.01' : '1'"
+                       [(ngModel)]="settingValues[setting.systemSettingId]"
+                       class="form-input" />
+              </div>
+
+              <div class="flex gap-2 xl:justify-end">
+                <button type="button"
+                        class="app-secondary-button px-4 py-2"
+                        [disabled]="!isSettingDirty(setting) || isSavingSetting(setting)"
+                        (click)="resetSetting(setting)">
+                  Reset
+                </button>
+
+                <button type="button"
+                        class="app-primary-button px-4 py-2"
+                        [disabled]="!isSettingDirty(setting) || isSavingSetting(setting)"
+                        (click)="saveSetting(setting)">
+                  {{ isSavingSetting(setting) ? 'Saving...' : 'Save' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
   </div>
 </ng-container>
 

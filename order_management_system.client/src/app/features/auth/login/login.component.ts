@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
@@ -38,18 +39,19 @@ export class LoginComponent {
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.authService.clearToken();
 
-    this.http.post<any>('https://localhost:7233/api/auth/login', this.loginForm.value).subscribe({
+    this.http.post<any>('https://localhost:7233/api/auth/login', this.loginForm.value)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+      }))
+      .subscribe({
       next: (response) => {
         this.authService.setToken(response.token);
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
-        this.errorMessage = 'Invalid username/email or password.';
-        this.isLoading = false;
-      },
-      complete: () => {
-        this.isLoading = false;
+      error: (err) => {
+        this.errorMessage = err?.error?.message || 'Invalid username/email or password.';
       }
     });
   }

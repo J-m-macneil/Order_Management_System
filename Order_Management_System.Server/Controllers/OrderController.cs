@@ -22,6 +22,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "SalesOrAdmin")]
     public async Task<IActionResult> Create(CreateOrderCommand command)
     {
         var orderId = await _mediator.Send(command);
@@ -29,11 +30,23 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "SalesOrAdmin")]
     public async Task<IActionResult> Update(int id, UpdateOrderCommand command, CancellationToken ct)
     {
-        command.OrderId = id;
-        await _mediator.Send(command, ct);
-        return NoContent();
+        try
+        {
+            command.OrderId = id;
+            await _mediator.Send(command, ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet("{id}")]
@@ -51,11 +64,23 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{id}/status")]
+    [Authorize(Roles = "Sales,Operations,Admin")]
     public async Task<IActionResult> ChangeStatus(int id, ChangeOrderStatusCommand command)
     {
-        command.OrderId = id;
-        await _mediator.Send(command);
-        return NoContent();
+        try
+        {
+            command.OrderId = id;
+            await _mediator.Send(command);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet("{id}/history")]
@@ -66,6 +91,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id}/allowed-statuses")]
+    [Authorize(Roles = "Sales,Operations,Admin")]
     public async Task<IActionResult> GetAllowedStatuses(int id)
     {
         var result = await _mediator.Send(new GetAllowedStatusesQuery { OrderId = id });

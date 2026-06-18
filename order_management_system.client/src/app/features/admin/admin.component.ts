@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+import { SystemSetting } from '../../core/models/system-setting.model';
 import { Department, Role, User, UserSaveRequest } from '../../core/models/user-management.model';
+import { SystemSettingsService } from '../../core/services/system-settings.service';
 import { UsersService } from '../../core/services/users.service';
 
 @Component({
@@ -11,9 +13,14 @@ import { UsersService } from '../../core/services/users.service';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
+  activeSection: 'users' | 'settings' = 'users';
+
   users: User[] = [];
   roles: Role[] = [];
   departments: Department[] = [];
+  systemSettings: SystemSetting[] = [];
+  settingValues: Record<number, string> = {};
+  savingSettingIds = new Set<number>();
 
   userForm: FormGroup;
   selectedUser: User | null = null;
@@ -33,11 +40,14 @@ export class AdminComponent implements OnInit {
   filtersVisible = false;
 
   isLoading = false;
+  isLoadingSettings = false;
   isSaving = false;
   errorMessage = '';
+  settingsMessage = '';
 
   constructor(
     private usersService: UsersService,
+    private systemSettingsService: SystemSettingsService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
@@ -57,6 +67,21 @@ export class AdminComponent implements OnInit {
   ngOnInit(): void {
     this.loadReferenceData();
     this.loadUsers();
+    this.loadSystemSettings();
+  }
+
+  showUsersSection(): void {
+    this.activeSection = 'users';
+    this.showUserForm = false;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+  }
+
+  showSettingsSection(): void {
+    this.activeSection = 'settings';
+    this.showUserForm = false;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
   }
 
   loadReferenceData(): void {
@@ -111,6 +136,29 @@ export class AdminComponent implements OnInit {
         console.error('Failed to load users', err);
         this.errorMessage = 'Failed to load users.';
         this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadSystemSettings(): void {
+    this.isLoadingSettings = true;
+    this.settingsMessage = '';
+
+    this.systemSettingsService.getSettings().subscribe({
+      next: settings => {
+        this.systemSettings = settings;
+        this.settingValues = settings.reduce<Record<number, string>>((values, setting) => {
+          values[setting.systemSettingId] = setting.settingValue;
+          return values;
+        }, {});
+        this.isLoadingSettings = false;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error('Failed to load system settings', err);
+        this.errorMessage = 'Failed to load system settings.';
+        this.isLoadingSettings = false;
         this.cdr.detectChanges();
       }
     });
@@ -207,6 +255,36 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  saveSetting(setting: SystemSetting): void {
+    const value = this.settingValues[setting.systemSettingId];
+    const validationError = this.validateSettingValue(setting, value);
+
+    if (validationError) {
+      this.errorMessage = validationError;
+      this.settingsMessage = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.errorMessage = '';
+    this.settingsMessage = '';
+    this.savingSettingIds.add(setting.systemSettingId);
+
+    this.systemSettingsService.update(setting.systemSettingId, { settingValue: value.trim() }).subscribe({
+      next: () => {
+        this.savingSettingIds.delete(setting.systemSettingId);
+        this.settingsMessage = `${this.formatSettingName(setting.settingKey)} updated.`;
+        this.loadSystemSettings();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        console.error('Failed to update system setting', err);
+        this.savingSettingIds.delete(setting.systemSettingId);
+        this.errorMessage = err?.error?.message ?? 'Failed to update system setting.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   goToPreviousPage(): void {
     if (!this.hasPreviousPage) {
       return;
@@ -251,6 +329,54 @@ export class AdminComponent implements OnInit {
     return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
   }
 
+  getSettingsByGroup(group: string): SystemSetting[] {
+    return this.systemSettings.filter(setting => this.getSettingGroup(setting.settingKey) === group);
+  }
+
+  getSettingGroups(): string[] {
+    return ['Orders', 'Background Processing', 'Dashboard', 'Compliance'];
+  }
+
+  getSettingGroup(settingKey: string): string {
+    if (settingKey.includes('BackgroundJob')) {
+      return 'Background Processing';
+    }
+
+    if (settingKey.includes('Dashboard')) {
+      return 'Dashboard';
+    }
+
+    if (settingKey.includes('Sds') || settingKey.includes('Hazardous')) {
+      return 'Compliance';
+    }
+
+    return 'Orders';
+  }
+
+  formatSettingName(settingKey: string): string {
+    return settingKey.replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+
+  isSettingDirty(setting: SystemSetting): boolean {
+    return this.settingValues[setting.systemSettingId] !== setting.settingValue;
+  }
+
+  isSavingSetting(setting: SystemSetting): boolean {
+    return this.savingSettingIds.has(setting.systemSettingId);
+  }
+
+  isBooleanSetting(setting: SystemSetting): boolean {
+    return setting.dataType.toLowerCase() === 'boolean';
+  }
+
+  setBooleanSetting(setting: SystemSetting, checked: boolean): void {
+    this.settingValues[setting.systemSettingId] = checked ? 'true' : 'false';
+  }
+
+  resetSetting(setting: SystemSetting): void {
+    this.settingValues[setting.systemSettingId] = setting.settingValue;
+  }
+
   private buildSaveRequest(): UserSaveRequest {
     const value = this.userForm.value;
 
@@ -277,6 +403,29 @@ export class AdminComponent implements OnInit {
     this.errorMessage = err?.error?.message ?? 'Failed to save user.';
     this.isSaving = false;
     this.cdr.detectChanges();
+  }
+
+  private validateSettingValue(setting: SystemSetting, value: string | undefined): string | null {
+    if (!value || !value.trim()) {
+      return `${this.formatSettingName(setting.settingKey)} requires a value.`;
+    }
+
+    const trimmed = value.trim();
+    const dataType = setting.dataType.toLowerCase();
+
+    if (dataType === 'integer' && !/^-?\d+$/.test(trimmed)) {
+      return `${this.formatSettingName(setting.settingKey)} must be a whole number.`;
+    }
+
+    if (dataType === 'decimal' && Number.isNaN(Number(trimmed))) {
+      return `${this.formatSettingName(setting.settingKey)} must be a decimal number.`;
+    }
+
+    if (dataType === 'boolean' && trimmed !== 'true' && trimmed !== 'false') {
+      return `${this.formatSettingName(setting.settingKey)} must be true or false.`;
+    }
+
+    return null;
   }
 
   private getStatusFilterValue(): boolean | null {

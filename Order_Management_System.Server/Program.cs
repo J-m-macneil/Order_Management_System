@@ -9,8 +9,11 @@ using Infrastructure.Identity;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Server.Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 public static class Program
@@ -119,6 +122,34 @@ public static class Program
                     ),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var userIdValue =
+                            context.Principal?.FindFirstValue(JwtRegisteredClaimNames.Sub) ??
+                            context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                        if (!int.TryParse(userIdValue, out var userId))
+                        {
+                            context.Fail("Invalid token.");
+                            return;
+                        }
+
+                        var dbContext = context.HttpContext.RequestServices
+                            .GetRequiredService<Infrastructure.Persistence.Context.AppDbContext>();
+
+                        var isActive = await dbContext.Users
+                            .AsNoTracking()
+                            .AnyAsync(x => x.UserId == userId && x.IsActive);
+
+                        if (!isActive)
+                        {
+                            context.Fail("User account is inactive.");
+                        }
+                    }
                 };
             });
 

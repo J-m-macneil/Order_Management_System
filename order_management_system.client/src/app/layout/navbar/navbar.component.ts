@@ -1,4 +1,5 @@
 import { Component, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 
@@ -14,6 +15,7 @@ export class NavbarComponent {
 
   constructor(
     private authService: AuthService,
+    private router: Router,
     public themeService: ThemeService
   ) {
     this.loadUserFromToken();
@@ -38,5 +40,18 @@ export class NavbarComponent {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  }
+
+  canViewAdmin(): boolean {
+    return this.authService.hasRole('Admin');
+  }
+
+  canViewAudit(): boolean {
+    return this.authService.hasRole('Admin');
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

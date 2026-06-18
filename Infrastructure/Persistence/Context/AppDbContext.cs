@@ -5,6 +5,7 @@ using Domain.Entities.Orders;
 using Domain.Entities.Organisation;
 using Domain.Entities.Products;
 using Domain.Entities.Status;
+using Domain.Entities.SystemSettings;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Context;
@@ -35,7 +36,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<Notification> Notifications => Set<Notification>();
-    public DbSet<SystemSetting> SystemSettings => Set <SystemSetting> ();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
       => base.SaveChangesAsync(cancellationToken);
