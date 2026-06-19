@@ -28,8 +28,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
       ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=DevSql_2026_Strong!Pass;TrustServerCertificate=True"
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
 
   back-client:
     build:
@@ -40,9 +40,9 @@ services:
     depends_on:
       - back-api
     environment:
-      API_BASE_URL: "http://localhost:8080/api"
+      API_BASE_URL: "/api"
     ports:
-      - "4200:80"
+      - "80:80"
 
 volumes:
   back-db-data:
