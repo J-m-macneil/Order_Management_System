@@ -30,14 +30,15 @@ public class DashboardRepository : IDashboardRepository
             .Where(o => o.DeletedAt == null)
             .SumAsync(o => o.TotalAmount, ct);
 
-        var ordersByStatus = await _db.Orders
-            .Include(o => o.OrderStatus)
-            .Where(o => o.DeletedAt == null)
-            .GroupBy(o => o.OrderStatus.Name)
-            .Select(g => new StatusCount
+        var ordersByStatus = await _db.OrderStatuses
+            .AsNoTracking()
+            .OrderBy(s => s.DisplayOrder)
+            .Select(s => new StatusCount
             {
-                Status = g.Key,
-                Count = g.Count()
+                Status = s.Name,
+                Count = _db.Orders.Count(o =>
+                    o.DeletedAt == null &&
+                    o.OrderStatusId == s.OrderStatusId)
             })
             .ToListAsync(ct);
 
