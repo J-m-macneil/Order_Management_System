@@ -41,8 +41,23 @@ services:
       - back-api
     environment:
       API_BASE_URL: "/api"
+    expose:
+      - "80"
+
+  back-proxy:
+    image: caddy:2-alpine
+    container_name: back-proxy
+    depends_on:
+      - back-client
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - back-caddy-data:/data
+      - back-caddy-config:/config
 
 volumes:
   back-db-data:
+  back-caddy-data:
+  back-caddy-config:

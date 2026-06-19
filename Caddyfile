@@ -1,0 +1,3 @@
+back.software, www.back.software {
+    reverse_proxy back-client:80
+}
