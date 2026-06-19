@@ -18,15 +18,10 @@ export class NavbarComponent {
     private router: Router,
     public themeService: ThemeService
   ) {
-    this.loadUserFromToken();
-  }
-
-  private loadUserFromToken(): void {
-    const role = this.authService.getUserRole();
-    const name = this.authService.getUserFullName();
-
-    this.currentRole.set(role ?? 'User');
-    this.userName.set(name ?? 'User');
+    this.authService.currentUser$.subscribe(user => {
+      this.currentRole.set(user?.role ?? 'User');
+      this.userName.set(user?.fullName ?? 'User');
+    });
   }
 
   toggleDarkMode(): void {

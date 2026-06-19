@@ -1,86 +1,86 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, catchError, map, of, tap } from 'rxjs';
+import { apiBaseUrl } from '../config/api-url';
+
+export interface AuthUser {
+  userId: number;
+  username: string;
+  fullName: string;
+  role: string;
+}
+
+interface LoginResponse {
+  expiresAtUtc: string;
+  user: AuthUser;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  getToken(): string | null {
-    return localStorage.getItem('auth_token');
-  }
+  private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
 
-  setToken(token: string): void {
-    localStorage.setItem('auth_token', token);
-  }
+  currentUser$ = this.currentUserSubject.asObservable();
 
-  clearToken(): void {
-    localStorage.removeItem('auth_token');
+  constructor(private http: HttpClient) { }
+
+  login(credentials: { usernameOrEmail: string; password: string }): Observable<AuthUser> {
+    return this.http.post<LoginResponse>(`${apiBaseUrl}/auth/login`, credentials).pipe(
+      tap(response => this.setCurrentUser(response.user)),
+      map(response => response.user)
+    );
   }
 
   logout(): void {
-    this.clearToken();
+    this.http.post<void>(`${apiBaseUrl}/auth/logout`, {}).subscribe();
+    this.setCurrentUser(null);
+  }
+
+  ensureAuthenticated(): Observable<boolean> {
+    if (this.currentUserSubject.value) {
+      return of(true);
+    }
+
+    return this.loadCurrentUser().pipe(
+      map(user => !!user),
+      catchError(() => of(false))
+    );
+  }
+
+  loadCurrentUser(): Observable<AuthUser | null> {
+    return this.http.get<AuthUser>(`${apiBaseUrl}/auth/me`).pipe(
+      tap(user => this.setCurrentUser(user)),
+      map(user => user),
+      catchError(() => {
+        this.setCurrentUser(null);
+        return of(null);
+      })
+    );
   }
 
   isLoggedIn(): boolean {
-    const payload = this.getTokenPayload();
-
-    if (!payload) {
-      return false;
-    }
-
-    if (!payload.exp) {
-      return true;
-    }
-
-    return payload.exp * 1000 > Date.now();
-  }
-
-  private getTokenPayload(): any | null {
-    const token = this.getToken();
-
-    if (!token) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch {
-      return null;
-    }
+    return !!this.currentUserSubject.value;
   }
 
   getUserRole(): string | null {
-    const payload = this.getTokenPayload();
-
-    return (
-      payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
-      payload?.role ||
-      null
-    );
+    return this.currentUserSubject.value?.role ?? null;
   }
 
   getUserFullName(): string | null {
-    const payload = this.getTokenPayload();
-
-    return (
-      payload?.fullName ||
-      this.getUsername() ||
-      null
-    );
+    return this.currentUserSubject.value?.fullName ?? null;
   }
 
   getUsername(): string | null {
-    const payload = this.getTokenPayload();
-
-    return (
-      payload?.unique_name ||
-      payload?.['unique_name'] ||
-      payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
-      null
-    );
+    return this.currentUserSubject.value?.username ?? null;
   }
 
   hasRole(...roles: string[]): boolean {
     const userRole = this.getUserRole();
     return !!userRole && roles.includes(userRole);
+  }
+
+  private setCurrentUser(user: AuthUser | null): void {
+    this.currentUserSubject.next(user);
   }
 }

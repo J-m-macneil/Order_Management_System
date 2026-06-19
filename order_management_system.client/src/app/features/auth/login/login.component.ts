@@ -1,8 +1,6 @@
-import { apiBaseUrl } from '../../../core/config/api-url';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -21,7 +19,6 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private authService: AuthService,
     private router: Router,
     public themeService: ThemeService
@@ -40,15 +37,13 @@ export class LoginComponent {
 
     this.isLoading = true;
     this.errorMessage = '';
-    this.authService.clearToken();
 
-    this.http.post<any>(`${apiBaseUrl}/auth/login`, this.loginForm.value)
+    this.authService.login(this.loginForm.value)
       .pipe(finalize(() => {
         this.isLoading = false;
       }))
       .subscribe({
-      next: (response) => {
-        this.authService.setToken(response.token);
+      next: () => {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

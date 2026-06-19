@@ -93,7 +93,8 @@ public static class Program
                         "https://localhost:53923",
                         "http://localhost:4200")
                       .AllowAnyHeader()
-                      .AllowAnyMethod();
+                      .AllowAnyMethod()
+                      .AllowCredentials();
             });
         });
 
@@ -129,6 +130,21 @@ public static class Program
 
                 options.Events = new JwtBearerEvents
                 {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Cookies.TryGetValue("__Host-back_auth", out var token))
+                        {
+                            context.Token = token;
+                            return Task.CompletedTask;
+                        }
+
+                        if (context.Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Fail("Bearer tokens are not accepted. Use the secure auth cookie.");
+                        }
+
+                        return Task.CompletedTask;
+                    },
                     OnTokenValidated = async context =>
                     {
                         var userIdValue =
