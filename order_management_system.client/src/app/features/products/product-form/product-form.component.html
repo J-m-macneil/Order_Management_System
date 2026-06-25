@@ -8,13 +8,13 @@
       {{ isEditMode ? 'Update product details and safety information' : 'Create a new chemical product' }}
     </p>
   </div>
-  <a routerLink="/products" class="app-tertiary-button px-0 pt-2 pb-0">
+  <a routerLink="/products" class="app-tertiary-button app-back-link">
     ← Back to Products
   </a>
 </div>
 
 <!-- Loading -->
-<div *ngIf="isLoading" class="text-center py-12">
+<div *ngIf="isLoading" class="app-empty-state">
   <p class="text-slate-500 dark:text-slate-400">Loading...</p>
 </div>
 

@@ -11,19 +11,19 @@
 </div>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="app-stat-grid app-stat-grid--4">
   <div *ngFor="let stat of stats" class="metric-card">
-    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">
+    <p class="metric-card-label">
       {{ stat.label }}
     </p>
-    <p [class]="'text-3xl font-semibold text-slate-900 dark:text-white mt-2 ' + stat.color">
+    <p class="metric-card-value">
       {{ stat.value }}
     </p>
   </div>
 </div>
 
 <!-- Search and Filters -->
-<div class="mb-6">
+<div class="app-filter-section">
   <div class="app-responsive-action-row">
     <a routerLink="/products/create"
        class="app-primary-button px-4 py-3">
@@ -31,7 +31,7 @@
     </a>
   </div>
 
-  <div class="flex flex-col sm:flex-row gap-3">
+  <div class="app-search-row">
 
     <!-- Search -->
     <div class="relative flex-1">
@@ -40,7 +40,7 @@
              [(ngModel)]="searchTerm"
              (input)="applyFilters()"
              placeholder="Search by SKU, product name, pack size, category, unit, or hazard class..."
-             class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all" />
+             class="app-search-input" />
     </div>
 
     <!-- Filter Button -->
@@ -72,14 +72,14 @@
 
   <!-- Filter Panel -->
   <div *ngIf="showFilters()"
-       class="mt-4 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+       class="app-filter-panel app-filter-panel--3">
 
     <!-- Status -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Status</label>
+      <label class="form-label">Status</label>
       <select [(ngModel)]="activeFilter"
               (change)="applyFilters()"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+              class="form-input">
         <option value="">All products</option>
         <option value="active">Active Products</option>
         <option value="inactive">Inactive Products</option>
@@ -88,10 +88,10 @@
 
     <!-- Restricted -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Restricted</label>
+      <label class="form-label">Restricted</label>
       <select [(ngModel)]="restrictedFilter"
               (change)="applyFilters()"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+              class="form-input">
         <option value="">All</option>
         <option value="restricted">Restricted</option>
         <option value="unrestricted">Unrestricted</option>
@@ -100,10 +100,10 @@
 
     <!-- Category -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Category</label>
+      <label class="form-label">Category</label>
       <select [(ngModel)]="categoryFilter"
               (change)="applyFilters()"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+              class="form-input">
         <option [ngValue]="null">All categories</option>
         <option *ngFor="let category of categories" [ngValue]="category.productCategoryId">
           {{ category.name }}
@@ -113,10 +113,10 @@
 
     <!-- Hazard Class -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hazard Class</label>
+      <label class="form-label">Hazard Class</label>
       <select [(ngModel)]="hazardClassFilter"
               (change)="applyFilters()"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+              class="form-input">
         <option [ngValue]="null">All hazard classes</option>
         <option *ngFor="let hazardClass of hazardClasses" [ngValue]="hazardClass.hazardClassId">
           {{ hazardClass.name }}
@@ -126,10 +126,10 @@
 
     <!-- Hazardous -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hazardous</label>
+      <label class="form-label">Hazardous</label>
       <select [(ngModel)]="hazardousFilter"
               (change)="applyFilters()"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+              class="form-input">
         <option value="">All</option>
         <option value="hazardous">Hazardous</option>
         <option value="nonhazardous">Non-Hazardous</option>
@@ -137,7 +137,7 @@
     </div>
 
     <!-- Clear Filters -->
-    <div class="flex items-end lg:col-span-3">
+    <div class="app-filter-actions app-filter-actions--full">
       <button type="button"
               (click)="clearFilters()"
               class="app-secondary-button px-4 py-2 whitespace-nowrap">
@@ -149,7 +149,7 @@
 </div>
 
 <!-- Loading State -->
-<div *ngIf="isLoading" class="text-center py-12">
+<div *ngIf="isLoading" class="app-empty-state">
   <p class="text-slate-500 dark:text-slate-400">Loading products...</p>
 </div>
 
@@ -228,7 +228,7 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="filteredProducts.length === 0" class="text-center py-12">
+  <div *ngIf="filteredProducts.length === 0" class="app-empty-state">
     <p class="text-slate-500 dark:text-slate-400">No products found.</p>
   </div>
 

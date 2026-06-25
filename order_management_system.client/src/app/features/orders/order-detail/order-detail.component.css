@@ -1,12 +1,3 @@
-.detail-card {
-  @apply bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg p-6;
-}
-
-:host-context(.dark) .detail-card {
-  background: var(--app-surface);
-  border-color: var(--app-border);
-}
-
 .order-detail-title {
   font-size: 2rem;
 }

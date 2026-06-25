@@ -1,8 +1,0 @@
-.metric-card {
-  @apply bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg p-6 hover:shadow-sm transition-shadow;
-}
-
-:host-context(.dark) .metric-card {
-  background: var(--app-surface);
-  border-color: var(--app-border);
-}

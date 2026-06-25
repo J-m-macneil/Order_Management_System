@@ -30,7 +30,7 @@ export class CustomersComponent implements OnInit {
 
   private filtersVisible = false;
 
-  stats: { label: string; value: string | number; color: string }[] = [];
+  stats: { label: string; value: string | number }[] = [];
   industries: string[] = [];
 
   constructor(
@@ -49,18 +49,15 @@ export class CustomersComponent implements OnInit {
         this.stats = [
           {
             label: 'Total Customers',
-            value: summary.totalCustomers,
-            color: ''
+            value: summary.totalCustomers
           },
           {
             label: 'Active',
-            value: summary.activeCustomers,
-            color: 'text-emerald-600 dark:text-emerald-400'
+            value: summary.activeCustomers
           },
           {
             label: 'Inactive',
-            value: summary.inactiveCustomers,
-            color: 'text-red-600 dark:text-red-400'
+            value: summary.inactiveCustomers
           }
         ];
         this.cdr.detectChanges();

@@ -20,10 +20,10 @@
 
 <div *ngIf="!isLoading && !errorMessage" class="dashboard-layout">
   <!-- Metric Cards Grid -->
-  <div class="stats-strip">
+  <div class="app-stat-grid app-stat-grid--4 app-stat-grid--flush">
     <div *ngFor="let metric of metrics" class="metric-card">
-      <p>{{ metric.label }}</p>
-      <strong>
+      <p class="metric-card-label">{{ metric.label }}</p>
+      <strong class="metric-card-value">
         {{ metric.type === 'totalValue' ? formatCurrency(metric.value) : (metric.value | number) }}
       </strong>
     </div>

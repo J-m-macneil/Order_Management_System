@@ -1,5 +1,5 @@
 <!-- Loading State -->
-<div *ngIf="isLoading" class="text-center py-12">
+<div *ngIf="isLoading" class="app-empty-state">
   <p class="text-slate-500 dark:text-slate-400">Loading order details...</p>
 </div>
 
@@ -10,21 +10,32 @@
 
 <!-- Order Detail Content -->
 <div *ngIf="order as currentOrder" class="space-y-6">
-  <!-- Back Button -->
-  <div class="mb-6">
-    <a routerLink="/orders" class="app-tertiary-button gap-2 px-0 pt-2 pb-0">
-      ← Back to Orders
+  <!-- Page Header -->
+  <div class="app-page-header">
+    <div>
+      <h1 class="brand-page-title order-detail-title">
+        {{ currentOrder.orderNumber }}<span class="brand-page-dot" aria-hidden="true">.</span>
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
+    </div>
+    <a routerLink="/orders" class="app-tertiary-button app-back-link">
+      &larr; Back to Orders
     </a>
   </div>
 
-  <!-- Header Card -->
-  <div class="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg p-8">
-    <div class="flex items-start justify-between mb-6">
-      <div>
-        <h1 class="brand-page-title order-detail-title">
-          {{ currentOrder.orderNumber }}<span class="brand-page-dot" aria-hidden="true">.</span>
-        </h1>
-        <p class="text-slate-500 dark:text-slate-400 mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
+  <!-- Status Strip -->
+  <div class="detail-card">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="space-y-3">
+        <div class="flex flex-wrap gap-2">
+          <span class="inline-flex px-3 py-1 rounded-md bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-medium">
+            {{ currentOrder.orderStatusName || 'Status ' + currentOrder.orderStatusId }}
+          </span>
+          <span *ngIf="currentOrder.isPriorityOrder" class="inline-flex px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+            Priority Order
+          </span>
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-300">{{ getEditLockMessage() }}</p>
       </div>
       <a *ngIf="canEditOrder()"
          [routerLink]="['/orders', currentOrder.orderId, 'edit']"
@@ -32,20 +43,6 @@
         Edit
       </a>
     </div>
-
-    <!-- Badges -->
-    <div class="flex flex-wrap gap-2">
-      <span class="inline-flex px-3 py-1 rounded-md bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-medium">
-        {{ currentOrder.orderStatusName || 'Status ' + currentOrder.orderStatusId }}
-      </span>
-      <span *ngIf="currentOrder.isPriorityOrder" class="inline-flex px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
-        Priority Order
-      </span>
-    </div>
-
-    <p class="mt-4 text-sm text-slate-600 dark:text-slate-300">
-      {{ getEditLockMessage() }}
-    </p>
   </div>
 
   <!-- Main Content Grid -->

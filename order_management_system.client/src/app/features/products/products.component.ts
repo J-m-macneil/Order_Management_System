@@ -34,7 +34,7 @@ export class ProductsComponent implements OnInit {
 
   private filtersVisible = false;
 
-  stats: { label: string; value: string | number; color: string }[] = [];
+  stats: { label: string; value: string | number }[] = [];
   categories: ProductCategory[] = [];
   hazardClasses: HazardClass[] = [];
 
@@ -75,23 +75,19 @@ export class ProductsComponent implements OnInit {
         this.stats = [
           {
             label: 'Total Products',
-            value: summary.totalProducts,
-            color: ''
+            value: summary.totalProducts
           },
           {
             label: 'Active Products',
-            value: summary.activeProducts,
-            color: 'text-emerald-600 dark:text-emerald-400'
+            value: summary.activeProducts
           },
           {
             label: 'Restricted',
-            value: summary.restrictedProducts,
-            color: 'text-red-600 dark:text-red-400'
+            value: summary.restrictedProducts
           },
           {
             label: 'Hazardous',
-            value: summary.hazardousProducts,
-            color: 'text-amber-600 dark:text-amber-400'
+            value: summary.hazardousProducts
           }
         ];
         this.cdr.detectChanges();

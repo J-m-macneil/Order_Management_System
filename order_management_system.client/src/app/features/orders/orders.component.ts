@@ -6,7 +6,6 @@ import { Order } from '../../core/models/order.model';
   selector: 'app-orders',
   standalone: false,
   templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.css'],
 })
 export class OrdersComponent implements OnInit {
   orders: Order[] = [];
