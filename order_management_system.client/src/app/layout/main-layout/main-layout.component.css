@@ -12,7 +12,8 @@
   .app-shell {
     display: grid;
     grid-template-columns: 5rem minmax(0, 1fr);
-    min-height: calc(100vh - 3rem);
+    height: calc(100vh - 3rem);
+    min-height: 0;
     max-width: 1500px;
     margin: 0 auto;
     overflow: hidden;
@@ -29,23 +30,101 @@
 
   .app-content {
     min-width: 0;
-    max-height: calc(100vh - 3rem);
+    min-height: 0;
+    height: 100%;
     overflow: auto;
     padding: 2rem;
   }
 
-  @media (max-width: 900px) {
-    :host {
-      padding: 0.75rem;
-    }
-
-    .app-shell {
-      grid-template-columns: 1fr;
-      min-height: calc(100vh - 1.5rem);
-    }
-
-    .app-content {
-      max-height: none;
-      padding: 1rem;
-    }
+  .nav-shell {
+    display: block;
+    min-height: 0;
+    height: 100%;
   }
+
+  .mobile-nav-header,
+  .mobile-backdrop {
+    display: none;
+  }
+
+@media (max-width: 900px) {
+  :host {
+    padding: 0.75rem;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: calc(100vh - 1.5rem);
+  }
+
+  .mobile-nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4.75rem;
+    padding: 1rem;
+    border-bottom: 1px solid #8fa4c0;
+    background: #ffffff;
+  }
+
+  :host-context(.dark) .mobile-nav-header {
+    border-bottom-color: rgba(255,255,255,0.1);
+    background: #1b1e22;
+  }
+
+  .mobile-nav-logo {
+    display: block;
+    width: 2.5rem;
+    height: auto;
+  }
+
+  .mobile-nav-button {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    place-items: center;
+    border: 1px solid #9aa8bc;
+    border-radius: 999px;
+    background: #e8edf5;
+    color: #334155;
+    cursor: pointer;
+  }
+
+  .mobile-nav-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  :host-context(.dark) .mobile-nav-button {
+    border-color: transparent;
+    background: #2b2f34;
+    color: #9ca3af;
+  }
+
+  .nav-shell {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
+    z-index: 50;
+  }
+
+    .nav-shell.open {
+      transform: translateX(0);
+    }
+
+  .mobile-backdrop.open {
+    position: fixed;
+    inset: 0;
+    display: block;
+    background: rgb(0 0 0 / 0.4);
+    z-index: 40;
+  }
+
+  .app-content {
+    padding: 1rem;
+  }
+}

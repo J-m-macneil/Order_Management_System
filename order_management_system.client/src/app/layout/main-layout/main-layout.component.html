@@ -1,5 +1,25 @@
 <div class="app-shell">
-  <app-navbar></app-navbar>
+  <header class="mobile-nav-header">
+    <img class="mobile-nav-logo"
+         [src]="themeService.isDarkMode() ? 'brand-logo.png' : 'brand-logo-light.svg'"
+         alt="Back" />
+
+    <button type="button"
+            class="mobile-nav-button"
+            (click)="toggleNav()"
+            aria-label="Open navigation"
+            [attr.aria-expanded]="isNavOpen">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M4 20h16" />
+        <path d="M4 12h16" />
+        <path d="M4 4h16" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="mobile-backdrop" [class.open]="isNavOpen" (click)="closeNav()"></div>
+  <app-navbar class="nav-shell" [class.open]="isNavOpen"></app-navbar>
 
   <main class="app-content">
     <router-outlet></router-outlet>

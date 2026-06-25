@@ -200,7 +200,8 @@
   font-size: 0.86rem;
 }
 
-.alert-panel th {
+.alert-panel th,
+.alert-panel td::before {
   padding: 0.75rem 0.5rem;
   color: var(--app-heading);
   font-size: 0.72rem;
@@ -216,7 +217,8 @@
   font-weight: 500;
 }
 
-:host-context(.dark) .alert-panel th {
+:host-context(.dark) .alert-panel th,
+:host-context(.dark) .alert-panel td::before {
   color: var(--app-muted-text);
 }
 
@@ -257,17 +259,99 @@
 }
 
 @media (max-width: 1100px) {
-  .stats-strip,
-  .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .stats-strip {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 700px) {
-  .stats-strip,
-  .dashboard-grid,
-  .status-list {
+  .dashboard-grid {
     grid-template-columns: 1fr;
   }
 }
 
+@media (max-width: 700px) {
+  .welcome-back {
+    font-size: 2.25rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 1rem;
+  }
+
+  .metric-card {
+    padding: 1rem;
+  }
+
+  .metric-card strong {
+    margin-top: 0.35rem;
+    font-size: 1.6rem;
+  }
+
+  .alert-panel table,
+  .alert-panel thead,
+  .alert-panel tbody,
+  .alert-panel tr,
+  .alert-panel td {
+    display: block;
+  }
+
+  .alert-panel thead {
+    display: none;
+  }
+
+  .alert-panel tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .alert-panel tr {
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    background: var(--app-muted-surface);
+    padding: 0.85rem;
+  }
+
+  .alert-panel td {
+    display: block;
+    border-top: 1px solid var(--app-border);
+    padding: 0.35rem 0;
+  }
+
+  .alert-panel td::before {
+    display: block;
+    margin-bottom: 0.2rem;
+    content: attr(data-label);
+    padding: 0;
+  }
+
+  .alert-panel td:first-child {
+    border-top: 0;
+    padding-bottom: 0.35rem;
+    font-weight: 800;
+  }
+
+  .alert-panel td:nth-child(2) {
+    color: var(--app-muted-text);
+    font-weight: 700;
+  }
+
+  .alert-panel td:nth-child(3),
+  .alert-panel td:nth-child(4) {
+    margin-top: 0.35rem;
+  }
+
+  .alert-panel td > *:last-child {
+    min-width: 0;
+  }
+
+  .failure-badge,
+  .priority-badge {
+    border-radius: 8px;
+    text-align: left;
+  }
+}
+
+.failure-badge,
+.priority-badge {
+  white-space: normal;
+  text-align: left;
+}

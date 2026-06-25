@@ -92,18 +92,18 @@
 
         <tbody>
           <tr *ngFor="let failure of recentFailures">
-            <td>
+            <td data-label="Order #">
               <a [routerLink]="['/orders', failure.orderId]" class="app-link-button">
                 {{ failure.orderNumber }}
               </a>
             </td>
-            <td>{{ failure.customer }}</td>
-            <td>
+            <td data-label="Customer">{{ failure.customer }}</td>
+            <td data-label="Reason">
               <span class="failure-badge">
                 {{ failure.reason }}
               </span>
             </td>
-            <td>{{ failure.date }}</td>
+            <td data-label="Date">{{ failure.date }}</td>
           </tr>
         </tbody>
       </table>
@@ -127,18 +127,18 @@
 
         <tbody>
           <tr *ngFor="let order of priorityOrders">
-            <td>
+            <td data-label="Order #">
               <a [routerLink]="['/orders', order.orderId]" class="app-link-button">
                 {{ order.orderNumber }}
               </a>
             </td>
-            <td>{{ order.customer }}</td>
-            <td>
+            <td data-label="Customer">{{ order.customer }}</td>
+            <td data-label="Priority">
               <span [class]="'priority-badge ' + getPriorityColor(order.priority)">
                 {{ order.priority }}
               </span>
             </td>
-            <td>{{ order.dueDate }}</td>
+            <td data-label="Due Date">{{ order.dueDate }}</td>
           </tr>
         </tbody>
       </table>
