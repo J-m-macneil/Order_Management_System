@@ -233,6 +233,13 @@ _pkginfo.txt
 ClientBin/
 ~$*
 *~
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.cer
 *.dbmdl
 *.dbproj.schemaview
 *.jfm
@@ -352,6 +359,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Generated application documents
+Order_Management_System.Server/documents/
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/

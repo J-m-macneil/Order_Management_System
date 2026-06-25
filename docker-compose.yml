@@ -4,13 +4,13 @@ services:
     container_name: back-db
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "DevSql_2026_Strong!Pass"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}"
     ports:
-      - "14333:1433"
+      - "127.0.0.1:14333:1433"
     volumes:
       - back-db-data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'DevSql_2026_Strong!Pass' -C -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -27,7 +27,10 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
-      ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=DevSql_2026_Strong!Pass;TrustServerCertificate=True"
+      Jwt__Issuer: "${JWT_ISSUER:-Back}"
+      Jwt__Audience: "${JWT_AUDIENCE:-Back.Client}"
+      Jwt__SecretKey: "${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}"
+      ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True"
     expose:
       - "8080"
 
@@ -49,6 +52,8 @@ services:
     container_name: back-proxy
     depends_on:
       - back-client
+    environment:
+      APP_DOMAIN: "${APP_DOMAIN:-localhost}"
     ports:
       - "80:80"
       - "443:443"
