@@ -319,14 +319,14 @@ export class AdminComponent implements OnInit {
 
   getRoleClass(role: string): string {
     if (role === 'Admin') {
-      return 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+      return 'app-badge app-badge--danger';
     }
 
     if (role === 'Operations') {
-      return 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400';
+      return 'app-badge app-badge--info';
     }
 
-    return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+    return 'app-badge app-badge--neutral';
   }
 
   getSettingsByGroup(group: string): SystemSetting[] {

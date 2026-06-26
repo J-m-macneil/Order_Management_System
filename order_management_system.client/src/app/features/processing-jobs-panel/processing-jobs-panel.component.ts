@@ -83,15 +83,15 @@ export class ProcessingJobsPanelComponent implements OnChanges {
   getJobStatusClass(status: string): string {
     switch (status) {
       case 'Completed':
-        return 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400';
+        return 'app-badge app-badge--success';
       case 'Processing':
-        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+        return 'app-badge app-badge--info';
       case 'Queued':
-        return 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400';
+        return 'app-badge app-badge--warning';
       case 'Failed':
-        return 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+        return 'app-badge app-badge--danger';
       default:
-        return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+        return 'app-badge app-badge--neutral';
     }
   }
 }

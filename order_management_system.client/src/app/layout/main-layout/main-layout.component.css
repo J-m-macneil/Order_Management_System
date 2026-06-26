@@ -2,11 +2,7 @@
   display: block;
   min-height: 100vh;
   padding: 1.5rem;
-  background: linear-gradient( 135deg, #2563eb 0%, #2563eb 48%, #2563eb 100%);
-}
-
-:host-context(.dark) {
-  background: radial-gradient( circle at top center, rgba(255,255,255,0.03), transparent 40% ), #0a0a0b;
+  background: var(--app-shell-page-bg);
 }
 
   .app-shell {
@@ -17,15 +13,10 @@
     max-width: 1500px;
     margin: 0 auto;
     overflow: hidden;
-    border: 1px solid #8fa4c0;
+    border: 1px solid var(--app-shell-border);
     border-radius: 24px;
-    background: #f3f7fb;
-    box-shadow: 0 28px 80px rgb(15 23 42 / 0.24);
-  }
-
-  :host-context(.dark) .app-shell {
-    border-color: rgba(255,255,255,0.1);
-    background: #24272b;
+    background: var(--app-shell-bg);
+    box-shadow: var(--app-shell-shadow);
   }
 
   .app-content {
@@ -64,13 +55,8 @@
     justify-content: space-between;
     min-height: 4.75rem;
     padding: 1rem;
-    border-bottom: 1px solid #8fa4c0;
-    background: #ffffff;
-  }
-
-  :host-context(.dark) .mobile-nav-header {
-    border-bottom-color: rgba(255,255,255,0.1);
-    background: #1b1e22;
+    border-bottom: 1px solid var(--app-nav-border);
+    background: var(--app-nav-bg);
   }
 
   .mobile-nav-logo {
@@ -84,22 +70,16 @@
     width: 2.65rem;
     height: 2.65rem;
     place-items: center;
-    border: 1px solid #9aa8bc;
+    border: 1px solid var(--app-nav-item-border);
     border-radius: 999px;
-    background: #e8edf5;
-    color: #334155;
+    background: var(--app-nav-item-bg);
+    color: var(--app-nav-item-text);
     cursor: pointer;
   }
 
   .mobile-nav-button svg {
     width: 1.25rem;
     height: 1.25rem;
-  }
-
-  :host-context(.dark) .mobile-nav-button {
-    border-color: transparent;
-    background: #2b2f34;
-    color: #9ca3af;
   }
 
   .nav-shell {
@@ -120,7 +100,7 @@
     position: fixed;
     inset: 0;
     display: block;
-    background: rgb(0 0 0 / 0.4);
+    background: var(--app-mobile-backdrop-bg);
     z-index: 40;
   }
 

@@ -1,8 +1,0 @@
-:host-context(.dark) .form-card .bg-slate-50,
-:host-context(.dark) .form-card .dark\:bg-slate-900\/60 {
-  background: var(--app-secondary-surface);
-}
-
-:host-context(.dark) .form-card .dark\:border-slate-700 {
-  border-color: var(--app-border);
-}

@@ -1,8 +1,8 @@
 :host {
   display: block;
   width: 240px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
+  background: var(--app-nav-bg);
+  border-right: 1px solid var(--app-nav-border);
   padding-top: 16px;
   min-height: 100%;
 }

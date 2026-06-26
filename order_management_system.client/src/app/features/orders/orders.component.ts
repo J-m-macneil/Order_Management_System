@@ -57,22 +57,15 @@ export class OrdersComponent implements OnInit {
   };
 
   statusColors: Record<number | string, string> = {
-    1: 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200',
-    2: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
-    3: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400',
-    4: 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400',
-    5: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
-    6: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
-    7: 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400',
-    8: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
-    9: 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
-  };
-
-  priorityColors: Record<string, string> = {
-    low: 'text-slate-600 dark:text-slate-400',
-    medium: 'text-blue-600 dark:text-blue-400',
-    high: 'text-amber-600 dark:text-amber-400',
-    urgent: 'text-red-600 dark:text-red-400'
+    1: 'app-badge app-badge--neutral',
+    2: 'app-badge app-badge--info',
+    3: 'app-badge app-badge--warning',
+    4: 'app-badge app-badge--success',
+    5: 'app-badge app-badge--info',
+    6: 'app-badge app-badge--info',
+    7: 'app-badge app-badge--success',
+    8: 'app-badge app-badge--danger',
+    9: 'app-badge app-badge--neutral'
   };
 
   constructor(
@@ -163,8 +156,8 @@ export class OrdersComponent implements OnInit {
     return this.statusColors[statusId] || this.statusColors[1];
   }
 
-  getPriorityColor(isPriority: boolean): string {
-    return isPriority ? this.priorityColors['high'] : this.priorityColors['medium'];
+  getPriorityBadgeClass(isPriority: boolean): string {
+    return isPriority ? 'app-badge app-badge--warning' : 'app-badge app-badge--info';
   }
 
   getOrderStatusId(order: Order): number {

@@ -6,10 +6,10 @@ import { OrderDetailComponent } from './order-detail/order-detail.component';
 import { OrdersComponent } from './orders.component';
 
 const routes: Routes = [
-  { path: '', component: OrdersComponent },
-  { path: 'create', component: OrderCreateComponent },
-  { path: ':id/edit', component: OrderCreateComponent },
-  { path: ':id', component: OrderDetailComponent }
+  { path: '', component: OrdersComponent, title: 'Orders | Back.' },
+  { path: 'create', component: OrderCreateComponent, title: 'New Order | Back.' },
+  { path: ':id/edit', component: OrderCreateComponent, title: 'Edit Order | Back.' },
+  { path: ':id', component: OrderDetailComponent, title: 'Order Details | Back.' }
 ];
 
 @NgModule({

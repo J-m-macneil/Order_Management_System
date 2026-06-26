@@ -121,12 +121,12 @@ export class DashboardComponent implements OnInit {
       .join('');
   }
 
-  getPriorityColor(priority: string): string {
+  getPriorityBadgeClass(priority: string): string {
     const colors: Record<string, string> = {
-      low: 'text-slate-600 dark:text-slate-400',
-      medium: 'text-blue-600 dark:text-blue-400',
-      high: 'text-amber-600 dark:text-amber-400',
-      urgent: 'text-red-600 dark:text-red-400'
+      low: 'app-badge--neutral',
+      medium: 'app-badge--info',
+      high: 'app-badge--warning',
+      urgent: 'app-badge--danger'
     };
 
     return colors[priority.toLowerCase()] || colors['low'];

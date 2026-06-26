@@ -1,7 +1,7 @@
 <div class="app-page-header">
   <div>
     <h1 class="brand-page-title">Audit Logs<span class="brand-page-dot" aria-hidden="true">.</span></h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-2">Investigate system activity, user changes, and workflow events</p>
+    <p class="app-muted-text mt-2">Investigate system activity, user changes, and workflow events</p>
   </div>
 </div>
 
@@ -49,7 +49,7 @@
       <span>Filters</span>
 
       <span *ngIf="searchTerm || entityType || action || entityId || performedByUserId || from || to"
-            class="ml-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
+            class="app-count-badge ml-1">
         {{ (searchTerm ? 1 : 0) + (entityType ? 1 : 0) + (action ? 1 : 0) + (entityId ? 1 : 0) + (performedByUserId ? 1 : 0) + (from ? 1 : 0) + (to ? 1 : 0) }}
       </span>
     </button>
@@ -120,11 +120,11 @@
 </div>
 
 <div *ngIf="isLoading" class="app-empty-state">
-  <p class="text-slate-500 dark:text-slate-400">Loading audit logs...</p>
+  <p>Loading audit logs...</p>
 </div>
 
-<div *ngIf="errorMessage && !isLoading" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
-  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
 <div *ngIf="!isLoading && !errorMessage" class="app-table-card">
@@ -145,24 +145,24 @@
           <tr>
             <td class="px-6 py-4">
               <div class="flex flex-wrap items-center gap-2">
-                <span [class]="'inline-flex px-2 py-1 rounded-md text-xs font-medium ' + getActionClass(log)">
+                <span [class]="getActionClass(log)">
                   {{ log.action }}
                 </span>
-                <span class="text-slate-900 dark:text-white font-medium">{{ getEventLabel(log) }}</span>
+                <span class="app-strong-text">{{ getEventLabel(log) }}</span>
               </div>
-              <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+              <div class="text-xs app-muted-text mt-1 max-w-2xl">
                 {{ getAuditDescription(log) }}
               </div>
             </td>
             <td class="px-6 py-4">
-              <span [class]="'inline-flex px-3 py-1 rounded-md text-xs font-medium ' + getEntityClass(log.entityType)">
+              <span [class]="getEntityClass(log.entityType)">
                 {{ log.entityType }} #{{ log.entityId }}
               </span>
             </td>
-            <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+            <td class="px-6 py-4 app-body-text">
               {{ getActorLabel(log) }}
             </td>
-            <td class="px-6 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+            <td class="px-6 py-4 app-body-text whitespace-nowrap">
               {{ log.performedAt | date: 'MMM d, yyyy h:mm a' }}
             </td>
             <td class="px-6 py-4 text-center">
@@ -174,35 +174,35 @@
             </td>
           </tr>
 
-          <tr *ngIf="selectedLog?.auditLogId === log.auditLogId" class="bg-slate-50 dark:bg-slate-900/60">
+          <tr *ngIf="selectedLog?.auditLogId === log.auditLogId" class="app-table-expanded-row">
             <td colspan="5" class="px-6 py-5">
               <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
                 <div>
-                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Entity</p>
-                  <p class="text-sm text-slate-900 dark:text-white mt-1">{{ log.entityType }} #{{ log.entityId }}</p>
+                  <p class="form-label">Entity</p>
+                  <p class="text-sm app-body-text mt-1">{{ log.entityType }} #{{ log.entityId }}</p>
                 </div>
                 <div>
-                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Actor</p>
-                  <p class="text-sm text-slate-900 dark:text-white mt-1">{{ getActorLabel(log) }}</p>
+                  <p class="form-label">Actor</p>
+                  <p class="text-sm app-body-text mt-1">{{ getActorLabel(log) }}</p>
                 </div>
                 <div>
-                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Recorded</p>
-                  <p class="text-sm text-slate-900 dark:text-white mt-1">{{ log.performedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+                  <p class="form-label">Recorded</p>
+                  <p class="text-sm app-body-text mt-1">{{ log.performedAt | date: 'MMM d, yyyy h:mm a' }}</p>
                 </div>
               </div>
 
-              <div *ngIf="log.changeSummary" class="mb-5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium mb-2">Changes</p>
-                <p class="text-sm text-slate-900 dark:text-white">{{ log.changeSummary }}</p>
+              <div *ngIf="log.changeSummary" class="app-sub-card mb-5">
+                <p class="form-label mb-2">Changes</p>
+                <p class="text-sm app-body-text">{{ log.changeSummary }}</p>
               </div>
 
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium mb-2">Old Values JSON</p>
+                  <p class="form-label mb-2">Old Values JSON</p>
                   <pre class="audit-json">{{ formatJson(log.oldValuesJson) }}</pre>
                 </div>
                 <div>
-                  <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium mb-2">New Values JSON</p>
+                  <p class="form-label mb-2">New Values JSON</p>
                   <pre class="audit-json">{{ formatJson(log.newValuesJson) }}</pre>
                 </div>
               </div>
@@ -214,21 +214,21 @@
   </div>
 
   <div *ngIf="logs.length === 0" class="app-empty-state">
-    <p class="text-slate-500 dark:text-slate-400">No audit logs found.</p>
+    <p>No audit logs found.</p>
   </div>
 
   <div class="app-table-footer">
-    <div class="text-sm text-slate-600 dark:text-slate-400">
+    <div class="text-sm app-muted-text">
       Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
       <span *ngIf="totalCount">({{ totalCount }} logs)</span>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-      <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      <label class="flex items-center gap-2 text-sm app-muted-text">
         Page size
         <select [(ngModel)]="pageSize"
                 (ngModelChange)="onPageSizeChange($event)"
-                class="px-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                class="form-input form-input--compact">
           <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
         </select>
       </label>

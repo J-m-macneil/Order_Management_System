@@ -1,21 +1,21 @@
-<div class="login-page min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+<div class="login-page min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md">
 
     <!-- Logo and Branding -->
     <div class="text-center mb-6">
       <img class="login-logo" [src]="themeService.isDarkMode() ? 'login-logo-dark.svg' : 'login-logo-light.svg'" alt="ChemFlow" />
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">
+      <p class="text-xs app-muted-text mt-3">
         Order Management System
       </p>
     </div>
 
     <!-- Login Card -->
-    <div class="login-card bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 p-8 shadow-sm">
+    <div class="login-card app-card p-8">
       <div class="mb-6">
-        <h1 class="text-2xl font-medium text-slate-900 dark:text-white">
+        <h1 class="text-2xl app-strong-text">
           Sign in
         </h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p class="text-sm app-muted-text mt-1">
           Access your order management system
         </p>
       </div>
@@ -24,44 +24,44 @@
 
         <!-- Username/Email Field -->
         <div>
-          <label for="usernameOrEmail" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label for="usernameOrEmail" class="form-label">
             Username or email
           </label>
 
           <input id="usernameOrEmail"
                  type="text"
                  formControlName="usernameOrEmail"
-                 class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-all"
+                 class="form-input"
                  placeholder="username@example.com" />
 
           <div *ngIf="loginForm.get('usernameOrEmail')?.hasError('required') && loginForm.get('usernameOrEmail')?.touched"
-               class="mt-1.5 text-sm text-red-500 dark:text-red-400">
+               class="mt-1.5 text-sm app-alert-text--danger">
             Username or email is required
           </div>
         </div>
 
         <!-- Password Field -->
         <div>
-          <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label for="password" class="form-label">
             Password
           </label>
 
           <input id="password"
                  type="password"
                  formControlName="password"
-                 class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-all"
+                 class="form-input"
                  placeholder="••••••••" />
 
           <div *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched"
-               class="mt-1.5 text-sm text-red-500 dark:text-red-400">
+               class="mt-1.5 text-sm app-alert-text--danger">
             Password is required
           </div>
         </div>
 
         <!-- Error Message -->
         <div *ngIf="errorMessage"
-             class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
-          <p class="text-sm text-red-600 dark:text-red-400">
+             class="p-4 app-alert app-alert--danger">
+          <p class="text-sm app-alert-text--danger">
             {{ errorMessage }}
           </p>
         </div>
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Footer -->
-    <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-6">
+    <p class="text-center text-xs app-muted-text mt-6">
       Protected with industry-standard security
     </p>
 

@@ -1,13 +1,13 @@
 <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md shadow-lg">
+  <div class="app-card p-6 w-full max-w-md">
 
-    <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-4">
+    <h2 class="app-section-title mb-4">
       {{ title }}
     </h2>
 
     <textarea [(ngModel)]="value"
               rows="4"
-              class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+              class="form-input text-sm"
               [placeholder]="placeholder"></textarea>
 
     <div class="flex justify-end gap-2 mt-4">

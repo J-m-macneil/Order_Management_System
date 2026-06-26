@@ -2,7 +2,7 @@
 <div class="app-page-header">
   <div>
     <h1 class="brand-page-title">{{ isEditMode ? 'Edit Order' : 'Create Order' }}<span class="brand-page-dot" aria-hidden="true">.</span></h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-2">
+    <p class="app-muted-text mt-2">
       {{ isEditMode ? 'Update draft order ' + orderNumber : 'Fill in the form below to create a new order' }}
     </p>
   </div>
@@ -13,12 +13,12 @@
 </div>
 
 <div *ngIf="errorMessage"
-     class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
-  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+     class="mb-6 p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
 <div *ngIf="isLoadingOrder" class="app-empty-state">
-  <p class="text-slate-500 dark:text-slate-400">Loading order...</p>
+  <p>Loading order...</p>
 </div>
 
 <!-- Order Creation Form -->
@@ -27,23 +27,23 @@
   <div class="lg:col-span-2 space-y-6">
     <!-- Customer Information -->
     <div class="form-card">
-      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Customer Information</h2>
+      <h2 class="app-section-title mb-6">Customer Information</h2>
       <div class="space-y-4">
         <!-- Customer Selection -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Customer <span class="text-red-500">*</span>
+          <label class="form-label">
+            Customer <span class="app-required-marker">*</span>
           </label>
           <select
             formControlName="customerId"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           >
             <option [ngValue]="null">Select a customer</option>
             <option *ngFor="let customer of customers" [ngValue]="customer.customerId">
               {{ customer.companyName }}
             </option>
           </select>
-          <div *ngIf="orderForm.get('customerId')?.hasError('required') && orderForm.get('customerId')?.touched" class="mt-1 text-sm text-red-500">
+          <div *ngIf="orderForm.get('customerId')?.hasError('required') && orderForm.get('customerId')?.touched" class="mt-1 app-validation-message">
             Customer is required
           </div>
         </div>
@@ -52,73 +52,73 @@
 
     <!-- Delivery Information -->
     <div class="form-card">
-      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Delivery Information</h2>
+      <h2 class="app-section-title mb-6">Delivery Information</h2>
       <div class="space-y-4">
         <!-- Billing Address -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Billing Address <span class="text-red-500">*</span>
+          <label class="form-label">
+            Billing Address <span class="app-required-marker">*</span>
           </label>
           <select
             formControlName="billingAddressId"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           >
             <option [ngValue]="null">Select billing address</option>
             <option *ngFor="let address of billingAddresses" [ngValue]="address.addressId">
               {{ address.siteName }} - {{ address.line1 }}
             </option>
           </select>
-          <div *ngIf="orderForm.get('billingAddressId')?.hasError('required') && orderForm.get('billingAddressId')?.touched" class="mt-1 text-sm text-red-500">
+          <div *ngIf="orderForm.get('billingAddressId')?.hasError('required') && orderForm.get('billingAddressId')?.touched" class="mt-1 app-validation-message">
             Billing address is required
           </div>
         </div>
 
         <!-- Delivery Address -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Delivery Address <span class="text-red-500">*</span>
+          <label class="form-label">
+            Delivery Address <span class="app-required-marker">*</span>
           </label>
           <select
             formControlName="deliveryAddressId"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           >
             <option [ngValue]="null">Select delivery address</option>
             <option *ngFor="let address of deliveryAddresses" [ngValue]="address.addressId">
               {{ address.siteName }} - {{ address.line1 }}
             </option>
           </select>
-          <div *ngIf="orderForm.get('deliveryAddressId')?.hasError('required') && orderForm.get('deliveryAddressId')?.touched" class="mt-1 text-sm text-red-500">
+          <div *ngIf="orderForm.get('deliveryAddressId')?.hasError('required') && orderForm.get('deliveryAddressId')?.touched" class="mt-1 app-validation-message">
             Delivery address is required
           </div>
         </div>
 
         <!-- Warehouse -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Warehouse <span class="text-red-500">*</span>
+          <label class="form-label">
+            Warehouse <span class="app-required-marker">*</span>
           </label>
           <select
             formControlName="warehouseId"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           >
             <option [ngValue]="null">Select warehouse</option>
             <option *ngFor="let warehouse of warehouses" [ngValue]="warehouse.warehouseId">
               {{ warehouse.name }}
             </option>
           </select>
-          <div *ngIf="orderForm.get('warehouseId')?.hasError('required') && orderForm.get('warehouseId')?.touched" class="mt-1 text-sm text-red-500">
+          <div *ngIf="orderForm.get('warehouseId')?.hasError('required') && orderForm.get('warehouseId')?.touched" class="mt-1 app-validation-message">
             Warehouse is required
           </div>
         </div>
 
         <!-- Carrier -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label class="form-label">
             Carrier
           </label>
           <select
             formControlName="carrierId"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           >
             <option [ngValue]="null">Select carrier (optional)</option>
             <option *ngFor="let carrier of carriers" [ngValue]="carrier.carrierId">
@@ -129,15 +129,15 @@
 
         <!-- Requested Delivery Date -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Requested Delivery Date <span class="text-red-500">*</span>
+          <label class="form-label">
+            Requested Delivery Date <span class="app-required-marker">*</span>
           </label>
           <input
             type="date"
             formControlName="requestedDeliveryDate"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           />
-          <div *ngIf="orderForm.get('requestedDeliveryDate')?.hasError('required') && orderForm.get('requestedDeliveryDate')?.touched" class="mt-1 text-sm text-red-500">
+          <div *ngIf="orderForm.get('requestedDeliveryDate')?.hasError('required') && orderForm.get('requestedDeliveryDate')?.touched" class="mt-1 app-validation-message">
             Delivery date is required
           </div>
         </div>
@@ -147,7 +147,7 @@
     <!-- Order Items -->
     <div class="form-card">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white">Order Items</h2>
+        <h2 class="app-section-title">Order Items</h2>
         <button
           type="button"
           (click)="addItem()"
@@ -158,9 +158,9 @@
       </div>
 
       <div formArrayName="items" class="space-y-4">
-        <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+        <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="border app-border rounded-lg p-4">
           <div class="flex items-start justify-between mb-4">
-            <h3 class="text-sm font-medium text-slate-900 dark:text-white">Item {{ i + 1 }}</h3>
+            <h3 class="text-sm app-strong-text">Item {{ i + 1 }}</h3>
             <button
               type="button"
               *ngIf="items.length > 1"
@@ -174,12 +174,12 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <!-- Product -->
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Product <span class="text-red-500">*</span>
+              <label class="form-label">
+                Product <span class="app-required-marker">*</span>
               </label>
               <select
                 formControlName="productId"
-                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                class="form-input"
               >
                 <option [ngValue]="null">Select product</option>
                 <option *ngFor="let product of products" [ngValue]="product.productId">
@@ -190,34 +190,34 @@
 
             <!-- Quantity -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Quantity <span class="text-red-500">*</span>
+              <label class="form-label">
+                Quantity <span class="app-required-marker">*</span>
               </label>
               <input
                 type="number"
                 formControlName="quantity"
                 min="1"
-                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                class="form-input"
               />
             </div>
 
             <!-- Unit Price -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Unit Price <span class="text-red-500">*</span>
+              <label class="form-label">
+                Unit Price <span class="app-required-marker">*</span>
               </label>
               <input
                 type="number"
                 formControlName="unitPrice"
                 min="0"
                 step="0.01"
-                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                class="form-input"
               />
             </div>
 
             <!-- Discount % -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label class="form-label">
                 Discount %
               </label>
               <input
@@ -225,19 +225,19 @@
                 formControlName="discountPercent"
                 min="0"
                 max="100"
-                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                class="form-input"
               />
             </div>
 
             <!-- Notes -->
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label class="form-label">
                 Notes
               </label>
               <textarea
                 formControlName="notes"
                 rows="2"
-                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                class="form-input resize-none"
                 placeholder="Add any notes for this item..."
               ></textarea>
             </div>
@@ -248,29 +248,29 @@
 
     <!-- Additional Information -->
     <div class="form-card">
-      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Additional Information</h2>
+      <h2 class="app-section-title mb-6">Additional Information</h2>
       <div class="space-y-4">
         <!-- PO Reference -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label class="form-label">
             PO Reference
           </label>
           <input
             type="text"
             formControlName="purchaseOrderReference"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
             placeholder="Enter PO reference number"
           />
         </div>
 
         <!-- Project -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label class="form-label">
             Project
           </label>
           <select
             formControlName="projectId"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="form-input"
           >
             <option [ngValue]="null">Select project (optional)</option>
             <option *ngFor="let project of projects" [ngValue]="project.projectId">
@@ -281,26 +281,26 @@
 
         <!-- Special Instructions -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label class="form-label">
             Special Instructions
           </label>
           <textarea
             formControlName="specialInstructions"
             rows="3"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+            class="form-input resize-none"
             placeholder="Enter any special instructions for this order..."
           ></textarea>
         </div>
 
         <!-- Internal Notes -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label class="form-label">
             Internal Notes
           </label>
           <textarea
             formControlName="internalNotes"
             rows="3"
-            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+            class="form-input resize-none"
             placeholder="Internal notes (not visible to customer)..."
           ></textarea>
         </div>
@@ -311,9 +311,9 @@
             type="checkbox"
             id="priorityOrder"
             formControlName="isPriorityOrder"
-            class="w-4 h-4 accent-blue-600"
+            class="app-checkbox"
           />
-          <label for="priorityOrder" class="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+          <label for="priorityOrder" class="form-label cursor-pointer">
             Mark as priority order
           </label>
         </div>
@@ -325,21 +325,21 @@
   <div class="space-y-6">
     <!-- Order Summary -->
     <div class="form-card sticky top-24">
-      <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Order Summary</h2>
+      <h2 class="app-section-title mb-6">Order Summary</h2>
       <div class="space-y-3">
-        <div class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
-          <span class="text-slate-600 dark:text-slate-400">Items</span>
-          <span class="text-slate-900 dark:text-white font-medium">{{ items.length }}</span>
+        <div class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Items</span>
+          <span class="app-strong-text">{{ items.length }}</span>
         </div>
-        <div class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
-          <span class="text-slate-600 dark:text-slate-400">Status</span>
-          <span class="inline-flex px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
+        <div class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Status</span>
+          <span class="app-badge app-badge--neutral">
             Draft
           </span>
         </div>
-        <div *ngIf="orderForm.get('isPriorityOrder')?.value" class="flex justify-between text-sm pb-3 border-b border-slate-200 dark:border-slate-700">
-          <span class="text-slate-600 dark:text-slate-400">Priority</span>
-          <span class="inline-flex px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+        <div *ngIf="orderForm.get('isPriorityOrder')?.value" class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Priority</span>
+          <span class="app-badge app-badge--warning">
             Yes
           </span>
         </div>

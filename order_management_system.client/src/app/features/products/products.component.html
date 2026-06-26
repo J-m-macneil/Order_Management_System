@@ -2,7 +2,7 @@
 <div class="app-page-header">
   <div>
     <h1 class="brand-page-title">Products<span class="brand-page-dot" aria-hidden="true">.</span></h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-2">Manage your chemical products and pricing</p>
+    <p class="app-muted-text mt-2">Manage your chemical products and pricing</p>
   </div>
   <a routerLink="/products/create"
      class="app-primary-button app-page-header-action px-4 py-3">
@@ -64,7 +64,7 @@
       <span>Filters</span>
 
       <span *ngIf="activeFilter || restrictedFilter || hazardousFilter || categoryFilter || hazardClassFilter"
-            class="ml-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded">
+            class="app-count-badge ml-1">
         {{ (activeFilter ? 1 : 0) + (restrictedFilter ? 1 : 0) + (hazardousFilter ? 1 : 0) + (categoryFilter ? 1 : 0) + (hazardClassFilter ? 1 : 0) }}
       </span>
     </button>
@@ -150,12 +150,12 @@
 
 <!-- Loading State -->
 <div *ngIf="isLoading" class="app-empty-state">
-  <p class="text-slate-500 dark:text-slate-400">Loading products...</p>
+  <p>Loading products...</p>
 </div>
 
 <!-- Error State -->
-<div *ngIf="errorMessage && !isLoading" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
-  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
 <!-- Products Table -->
@@ -186,7 +186,7 @@
       </thead>
       <tbody class="app-table-body">
         <tr *ngFor="let product of filteredProducts">
-          <td class="px-6 py-4 text-slate-900 dark:text-white font-medium font-mono text-xs">
+          <td class="px-6 py-4 app-strong-text font-mono text-xs">
             {{ product.sku }}
           </td>
           <td class="px-6 py-4">
@@ -195,17 +195,17 @@
               {{ product.productName }}
             </a>
           </td>
-          <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+          <td class="px-6 py-4 app-body-text">
             {{ product.packSize || '—' }}
           </td>
-          <td class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white">
+          <td class="px-6 py-4 text-right app-strong-text">
             {{ product.basePrice | currency: 'GBP' }}
           </td>
           <td class="px-6 py-4 text-center">
-            <span *ngIf="product.isRestricted" class="inline-flex px-2 py-1 rounded-md bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-medium">
+            <span *ngIf="product.isRestricted" class="app-badge app-badge--danger">
               Yes
             </span>
-            <span *ngIf="!product.isRestricted" class="text-slate-500 dark:text-slate-400 text-xs">
+            <span *ngIf="!product.isRestricted" class="app-muted-text text-xs">
               No
             </span>
           </td>
@@ -229,21 +229,21 @@
 
   <!-- Empty State -->
   <div *ngIf="filteredProducts.length === 0" class="app-empty-state">
-    <p class="text-slate-500 dark:text-slate-400">No products found.</p>
+    <p>No products found.</p>
   </div>
 
   <div class="app-table-footer">
-    <div class="text-sm text-slate-600 dark:text-slate-400">
+    <div class="text-sm app-muted-text">
       Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
       <span *ngIf="totalCount">({{ totalCount }} products)</span>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-      <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      <label class="flex items-center gap-2 text-sm app-muted-text">
         Page size
         <select [(ngModel)]="pageSize"
                 (ngModelChange)="onPageSizeChange($event)"
-                class="px-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                class="form-input form-input--compact">
           <option *ngFor="let option of pageSizeOptions"
                   [ngValue]="option">
             {{ option }}

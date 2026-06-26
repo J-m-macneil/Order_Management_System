@@ -5,9 +5,9 @@ import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { CustomersComponent } from './customers.component';
 
 const routes: Routes = [
-  { path: '', component: CustomersComponent },
-  { path: 'new', component: CustomerFormComponent },
-  { path: 'edit/:id', component: CustomerFormComponent }
+  { path: '', component: CustomersComponent, title: 'Customers | Back.' },
+  { path: 'new', component: CustomerFormComponent, title: 'New Customer | Back.' },
+  { path: 'edit/:id', component: CustomerFormComponent, title: 'Edit Customer | Back.' }
 ];
 
 @NgModule({

@@ -1,22 +1,19 @@
 :host {
   display: block;
   height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
   min-height: 100%;
   padding: 1rem 0.75rem;
-  border-right: 1px solid #8fa4c0;
-  background: #ffffff;
-}
-
-:host-context(.dark) .sidebar {
-  border-right-color: rgba(255,255,255,0.1);
-  background: #1b1e22;
+  border-right: 1px solid var(--app-nav-border);
+  background: var(--app-nav-bg);
 }
 
 .user-avatar {
@@ -25,7 +22,7 @@
   height: 2.65rem;
   place-items: center;
   border-radius: 999px;
-  color: white;
+  color: var(--app-primary-text);
   font-weight: 800;
 }
 
@@ -47,11 +44,12 @@
   display: grid;
   gap: 0.75rem;
   margin-block: auto;
+  padding-block: 1rem;
 }
 
 .sidebar-footer {
   display: grid;
-  width: 2.5rem;
+  width: 2.65rem;
   place-items: center;
   gap: 0.75rem;
 }
@@ -61,11 +59,10 @@
   width: 2.65rem;
   height: 2.65rem;
   place-items: center;
-  border: 1px solid transparent;
+  border: 1px solid var(--app-nav-item-border);
   border-radius: 999px;
-  color: #334155;
-  background: #e8edf5;
-  border-color: #9aa8bc;
+  color: var(--app-nav-item-text);
+  background: var(--app-nav-item-bg);
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
@@ -80,23 +77,21 @@ button.nav-icon {
 
 .nav-icon:hover,
 .nav-icon.nav-active {
-  color: #1d4ed8;
-  background: #dbeafe;
+  color: var(--app-nav-item-active-text);
+  background: var(--app-nav-item-active-bg);
   transform: translateY(-1px);
 }
 
-:host-context(.dark) .nav-icon {
-  color: #9ca3af;
-  background: #2b2f34;
+.user-avatar {
+  background: var(--app-nav-avatar-bg);
+  font-size: 0.75rem;
 }
 
-  :host-context(.dark) .nav-icon:hover,
-  :host-context(.dark) .nav-icon.nav-active {
-    color: #f3f4f6;
-    background: #33383e;
-  }
+:host::-webkit-scrollbar {
+  width: 0.35rem;
+}
 
-.user-avatar {
-  background: #172554;
-  font-size: 0.75rem;
+:host::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--app-nav-scrollbar-thumb);
 }

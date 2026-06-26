@@ -1,7 +1,6 @@
 <!-- Page Header -->
 <div class="dashboard-header">
   <h1 class="dashboard-welcome-heading" aria-label="Welcome Back.">
-    <!--<span class="welcome-solid">Welcome</span>-->
     <span class="welcome-back">Welcome Back<span class="welcome-dot">.</span></span>
   </h1>
   <p>
@@ -15,7 +14,7 @@
 
 <div *ngIf="errorMessage && !isLoading"
      class="dashboard-error">
-  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
 <div *ngIf="!isLoading && !errorMessage" class="dashboard-layout">
@@ -99,7 +98,7 @@
             </td>
             <td data-label="Customer">{{ failure.customer }}</td>
             <td data-label="Reason">
-              <span class="failure-badge">
+              <span class="app-badge app-badge--danger">
                 {{ failure.reason }}
               </span>
             </td>
@@ -134,7 +133,7 @@
             </td>
             <td data-label="Customer">{{ order.customer }}</td>
             <td data-label="Priority">
-              <span [class]="'priority-badge ' + getPriorityColor(order.priority)">
+              <span [class]="'app-badge ' + getPriorityBadgeClass(order.priority)">
                 {{ order.priority }}
               </span>
             </td>

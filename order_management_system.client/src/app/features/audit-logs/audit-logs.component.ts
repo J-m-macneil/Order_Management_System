@@ -213,32 +213,32 @@ export class AuditLogsComponent implements OnInit {
 
   getActionClass(log: AuditLog): string {
     if (this.isFailedAction(log)) {
-      return 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+      return 'app-badge app-badge--danger';
     }
 
     if (!log.performedByUserId) {
-      return 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400';
+      return 'app-badge app-badge--info';
     }
 
     if (log.action === 'Deleted') {
-      return 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400';
+      return 'app-badge app-badge--warning';
     }
 
-    return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+    return 'app-badge app-badge--neutral';
   }
 
   getEntityClass(entityType: string): string {
     switch (entityType) {
       case 'Order':
-        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+        return 'app-badge app-badge--info';
       case 'Customer':
-        return 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400';
+        return 'app-badge app-badge--success';
       case 'Product':
-        return 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400';
+        return 'app-badge app-badge--warning';
       case 'ProcessingJob':
-        return 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400';
+        return 'app-badge app-badge--info';
       default:
-        return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+        return 'app-badge app-badge--neutral';
     }
   }
 

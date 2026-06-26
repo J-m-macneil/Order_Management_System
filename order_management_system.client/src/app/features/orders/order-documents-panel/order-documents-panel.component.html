@@ -1,14 +1,14 @@
 <div class="detail-card">
-  <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">
+  <h2 class="app-section-title mb-6">
     Documents
   </h2>
 
   <div *ngIf="errorMessage"
-       class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
-    <p class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+       class="mb-4 p-3 app-alert app-alert--danger">
+    <p class="text-sm app-alert-text--danger">{{ errorMessage }}</p>
   </div>
 
-  <p *ngIf="isLoading" class="text-slate-500 dark:text-slate-400 text-sm">
+  <p *ngIf="isLoading" class="app-muted-text text-sm">
     Loading documents...
   </p>
 
@@ -16,17 +16,17 @@
        class="space-y-4">
 
     <div *ngFor="let document of documents"
-         class="border-l-2 border-slate-200 dark:border-slate-700 pl-4">
+         class="border-l-2 app-divider pl-4">
 
-      <p class="text-sm font-medium text-slate-900 dark:text-white">
+      <p class="text-sm app-strong-text">
         {{ document.documentType }}
       </p>
 
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 break-all">
+      <p class="text-xs app-muted-text mt-1 break-all">
         {{ document.fileName }}
       </p>
 
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+      <p class="text-xs app-muted-text mt-1">
         Created: {{ document.createdAt | date: 'MMM d, yyyy h:mm a' }}
       </p>
 
@@ -48,7 +48,7 @@
 
   <ng-template #noDocuments>
     <p *ngIf="!isLoading && !errorMessage"
-       class="text-slate-500 dark:text-slate-400 text-sm">
+       class="app-muted-text text-sm">
       No documents found.
     </p>
   </ng-template>

@@ -1,11 +1,11 @@
 <!-- Loading State -->
 <div *ngIf="isLoading" class="app-empty-state">
-  <p class="text-slate-500 dark:text-slate-400">Loading order details...</p>
+  <p>Loading order details...</p>
 </div>
 
 <!-- Error State -->
-<div *ngIf="errorMessage && !isLoading" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg">
-  <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
 <!-- Order Detail Content -->
@@ -16,7 +16,7 @@
       <h1 class="brand-page-title order-detail-title">
         {{ currentOrder.orderNumber }}<span class="brand-page-dot" aria-hidden="true">.</span>
       </h1>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
+      <p class="app-muted-text mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
     </div>
     <a routerLink="/orders" class="app-tertiary-button app-back-link">
       &larr; Back to Orders
@@ -28,14 +28,14 @@
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="space-y-3">
         <div class="flex flex-wrap gap-2">
-          <span class="inline-flex px-3 py-1 rounded-md bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-medium">
+          <span class="app-badge app-badge--info">
             {{ currentOrder.orderStatusName || 'Status ' + currentOrder.orderStatusId }}
           </span>
-          <span *ngIf="currentOrder.isPriorityOrder" class="inline-flex px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+          <span *ngIf="currentOrder.isPriorityOrder" class="app-badge app-badge--warning">
             Priority Order
           </span>
         </div>
-        <p class="text-sm text-slate-600 dark:text-slate-300">{{ getEditLockMessage() }}</p>
+        <p class="text-sm app-body-text">{{ getEditLockMessage() }}</p>
       </div>
       <a *ngIf="canEditOrder()"
          [routerLink]="['/orders', currentOrder.orderId, 'edit']"
@@ -51,108 +51,108 @@
     <div class="lg:col-span-2 space-y-6">
       <!-- Order Information -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Order Information</h2>
+        <h2 class="app-section-title mb-6">Order Information</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Requested Delivery Date</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.requestedDeliveryDate | date: 'MMM d, yyyy' }}</p>
+            <p class="form-label">Requested Delivery Date</p>
+            <p class="app-body-text mt-2">{{ currentOrder.requestedDeliveryDate | date: 'MMM d, yyyy' }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">PO Reference</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.purchaseOrderReference || '—' }}</p>
+            <p class="form-label">PO Reference</p>
+            <p class="app-body-text mt-2">{{ currentOrder.purchaseOrderReference || '—' }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Project</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.projectName || '—' }}</p>
+            <p class="form-label">Project</p>
+            <p class="app-body-text mt-2">{{ currentOrder.projectName || '—' }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Warehouse</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.warehouseName || '—' }}</p>
+            <p class="form-label">Warehouse</p>
+            <p class="app-body-text mt-2">{{ currentOrder.warehouseName || '—' }}</p>
           </div>
         </div>
       </div>
 
       <!-- Order Items Table -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Order Items</h2>
-        <div *ngIf="currentOrder.items && currentOrder.items.length > 0" class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+        <h2 class="app-section-title mb-6">Order Items</h2>
+        <div *ngIf="currentOrder.items && currentOrder.items.length > 0" class="app-table-scroll">
+          <table class="app-data-table">
+            <thead class="app-table-head">
               <tr>
-                <th class="text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-3 px-4">
+                <th class="app-table-heading">
                   Product
                 </th>
-                <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-3 px-4">
+                <th class="app-table-heading app-table-heading--right">
                   Qty
                 </th>
-                <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-3 px-4">
+                <th class="app-table-heading app-table-heading--right">
                   Unit Price
                 </th>
-                <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-3 px-4">
+                <th class="app-table-heading app-table-heading--right">
                   Discount
                 </th>
-                <th class="text-right text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide py-3 px-4">
+                <th class="app-table-heading app-table-heading--right">
                   Total
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-              <tr *ngFor="let item of currentOrder.items" class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+            <tbody class="app-table-body">
+              <tr *ngFor="let item of currentOrder.items">
                 <td class="px-4 py-4">
-                  <div class="font-medium text-slate-900 dark:text-white">
+                  <div class="app-strong-text">
                     {{ item.productName || 'Product #' + item.productId }}
                   </div>
-                  <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <div class="mt-1 flex flex-wrap items-center gap-2 text-xs app-muted-text">
                     <span *ngIf="item.productSku" class="font-mono">{{ item.productSku }}</span>
                     <span *ngIf="item.packSize">{{ item.packSize }}</span>
                     <span *ngIf="item.unNumber">{{ item.unNumber }}</span>
                     <span *ngIf="item.requiresSds"
-                          class="inline-flex px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium">
+                          class="app-badge app-badge--warning">
                       SDS
                     </span>
                     <span *ngIf="item.isRestricted"
-                          class="inline-flex px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-medium">
+                          class="app-badge app-badge--danger">
                       Restricted
                     </span>
                   </div>
-                  <div *ngIf="item.notes" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <div *ngIf="item.notes" class="mt-1 text-xs app-muted-text">
                     {{ item.notes }}
                   </div>
                 </td>
-                <td class="px-4 py-4 text-right text-slate-600 dark:text-slate-300">{{ item.quantity }}</td>
-                <td class="px-4 py-4 text-right text-slate-600 dark:text-slate-300">{{ item.unitPrice | currency: currentOrder.currency }}</td>
-                <td class="px-4 py-4 text-right text-slate-600 dark:text-slate-300">
+                <td class="px-4 py-4 text-right app-body-text">{{ item.quantity }}</td>
+                <td class="px-4 py-4 text-right app-body-text">{{ item.unitPrice | currency: currentOrder.currency }}</td>
+                <td class="px-4 py-4 text-right app-body-text">
                   <span *ngIf="item.discountPercent">{{ item.discountPercent }}%</span>
                   <span *ngIf="!item.discountPercent">—</span>
                 </td>
-                <td class="px-4 py-4 text-right text-slate-900 dark:text-white font-medium">{{ item.lineTotal | currency: currentOrder.currency }}</td>
+                <td class="px-4 py-4 text-right app-strong-text">{{ item.lineTotal | currency: currentOrder.currency }}</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div *ngIf="!currentOrder.items || currentOrder.items.length === 0" class="text-center py-8">
-          <p class="text-slate-500 dark:text-slate-400">No order items found.</p>
+          <p class="app-muted-text">No order items found.</p>
         </div>
       </div>
 
       <!-- Notes Section -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Notes</h2>
+        <h2 class="app-section-title mb-6">Notes</h2>
         <div class="space-y-4">
           <div *ngIf="currentOrder.specialInstructions">
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Special Instructions</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.specialInstructions }}</p>
+            <p class="form-label">Special Instructions</p>
+            <p class="app-body-text mt-2">{{ currentOrder.specialInstructions }}</p>
           </div>
           <div *ngIf="currentOrder.internalNotes">
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Internal Notes</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.internalNotes }}</p>
+            <p class="form-label">Internal Notes</p>
+            <p class="app-body-text mt-2">{{ currentOrder.internalNotes }}</p>
           </div>
           <div *ngIf="currentOrder.failureReason">
-            <p class="text-xs uppercase tracking-wide text-red-500 dark:text-red-400 font-medium">Failure Reason</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.failureReason }}</p>
+            <p class="text-xs uppercase tracking-wide app-alert-text--danger font-medium">Failure Reason</p>
+            <p class="app-body-text mt-2">{{ currentOrder.failureReason }}</p>
           </div>
           <div *ngIf="!currentOrder.specialInstructions && !currentOrder.internalNotes && !currentOrder.failureReason">
-            <p class="text-slate-500 dark:text-slate-400">No additional notes.</p>
+            <p class="app-muted-text">No additional notes.</p>
           </div>
         </div>
       </div>
@@ -163,7 +163,7 @@
 
       <!-- Status Actions -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">
+        <h2 class="app-section-title mb-6">
           Status Actions
         </h2>
 
@@ -179,7 +179,7 @@
         </div>
 
         <ng-template #noStatusActions>
-          <p class="text-slate-500 dark:text-slate-400 text-sm">
+          <p class="app-muted-text text-sm">
             No available status actions.
           </p>
         </ng-template>
@@ -187,23 +187,23 @@
 
       <!-- Summary Card -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Summary</h2>
+        <h2 class="app-section-title mb-6">Summary</h2>
         <div class="space-y-3">
-          <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
-            <span class="text-slate-600 dark:text-slate-400">Subtotal</span>
-            <span class="text-slate-900 dark:text-white font-medium">{{ currentOrder.subtotal | currency: currentOrder.currency }}</span>
+          <div class="flex justify-between items-center pb-3 border-b app-divider">
+            <span class="app-muted-text">Subtotal</span>
+            <span class="app-strong-text">{{ currentOrder.subtotal | currency: currentOrder.currency }}</span>
           </div>
-          <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
-            <span class="text-slate-600 dark:text-slate-400">Discount</span>
-            <span class="text-slate-900 dark:text-white font-medium">-{{ currentOrder.discountAmount | currency: currentOrder.currency }}</span>
+          <div class="flex justify-between items-center pb-3 border-b app-divider">
+            <span class="app-muted-text">Discount</span>
+            <span class="app-strong-text">-{{ currentOrder.discountAmount | currency: currentOrder.currency }}</span>
           </div>
-          <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
-            <span class="text-slate-600 dark:text-slate-400">Tax</span>
-            <span class="text-slate-900 dark:text-white font-medium">{{ currentOrder.taxAmount | currency: currentOrder.currency }}</span>
+          <div class="flex justify-between items-center pb-3 border-b app-divider">
+            <span class="app-muted-text">Tax</span>
+            <span class="app-strong-text">{{ currentOrder.taxAmount | currency: currentOrder.currency }}</span>
           </div>
           <div class="flex justify-between items-center pt-3">
-            <span class="text-lg font-medium text-slate-900 dark:text-white">Total</span>
-            <span class="text-2xl font-light text-blue-600 dark:text-blue-400">{{ currentOrder.totalAmount | currency: currentOrder.currency }}</span>
+            <span class="text-lg app-strong-text">Total</span>
+            <span class="text-2xl font-light app-accent-text">{{ currentOrder.totalAmount | currency: currentOrder.currency }}</span>
           </div>
         </div>
       </div>
@@ -216,67 +216,67 @@
 
       <!-- Quick Info -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Logistics</h2>
+        <h2 class="app-section-title mb-6">Logistics</h2>
         <div class="space-y-4">
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Carrier</p>
-            <p class="text-slate-900 dark:text-white mt-2">{{ currentOrder.carrierName || '—' }}</p>
+            <p class="form-label">Carrier</p>
+            <p class="app-body-text mt-2">{{ currentOrder.carrierName || '—' }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Delivery Address</p>
-            <p class="text-slate-900 dark:text-white mt-2">Address #{{ currentOrder.deliveryAddressId }}</p>
+            <p class="form-label">Delivery Address</p>
+            <p class="app-body-text mt-2">Address #{{ currentOrder.deliveryAddressId }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Billing Address</p>
-            <p class="text-slate-900 dark:text-white mt-2">Address #{{ currentOrder.billingAddressId }}</p>
+            <p class="form-label">Billing Address</p>
+            <p class="app-body-text mt-2">Address #{{ currentOrder.billingAddressId }}</p>
           </div>
         </div>
       </div>
 
       <!-- Timestamps -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">Activity</h2>
+        <h2 class="app-section-title mb-6">Activity</h2>
         <div class="space-y-4 text-sm">
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Created</p>
-            <p class="text-slate-900 dark:text-white mt-1">{{ currentOrder.createdAt | date: 'MMM d, yyyy h:mm a' }}</p>
+            <p class="form-label">Created</p>
+            <p class="app-body-text mt-1">{{ currentOrder.createdAt | date: 'MMM d, yyyy h:mm a' }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Last Updated</p>
-            <p class="text-slate-900 dark:text-white mt-1">{{ currentOrder.updatedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+            <p class="form-label">Last Updated</p>
+            <p class="app-body-text mt-1">{{ currentOrder.updatedAt | date: 'MMM d, yyyy h:mm a' }}</p>
           </div>
           <div *ngIf="currentOrder.submittedAt">
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-medium">Submitted</p>
-            <p class="text-slate-900 dark:text-white mt-1">{{ currentOrder.submittedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+            <p class="form-label">Submitted</p>
+            <p class="app-body-text mt-1">{{ currentOrder.submittedAt | date: 'MMM d, yyyy h:mm a' }}</p>
           </div>
         </div>
       </div>
 
       <!-- Status History -->
       <div class="detail-card">
-        <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">
+        <h2 class="app-section-title mb-6">
           Status History
         </h2>
 
         <div *ngIf="history.length > 0; else noHistory" class="space-y-4">
           <div *ngFor="let h of history"
-               class="border-l-2 border-slate-200 dark:border-slate-700 pl-4">
-            <p class="text-sm font-medium text-slate-900 dark:text-white">
+               class="border-l-2 app-divider pl-4">
+            <p class="text-sm app-strong-text">
               {{ h.fromStatusName || '—' }} → {{ h.toStatusName }}
             </p>
 
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p class="text-xs app-muted-text mt-1">
               {{ h.changedByUserName }} • {{ h.changedAt | date: 'MMM d, yyyy h:mm a' }}
             </p>
 
-            <p *ngIf="h.reason" class="text-sm text-red-600 dark:text-red-400 mt-2">
+            <p *ngIf="h.reason" class="text-sm app-alert-text--danger mt-2">
               Reason: {{ h.reason }}
             </p>
           </div>
         </div>
 
         <ng-template #noHistory>
-          <p class="text-slate-500 dark:text-slate-400 text-sm">
+          <p class="app-muted-text text-sm">
             No history available.
           </p>
         </ng-template>
@@ -301,5 +301,3 @@
                  (confirm)="onReasonConfirm($event)"
                  (cancel)="onReasonCancel()">
 </app-input-modal>
-
-

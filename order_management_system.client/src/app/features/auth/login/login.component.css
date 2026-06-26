@@ -5,11 +5,6 @@
   margin: 0 auto;
 }
 
-:host-context(.dark) .login-page {
-  background: #0a0a0b;
-}
-
-:host-context(.dark) .login-card {
-  background: var(--app-surface);
-  border-color: var(--app-border);
+.login-page {
+  background: var(--app-page-bg);
 }

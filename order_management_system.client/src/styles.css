@@ -5,217 +5,262 @@
 @tailwind utilities;
 
 :root {
+
+  /* App shell */
   --surface-border: #3f3f46;
+  --app-body-bg: #f8fafc;
+  --app-page-bg: var(--app-body-bg);
+  --app-shell-page-bg: linear-gradient(135deg, var(--app-primary-bg) 0%, var(--app-primary-bg) 48%, var(--app-primary-bg) 100%);
+  --app-shell-bg: #f3f7fb;
+  --app-shell-border: #8fa4c0;
+  --app-shell-shadow: 0 28px 80px rgb(15 23 42 / 0.24);
+  --app-mobile-backdrop-bg: rgb(0 0 0 / 0.4);
+
+  /* Navigation */
+  --app-nav-bg: #ffffff;
+  --app-nav-border: var(--app-shell-border);
+  --app-nav-item-bg: #e8edf5;
+  --app-nav-item-border: #9aa8bc;
+  --app-nav-item-text: #334155;
+  --app-nav-item-active-bg: #dbeafe;
+  --app-nav-item-active-text: #1d4ed8;
+  --app-nav-avatar-bg: #172554;
+  --app-nav-scrollbar-thumb: rgb(148 163 184 / 0.55);
+
+  /* Surfaces */
   --app-surface: #ffffff;
   --app-secondary-surface: #ffffff;
   --app-muted-surface: #e8edf5;
+
+  /* Borders */
   --app-border: #9aa8bc;
   --app-strong-border: #8fa4c0;
-  --app-table-chrome: #dbeafe;
-  --app-table-chrome-border: #93c5fd;
-  --app-table-row-border: #d2dae7;
+
+  /* Text */
   --app-text: #1f2737;
   --app-heading: #111827;
   --app-muted-text: #64748b;
+  --app-brand-heading: #0f172a;
+  --app-brand-accent: #1ca8fe;
+
+  /* Tables */
+  --app-table-chrome: #dbeafe;
+  --app-table-chrome-border: #93c5fd;
+  --app-table-row-border: #d2dae7;
+
+  /* Shadows */
   --app-panel-shadow: 0 14px 36px rgb(56 71 109 / 0.1), 0 0 0 1px rgb(255 255 255 / 0.9) inset;
   --app-table-shadow: 0 18px 48px rgb(56 71 109 / 0.14), 0 0 0 1px rgb(255 255 255 / 0.9) inset;
   --app-button-shadow: 0 8px 20px rgb(56 71 109 / 0.1);
+
+  /* Primary buttons */
   --app-primary-bg: #2563eb;
   --app-primary-hover: #1d4ed8;
   --app-primary-text: #ffffff;
+
+  /* Secondary buttons */
   --app-secondary-bg: #e8edf5;
   --app-secondary-hover: #dde4ee;
   --app-secondary-border: #7f8fa6;
   --app-secondary-text: #1f2737;
+
+  /* Reset buttons */
   --app-reset-bg: #fff7ed;
   --app-reset-hover: #ffedd5;
   --app-reset-border: #fdba74;
   --app-reset-text: #9a3412;
+
+  /* Danger buttons */
   --app-danger-bg: #dc2626;
   --app-danger-hover: #b91c1c;
   --app-danger-text: #ffffff;
+  --app-danger-link-text: #dc2626;
+
+  /* Badges */
+  --app-badge-neutral-bg: var(--app-muted-surface);
+  --app-badge-neutral-text: var(--app-text);
+  --app-badge-success-bg: #dcfce7;
+  --app-badge-success-text: #047857;
+  --app-badge-warning-bg: #fef3c7;
+  --app-badge-warning-text: #b45309;
+  --app-badge-danger-bg: #fee2e2;
+  --app-badge-danger-text: #b91c1c;
+  --app-badge-info-bg: #dbeafe;
+  --app-badge-info-text: #1d4ed8;
+
+  /* Alerts */
+  --app-alert-danger-bg: #fef2f2;
+  --app-alert-danger-border: #fecaca;
+  --app-alert-danger-text: #dc2626;
+  --app-alert-success-bg: #ecfdf5;
+  --app-alert-success-border: #a7f3d0;
+  --app-alert-success-text: #047857;
+  --app-alert-warning-bg: #fffbeb;
+  --app-alert-warning-border: #fde68a;
+  --app-alert-warning-text: #b45309;
+
+  /* Validation */
+  --app-validation-text: var(--app-alert-danger-text);
+
+  /* Links and actions */
   --app-link-text: #2563eb;
   --app-action-bg: #ffffff;
   --app-action-hover: #eff6ff;
   --app-action-border: var(--app-primary-bg);
   --app-action-text: var(--app-primary-bg);
+
+  /* Button shape */
   --app-button-radius: 999px;
+
+  /* Fields */
   --app-field-bg: #ffffff;
   --app-field-border: #7f8fa6;
   --app-field-hover-border: #5f6f86;
   --app-field-focus-border: var(--app-primary-bg);
   --app-field-radius: 0.75rem;
+
+  /* Scrollbars */
+  --app-scrollbar-track: #f1f5f9;
+  --app-scrollbar-thumb: #cbd5e1;
+  --app-scrollbar-thumb-hover: #94a3b8;
 }
 
 html.dark {
+
+  /* App shell */
   --surface-border: #334155;
+  --app-body-bg: #0a0a0b;
+  --app-page-bg: radial-gradient(circle at top center, rgba(255, 255, 255, 0.03), transparent 40%), #0a0a0b;
+  --app-shell-page-bg: var(--app-page-bg);
+  --app-shell-bg: #24272b;
+  --app-shell-border: rgba(255, 255, 255, 0.1);
+  --app-shell-shadow: none;
+  --app-mobile-backdrop-bg: rgb(0 0 0 / 0.4);
+
+  /* Navigation */
+  --app-nav-bg: #1b1e22;
+  --app-nav-border: var(--app-shell-border);
+  --app-nav-item-bg: #2b2f34;
+  --app-nav-item-border: transparent;
+  --app-nav-item-text: #9ca3af;
+  --app-nav-item-active-bg: #33383e;
+  --app-nav-item-active-text: #f3f4f6;
+  --app-nav-avatar-bg: #172554;
+  --app-nav-scrollbar-thumb: rgb(75 85 99 / 0.75);
+
+  /* Surfaces */
   --app-surface: #30343a;
   --app-secondary-surface: #383e46;
   --app-muted-surface: #3f464f;
+
+  /* Borders */
   --app-border: rgba(255, 255, 255, 0.14);
   --app-strong-border: rgba(255, 255, 255, 0.16);
-  --app-table-chrome: #383e46;
-  --app-table-chrome-border: rgba(255, 255, 255, 0.14);
-  --app-table-row-border: rgba(255, 255, 255, 0.13);
+
+  /* Text */
   --app-text: #f8fafc;
   --app-heading: #f8fafc;
   --app-muted-text: #94a3b8;
+  --app-brand-heading: #f8fafc;
+  --app-brand-accent: #1ca8fe;
+
+  /* Tables */
+  --app-table-chrome: #383e46;
+  --app-table-chrome-border: rgba(255, 255, 255, 0.14);
+  --app-table-row-border: rgba(255, 255, 255, 0.13);
+
+  /* Shadows */
   --app-panel-shadow: none;
   --app-table-shadow: none;
   --app-button-shadow: none;
+
+  /* Primary buttons */
   --app-primary-bg: #2563eb;
   --app-primary-hover: #1d4ed8;
   --app-primary-text: #ffffff;
+
+  /* Secondary buttons */
   --app-secondary-bg: #383e46;
   --app-secondary-hover: #444c56;
   --app-secondary-border: rgba(255, 255, 255, 0.14);
   --app-secondary-text: #f8fafc;
+
+  /* Reset buttons */
   --app-reset-bg: #2a2118;
   --app-reset-hover: #3a2b1d;
   --app-reset-border: #92400e;
   --app-reset-text: #fed7aa;
+
+  /* Danger buttons */
   --app-danger-bg: #991b1b;
   --app-danger-hover: #7f1d1d;
   --app-danger-text: #fee2e2;
+  --app-danger-link-text: #fca5a5;
+
+  /* Badges */
+  --app-badge-neutral-bg: var(--app-muted-surface);
+  --app-badge-neutral-text: var(--app-text);
+  --app-badge-success-bg: rgba(16, 185, 129, 0.12);
+  --app-badge-success-text: #34d399;
+  --app-badge-warning-bg: rgba(245, 158, 11, 0.14);
+  --app-badge-warning-text: #fbbf24;
+  --app-badge-danger-bg: rgba(239, 68, 68, 0.14);
+  --app-badge-danger-text: #f87171;
+  --app-badge-info-bg: rgba(28, 168, 254, 0.12);
+  --app-badge-info-text: #7dd3fc;
+
+  /* Alerts */
+  --app-alert-danger-bg: rgba(239, 68, 68, 0.12);
+  --app-alert-danger-border: rgba(239, 68, 68, 0.28);
+  --app-alert-danger-text: #fca5a5;
+  --app-alert-success-bg: rgba(16, 185, 129, 0.12);
+  --app-alert-success-border: rgba(16, 185, 129, 0.28);
+  --app-alert-success-text: #6ee7b7;
+  --app-alert-warning-bg: rgba(245, 158, 11, 0.14);
+  --app-alert-warning-border: rgba(245, 158, 11, 0.3);
+  --app-alert-warning-text: #fcd34d;
+
+  /* Validation */
+  --app-validation-text: var(--app-alert-danger-text);
+
+  /* Links and actions */
   --app-link-text: #7dd3fc;
   --app-action-bg: #383e46;
   --app-action-hover: #444c56;
   --app-action-border: rgba(255, 255, 255, 0.14);
   --app-action-text: #7dd3fc;
+
+  /* Button shape */
   --app-button-radius: 999px;
+
+  /* Fields */
   --app-field-bg: #20242a;
   --app-field-border: rgba(255, 255, 255, 0.16);
   --app-field-hover-border: rgba(255, 255, 255, 0.28);
   --app-field-focus-border: #7dd3fc;
   --app-field-radius: 0.75rem;
+
+  /* Scrollbars */
+  --app-scrollbar-track: #24272b;
+  --app-scrollbar-thumb: #1b1e22;
+  --app-scrollbar-thumb-hover: #1b1e22;
 }
 
-html.dark .dark\:bg-slate-800,
-html.dark .dark\:bg-slate-800\/50 {
-  background-color: #30343a;
-}
-
-html.dark .dark\:bg-slate-900 {
-  background-color: #1b1e22;
-}
-
-html.dark .dark\:bg-slate-900\/20,
-html.dark .dark\:bg-slate-900\/60 {
-  background-color: #383e46;
-}
-
-html.dark .dark\:bg-slate-700,
-html.dark .dark\:bg-slate-700\/50 {
-  background-color: #383e46;
-}
-
-html.dark .dark\:hover\:bg-slate-700\/50:hover,
-html.dark .dark\:hover\:bg-slate-600:hover {
-  background-color: #3f464f;
-}
-
-html.dark .dark\:border-slate-700,
-html.dark .dark\:border-slate-700\/50 {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-html.dark .dark\:divide-slate-700 > :not([hidden]) ~ :not([hidden]) {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-html.dark .dark\:bg-blue-900\/20 {
-  background-color: rgba(28, 168, 254, 0.12);
-}
-
-html.dark .dark\:text-blue-400 {
-  color: #7dd3fc;
-}
-
-html.dark .dark\:text-slate-300,
-html.dark .dark\:text-slate-400 {
-  color: #b8b8b8;
-}
-
-html.dark .dark\:placeholder-slate-500::placeholder {
-  color: #f8fafc;
-}
-
-html .bg-white {
-  background-color: var(--app-surface);
-}
-
-html .bg-slate-50 {
-  background-color: var(--app-secondary-surface);
-}
-
-html .bg-slate-100 {
-  background-color: var(--app-secondary-surface);
-  border-color: var(--app-border);
-}
-
-html .hover\:bg-slate-50:hover,
-html .hover\:bg-slate-200:hover {
-  background-color: var(--app-muted-surface);
-}
-
-html .border-slate-100,
-html .border-slate-200,
-html .border-slate-300 {
-  border-color: var(--app-border);
-}
-
-html .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--app-border);
-}
-
-html .bg-white.border {
-  border-color: var(--app-border);
-  border-radius: 18px;
-  box-shadow: var(--app-panel-shadow);
-}
-
-html input,
-html select,
-html textarea {
-  background-color: var(--app-field-bg);
-  border-color: var(--app-field-border);
-  color: var(--app-text);
-  font-weight: 500;
-}
-
-html input:hover,
-html select:hover,
-html textarea:hover {
-  border-color: var(--app-field-hover-border);
-}
-
-html input:focus,
-html select:focus,
-html textarea:focus {
-  border-color: var(--app-field-focus-border);
-}
-
-html input::placeholder,
-html textarea::placeholder {
+.app-muted-text {
   color: var(--app-muted-text);
 }
 
-html thead th {
-  color: var(--app-heading);
-  font-weight: 800;
+.app-accent-text {
+  color: var(--app-link-text);
 }
 
-html tbody td {
+.app-body-text {
   color: var(--app-text);
+}
+
+.app-strong-text {
+  color: var(--app-heading);
   font-weight: 500;
-}
-
-html tbody tr {
-  box-shadow: inset 0 -1px 0 var(--app-table-row-border);
-}
-
-html tbody tr:last-child {
-  box-shadow: none;
 }
 
 .app-table-card {
@@ -256,6 +301,10 @@ html tbody tr:last-child {
 }
 
 .app-table-body tr:hover {
+  background: var(--app-muted-surface);
+}
+
+.app-table-expanded-row {
   background: var(--app-muted-surface);
 }
 
@@ -301,6 +350,7 @@ html tbody tr:last-child {
   }
 }
 
+.app-card,
 .metric-card,
 .form-card,
 .detail-card {
@@ -335,16 +385,76 @@ html tbody tr:last-child {
   padding: 1.5rem;
 }
 
+.app-sub-card {
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  background: var(--app-muted-surface);
+  padding: 1rem;
+}
+
+.app-alert {
+  border: 1px solid;
+  border-radius: 0.75rem;
+}
+
+.app-alert--danger {
+  border-color: var(--app-alert-danger-border);
+  background: var(--app-alert-danger-bg);
+  color: var(--app-alert-danger-text);
+}
+
+.app-alert--success {
+  border-color: var(--app-alert-success-border);
+  background: var(--app-alert-success-bg);
+  color: var(--app-alert-success-text);
+}
+
+.app-alert--warning {
+  border-color: var(--app-alert-warning-border);
+  background: var(--app-alert-warning-bg);
+  color: var(--app-alert-warning-text);
+}
+
+.app-alert-text--danger {
+  color: var(--app-alert-danger-text);
+}
+
+.app-alert-text--success {
+  color: var(--app-alert-success-text);
+}
+
+.app-alert-text--warning {
+  color: var(--app-alert-warning-text);
+}
+
+.app-required-marker,
+.app-validation-message {
+  color: var(--app-validation-text);
+}
+
+.app-validation-message {
+  font-size: 0.875rem;
+}
+
+.app-border {
+  border-color: var(--app-border);
+}
+
+.app-divider {
+  border-color: var(--app-border);
+}
+
 .form-label {
-  display: block;
+  display: inline-block;
   margin-bottom: 0.5rem;
-  color: rgb(51 65 85);
+  color: var(--app-text);
   font-size: 0.875rem;
   font-weight: 500;
 }
 
-html.dark .form-label {
-  color: rgb(203 213 225);
+label.flex .form-label,
+label.inline-flex .form-label {
+  margin-bottom: 0;
 }
 
 .form-input,
@@ -360,6 +470,15 @@ html.dark .form-label {
 
 .form-input {
   padding: 0.5rem 1rem;
+}
+
+.form-input--compact {
+  width: auto;
+  min-width: 5rem;
+}
+
+select.form-input--compact {
+  padding-right: 2.5rem;
 }
 
 .app-search-input {
@@ -391,6 +510,59 @@ html.dark .form-label {
   margin-top: 0.25rem;
   color: var(--app-muted-text);
   font-size: 0.875rem;
+}
+
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.app-badge--neutral {
+  background: var(--app-badge-neutral-bg);
+  color: var(--app-badge-neutral-text);
+}
+
+.app-badge--success {
+  background: var(--app-badge-success-bg);
+  color: var(--app-badge-success-text);
+}
+
+.app-badge--warning {
+  background: var(--app-badge-warning-bg);
+  color: var(--app-badge-warning-text);
+}
+
+.app-badge--danger {
+  background: var(--app-badge-danger-bg);
+  color: var(--app-badge-danger-text);
+}
+
+.app-badge--info {
+  background: var(--app-badge-info-bg);
+  color: var(--app-badge-info-text);
+}
+
+.app-count-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  background: var(--app-badge-info-bg);
+  color: var(--app-badge-info-text);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.app-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--app-field-border);
+  accent-color: var(--app-primary-bg);
 }
 
 .app-stat-grid {
@@ -524,7 +696,7 @@ html.dark .form-label {
 }
 
 .brand-page-title {
-  color: #0f172a;
+  color: var(--app-brand-heading);
   font-family: "Pliant", "Baloo 2", "Nunito", system-ui, sans-serif;
   font-size: 2.25rem;
   font-weight: 500;
@@ -532,12 +704,8 @@ html.dark .form-label {
   letter-spacing: 0;
 }
 
-html.dark .brand-page-title {
-  color: #f8fafc;
-}
-
 .brand-page-dot {
-  color: #1ca8fe;
+  color: var(--app-brand-accent);
   font-family: "Fredoka", "Baloo 2", "Nunito", system-ui, sans-serif;
   font-weight: 700;
 }
@@ -684,16 +852,12 @@ html.dark .brand-page-title {
 }
 
 .app-danger-link {
-  color: var(--app-danger-bg);
+  color: var(--app-danger-link-text);
   font-weight: 700;
 }
 
 .app-danger-link:hover {
   text-decoration: underline;
-}
-
-html.dark .app-danger-link {
-  color: #fca5a5;
 }
 
 html.dark .app-primary-button {
@@ -705,7 +869,7 @@ html.dark .app-secondary-button {
 }
 
 .app-search-icon {
-  color: #334155;
+  color: var(--app-muted-text);
 }
 
 .app-search-icon svg {
@@ -735,10 +899,6 @@ html.dark .app-secondary-button {
   }
 }
 
-html.dark .app-search-icon {
-  color: #94a3b8;
-}
-
 /* Base global styles */
 html {
   height: 100%;
@@ -750,29 +910,19 @@ body {
   padding: 0;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f8fafc;
+  background-color: var(--app-body-bg);
 }
 
-html.dark body {
-  background-color: #0f172a;
-}
-
-select {
+select.form-input {
   font-family: inherit;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-
-  @apply px-4 pr-10 py-2 border border-slate-300;
-  border-radius: var(--app-field-radius);
+  padding-right: 2.5rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1rem;
-}
-
-select.rounded-lg {
-  border-radius: var(--app-field-radius);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
@@ -792,24 +942,16 @@ html.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-html.dark ::-webkit-scrollbar-track {
-  background: #24272b;
+  background: var(--app-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--app-scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-html.dark ::-webkit-scrollbar-thumb {
-  background: #1b1e22;
+  background: var(--app-scrollbar-thumb-hover);
 }
 
 /* Transitions */

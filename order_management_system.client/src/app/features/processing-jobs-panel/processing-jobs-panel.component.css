@@ -1,15 +1,4 @@
-.processing-job-count,
 .processing-job-card {
   border: 1px solid var(--app-border);
   background: var(--app-muted-surface);
-}
-
-.processing-job-count {
-  color: var(--app-text);
-}
-
-:host-context(.dark) .processing-job-count,
-:host-context(.dark) .processing-job-card {
-  background: var(--app-secondary-surface);
-  border-color: var(--app-border);
 }

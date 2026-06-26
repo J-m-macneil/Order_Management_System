@@ -9,8 +9,8 @@ import { AdminGuard } from './core/guards/admin.guard';
 import { LoginGuard } from './core/guards/login.guard';
 
 const routes: Routes = [
-  { path: '', component: LoginComponent, canActivate: [LoginGuard], pathMatch: 'full' },
-  { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
+  { path: '', component: LoginComponent, canActivate: [LoginGuard], title: 'Login | Back.', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent, canActivate: [LoginGuard], title: 'Login | Back.' },
   {
     path: '',
     component: MainLayoutComponent,
