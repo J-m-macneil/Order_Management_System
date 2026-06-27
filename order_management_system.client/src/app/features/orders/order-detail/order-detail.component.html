@@ -37,11 +37,18 @@
         </div>
         <p class="text-sm app-body-text">{{ getEditLockMessage() }}</p>
       </div>
-      <a *ngIf="canEditOrder()"
-         [routerLink]="['/orders', currentOrder.orderId, 'edit']"
-         class="app-primary-button px-4 py-2">
-        Edit
-      </a>
+      <div *ngIf="canEditOrder()" class="flex flex-wrap gap-2">
+        <a [routerLink]="['/orders', currentOrder.orderId, 'edit']"
+           class="app-primary-button px-4 py-2">
+          Edit
+        </a>
+        <button type="button"
+                (click)="discardDraft()"
+                [disabled]="isDiscardingDraft"
+                class="app-danger-button px-4 py-2">
+          {{ isDiscardingDraft ? 'Discarding...' : 'Discard Draft' }}
+        </button>
+      </div>
     </div>
   </div>
 
@@ -294,10 +301,13 @@
   </div>
 </div>
 
-<app-input-modal *ngIf="showReasonModal"
-                 [title]="reasonModalTitle"
-                 [placeholder]="reasonModalPlaceholder"
-                 [requireInput]="true"
-                 (confirm)="onReasonConfirm($event)"
-                 (cancel)="onReasonCancel()">
-</app-input-modal>
+<app-confirmation-modal *ngIf="showConfirmationModal"
+                        [title]="confirmationModalTitle"
+                        [message]="confirmationModalMessage"
+                        [confirmText]="confirmationModalConfirmText"
+                        [variant]="confirmationModalVariant"
+                        [requireReason]="confirmationModalRequiresReason"
+                        [reasonPlaceholder]="confirmationModalReasonPlaceholder"
+                        (confirm)="onConfirmationConfirm($event)"
+                        (cancel)="onConfirmationCancel()">
+</app-confirmation-modal>

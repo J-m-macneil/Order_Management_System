@@ -205,6 +205,11 @@
     </table>
   </div>
 
+  <!-- Empty State -->
+  <div *ngIf="filteredOrders.length === 0" class="app-empty-state">
+    <p>No orders found.</p>
+  </div>
+
   <div class="app-table-footer">
     <div class="text-sm app-muted-text">
       Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
@@ -248,8 +253,4 @@
     </div>
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="filteredOrders.length === 0" class="app-empty-state">
-    <p>No orders found.</p>
-  </div>
 </div>

@@ -18,7 +18,6 @@ import { ProductList } from '../models/product-list.model';
 })
 export class OrdersService {
   private readonly baseUrl = `${apiBaseUrl}/orders`;
-    apiUrl: any;
 
   constructor(private http: HttpClient) { }
 
@@ -72,6 +71,10 @@ export class OrdersService {
 
   updateOrder(orderId: number, order: CreateOrder): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${orderId}`, order);
+  }
+
+  discardDraftOrder(orderId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${orderId}`);
   }
 
   getOrderById(id: number): Observable<Order> {

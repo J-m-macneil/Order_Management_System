@@ -32,9 +32,11 @@ export class AuthService {
     );
   }
 
-  logout(): void {
-    this.http.post<void>(`${apiBaseUrl}/auth/logout`, {}).subscribe();
+  logout(): Observable<void> {
     this.setCurrentUser(null);
+    return this.http.post<void>(`${apiBaseUrl}/auth/logout`, {}).pipe(
+      catchError(() => of(void 0))
+    );
   }
 
   ensureAuthenticated(): Observable<boolean> {

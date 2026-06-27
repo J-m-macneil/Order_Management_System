@@ -158,7 +158,7 @@
                 <td class="px-6 py-4 app-body-text">{{ sds.uploadedByUserId }}</td>
                 <td class="px-6 py-4 text-center">
                   <button type="button"
-                          (click)="deleteSafetyDataSheet(sds.safetyDataSheetId)"
+                          (click)="openDeleteSdsModal(sds)"
                           class="app-danger-link text-xs">
                     Delete
                   </button>
@@ -357,3 +357,12 @@
     </div>
   </div>
 </form>
+
+<app-confirmation-modal *ngIf="sdsPendingDelete"
+                        title="Delete SDS"
+                        [message]="'Delete SDS record ' + sdsPendingDelete.fileName + '? This action cannot be undone.'"
+                        confirmText="Delete SDS"
+                        variant="danger"
+                        (confirm)="confirmDeleteSds()"
+                        (cancel)="cancelDeleteSds()">
+</app-confirmation-modal>

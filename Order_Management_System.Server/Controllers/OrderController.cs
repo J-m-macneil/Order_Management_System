@@ -1,5 +1,6 @@
 ﻿using Application.Features.Orders.Commands.ChangeOrderStatus;
 using Application.Features.Orders.Commands.CreateOrder;
+using Application.Features.Orders.Commands.DiscardDraftOrder;
 using Application.Features.Orders.Commands.UpdateOrder;
 using Application.Features.Orders.Queries.GetAllowedStatuses;
 using Application.Features.Orders.Queries.GetOrderById;
@@ -37,6 +38,25 @@ public class OrdersController : ControllerBase
         {
             command.OrderId = id;
             await _mediator.Send(command, ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Policy = "SalesOrAdmin")]
+    public async Task<IActionResult> DiscardDraft(int id, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new DiscardDraftOrderCommand { OrderId = id }, ct);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

@@ -32,6 +32,7 @@ export class CustomersComponent implements OnInit {
 
   stats: { label: string; value: string | number }[] = [];
   industries: string[] = [];
+  customerPendingDelete: Customer | null = null;
 
   constructor(
     private customersService: CustomersService,
@@ -141,18 +142,28 @@ export class CustomersComponent implements OnInit {
     return null;
   }
 
-  deleteCustomer(id: number): void {
-    if (!confirm('Are you sure you want to delete this customer?')) {
+  openDeleteCustomerModal(customer: Customer): void {
+    this.customerPendingDelete = customer;
+  }
+
+  cancelDeleteCustomer(): void {
+    this.customerPendingDelete = null;
+  }
+
+  confirmDeleteCustomer(): void {
+    if (!this.customerPendingDelete) {
       return;
     }
 
-    this.customersService.delete(id).subscribe({
+    this.customersService.delete(this.customerPendingDelete.customerId).subscribe({
       next: () => {
+        this.customerPendingDelete = null;
         this.loadSummary();
         this.loadCustomers();
       },
       error: () => {
         this.errorMessage = 'Failed to delete customer.';
+        this.customerPendingDelete = null;
         this.cdr.detectChanges();
       }
     });

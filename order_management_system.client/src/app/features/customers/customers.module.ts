@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { SharedModule } from '../../shared/shared.module';
 import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { CustomersRoutingModule } from './customers-routing.module';
 import { CustomersComponent } from './customers.component';
@@ -15,6 +16,7 @@ import { CustomersComponent } from './customers.component';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    SharedModule,
     CustomersRoutingModule
   ]
 })

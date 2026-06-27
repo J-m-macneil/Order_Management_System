@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { OrdersService } from '../../../core/services/orders.service';
 import { Order } from '../../../core/models/order.model';
 import { AllowedStatus } from '../../../core/models/allowed-status.model';
@@ -19,17 +19,24 @@ export class OrderDetailComponent implements OnInit {
 
   isLoading = false;
   isChangingStatus = false;
+  isDiscardingDraft = false;
   errorMessage = '';
 
-  showReasonModal = false;
+  showConfirmationModal = false;
+  confirmationModalTitle = 'Confirm Action';
+  confirmationModalMessage = '';
+  confirmationModalConfirmText = 'Confirm';
+  confirmationModalVariant: 'default' | 'warning' | 'danger' = 'default';
+  confirmationModalRequiresReason = false;
+  confirmationModalReasonPlaceholder = 'Enter reason...';
+  pendingConfirmationAction: 'status' | 'discardDraft' | null = null;
   pendingStatus: OrderStatus | null = null;
-  reasonModalTitle = 'Provide Reason';
-  reasonModalPlaceholder = 'Enter reason...';
 
   private orderId = 0;
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private ordersService: OrdersService,
     private cdr: ChangeDetectorRef
   ) { }
@@ -106,9 +113,16 @@ export class OrderDetailComponent implements OnInit {
 
     if (this.requiresReason(status)) {
       this.pendingStatus = status;
-      this.reasonModalTitle = this.getReasonModalTitle(status);
-      this.reasonModalPlaceholder = this.getReasonModalPlaceholder(status);
-      this.showReasonModal = true;
+      this.pendingConfirmationAction = 'status';
+      this.confirmationModalTitle = this.getReasonModalTitle(status);
+      this.confirmationModalMessage = '';
+      this.confirmationModalConfirmText = 'Confirm';
+      this.confirmationModalVariant = status === OrderStatus.Cancelled || status === OrderStatus.Failed
+        ? 'danger'
+        : 'warning';
+      this.confirmationModalRequiresReason = true;
+      this.confirmationModalReasonPlaceholder = this.getReasonModalPlaceholder(status);
+      this.showConfirmationModal = true;
       this.errorMessage = '';
       this.cdr.detectChanges();
       return;
@@ -117,19 +131,28 @@ export class OrderDetailComponent implements OnInit {
     this.executeStatusChange(status);
   }
 
-  onReasonConfirm(reason: string): void {
+  onConfirmationConfirm(reason?: string): void {
+    if (this.pendingConfirmationAction === 'discardDraft') {
+      this.showConfirmationModal = false;
+      this.pendingConfirmationAction = null;
+      this.executeDiscardDraft();
+      return;
+    }
+
     if (!this.pendingStatus) {
       return;
     }
 
-    this.showReasonModal = false;
+    this.showConfirmationModal = false;
     this.executeStatusChange(this.pendingStatus, reason);
     this.pendingStatus = null;
+    this.pendingConfirmationAction = null;
   }
 
-  onReasonCancel(): void {
-    this.showReasonModal = false;
+  onConfirmationCancel(): void {
+    this.showConfirmationModal = false;
     this.pendingStatus = null;
+    this.pendingConfirmationAction = null;
     this.cdr.detectChanges();
   }
 
@@ -212,6 +235,42 @@ export class OrderDetailComponent implements OnInit {
 
   canEditOrder(): boolean {
     return this.order?.orderStatusId === OrderStatus.Draft;
+  }
+
+  discardDraft(): void {
+    if (!this.order || this.isDiscardingDraft) {
+      return;
+    }
+
+    this.pendingConfirmationAction = 'discardDraft';
+    this.confirmationModalTitle = 'Discard Draft Order';
+    this.confirmationModalMessage = `Discard draft order ${this.order.orderNumber}? This will remove it from the active orders list.`;
+    this.confirmationModalConfirmText = 'Discard Draft';
+    this.confirmationModalVariant = 'danger';
+    this.confirmationModalRequiresReason = false;
+    this.confirmationModalReasonPlaceholder = '';
+    this.showConfirmationModal = true;
+  }
+
+  private executeDiscardDraft(): void {
+    if (!this.order || this.isDiscardingDraft) {
+      return;
+    }
+
+    this.isDiscardingDraft = true;
+    this.errorMessage = '';
+
+    this.ordersService.discardDraftOrder(this.order.orderId).subscribe({
+      next: () => {
+        this.isDiscardingDraft = false;
+        this.router.navigate(['/orders']);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to discard draft order.';
+        this.isDiscardingDraft = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private requiresReason(status: OrderStatus): boolean {

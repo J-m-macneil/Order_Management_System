@@ -37,6 +37,7 @@ export class ProductsComponent implements OnInit {
   stats: { label: string; value: string | number }[] = [];
   categories: ProductCategory[] = [];
   hazardClasses: HazardClass[] = [];
+  productPendingDelete: ProductList | null = null;
 
   private isHazardous(product: ProductList): boolean {
     return product.hazardClassName?.toLowerCase() !== 'non-hazardous';
@@ -157,19 +158,29 @@ export class ProductsComponent implements OnInit {
     this.filteredProducts = this.products;
   }
 
-  deleteProduct(id: number): void {
-    if (!confirm('Delete this product?')) {
+  openDeleteProductModal(product: ProductList): void {
+    this.productPendingDelete = product;
+  }
+
+  cancelDeleteProduct(): void {
+    this.productPendingDelete = null;
+  }
+
+  confirmDeleteProduct(): void {
+    if (!this.productPendingDelete) {
       return;
     }
 
-    this.productsService.delete(id).subscribe({
+    this.productsService.delete(this.productPendingDelete.productId).subscribe({
       next: () => {
+        this.productPendingDelete = null;
         this.loadSummary();
         this.loadProducts();
       },
       error: (err) => {
         console.error('Failed to delete product', err);
         this.errorMessage = 'Failed to delete product.';
+        this.productPendingDelete = null;
         this.cdr.detectChanges();
       }
     });

@@ -1,0 +1,33 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  <div class="app-card w-full max-w-md p-6">
+    <h2 class="app-section-title mb-3">
+      {{ title }}
+    </h2>
+
+    <p *ngIf="message" class="app-body-text text-sm">
+      {{ message }}
+    </p>
+
+    <div *ngIf="requireReason" class="mt-5">
+      <label class="form-label">{{ reasonLabel }}</label>
+      <textarea [(ngModel)]="reason"
+                rows="4"
+                class="form-input mt-2 text-sm"
+                [placeholder]="reasonPlaceholder"></textarea>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+      <button type="button"
+              (click)="close()"
+              class="app-secondary-button px-4 py-2 text-sm">
+        {{ cancelText }}
+      </button>
+
+      <button type="button"
+              (click)="submit()"
+              [class]="confirmButtonClass">
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

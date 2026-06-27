@@ -180,7 +180,7 @@
               <a [routerLink]="['/customers/edit', customer.customerId]" class="app-link-button text-xs">
                 Edit
               </a>
-              <button type="button" (click)="deleteCustomer(customer.customerId)" class="app-danger-link text-xs">
+              <button type="button" (click)="openDeleteCustomerModal(customer)" class="app-danger-link text-xs">
                 Delete
               </button>
             </div>
@@ -238,3 +238,12 @@
     </div>
   </div>
 </div>
+
+<app-confirmation-modal *ngIf="customerPendingDelete"
+                        title="Delete Customer"
+                        [message]="'Delete customer ' + customerPendingDelete.companyName + '? This action cannot be undone.'"
+                        confirmText="Delete Customer"
+                        variant="danger"
+                        (confirm)="confirmDeleteCustomer()"
+                        (cancel)="cancelDeleteCustomer()">
+</app-confirmation-modal>

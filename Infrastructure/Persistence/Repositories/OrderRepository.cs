@@ -42,7 +42,7 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.OrderStatusHistory)
                 .ThenInclude(h => h.ChangedByUser)
 
-            .FirstOrDefaultAsync(o => o.OrderId == id, ct);
+            .FirstOrDefaultAsync(o => o.OrderId == id && o.DeletedAt == null, ct);
     }
 
     public void RemoveItems(IEnumerable<OrderItem> items)
@@ -53,6 +53,7 @@ public class OrderRepository : IOrderRepository
     public async Task<List<Order>> GetAllAsync(CancellationToken ct)
     {
         return await _db.Orders
+            .Where(o => o.DeletedAt == null)
             .Include(o => o.Customer)
             .Include(o => o.OrderStatus)
             .Include(o => o.Warehouse)

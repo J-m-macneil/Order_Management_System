@@ -65,6 +65,25 @@ public class Order
     public ICollection<OrderStatusHistory> OrderStatusHistory { get; set; } = new List<OrderStatusHistory>();
     public ICollection<ProcessingJob> ProcessingJobs { get; set; } = new List<ProcessingJob>();
 
+    public void DiscardDraft()
+    {
+        if (DeletedAt != null)
+            return;
+
+        if ((OrderStatusEnum)OrderStatusId != OrderStatusEnum.Draft)
+            throw new InvalidOperationException("Only draft orders can be discarded.");
+
+        var discardedAt = DateTime.UtcNow;
+
+        DeletedAt = discardedAt;
+        UpdatedAt = discardedAt;
+
+        foreach (var item in OrderItems.Where(x => x.DeletedAt == null))
+        {
+            item.DeletedAt = discardedAt;
+        }
+    }
+
     public void ChangeStatus(int newStatusId, int userId, string? reason)
     {
         if (OrderStatusId == newStatusId)

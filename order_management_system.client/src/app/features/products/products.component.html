@@ -216,7 +216,7 @@
                 Edit
               </a>
               <button type="button"
-                      (click)="deleteProduct(product.productId)"
+                      (click)="openDeleteProductModal(product)"
                       class="app-danger-link text-xs">
                 Delete
               </button>
@@ -275,3 +275,12 @@
     </div>
   </div>
 </div>
+
+<app-confirmation-modal *ngIf="productPendingDelete"
+                        title="Delete Product"
+                        [message]="'Delete product ' + productPendingDelete.productName + '? This action cannot be undone.'"
+                        confirmText="Delete Product"
+                        variant="danger"
+                        (confirm)="confirmDeleteProduct()"
+                        (cancel)="cancelDeleteProduct()">
+</app-confirmation-modal>

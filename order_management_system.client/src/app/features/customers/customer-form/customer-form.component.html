@@ -289,7 +289,7 @@
                 Set Delivery
               </button>
               <button type="button"
-                      (click)="deleteAddress(address.addressId)"
+                      (click)="openDeleteAddressModal(address)"
                       class="app-danger-link text-xs">
                 Delete
               </button>
@@ -425,7 +425,7 @@
                 Set Primary
               </button>
               <button type="button"
-                      (click)="deleteContact(contact.customerContactId)"
+                      (click)="openDeleteContactModal(contact)"
                       class="app-danger-link text-xs">
                 Delete
               </button>
@@ -525,3 +525,21 @@
 
   </div>
 </form>
+
+<app-confirmation-modal *ngIf="addressPendingDelete"
+                        title="Delete Address"
+                        [message]="'Delete address ' + addressPendingDelete.siteName + '? This action cannot be undone.'"
+                        confirmText="Delete Address"
+                        variant="danger"
+                        (confirm)="confirmDeleteAddress()"
+                        (cancel)="cancelDeleteAddress()">
+</app-confirmation-modal>
+
+<app-confirmation-modal *ngIf="contactPendingDelete"
+                        title="Delete Contact"
+                        [message]="'Delete contact ' + contactPendingDelete.name + '? This action cannot be undone.'"
+                        confirmText="Delete Contact"
+                        variant="danger"
+                        (confirm)="confirmDeleteContact()"
+                        (cancel)="cancelDeleteContact()">
+</app-confirmation-modal>

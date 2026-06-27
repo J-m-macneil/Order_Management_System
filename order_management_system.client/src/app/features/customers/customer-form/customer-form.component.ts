@@ -36,6 +36,8 @@ export class CustomerFormComponent implements OnInit {
   editingContactId: number | null = null;
   isAddressFormOpen = false;
   editingAddressId: number | null = null;
+  addressPendingDelete: Address | null = null;
+  contactPendingDelete: CustomerContact | null = null;
   pricingTiers: PricingTier[] = [];
 
   constructor(
@@ -312,23 +314,33 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
-  deleteAddress(addressId: number): void {
+  openDeleteAddressModal(address: Address): void {
+    this.addressPendingDelete = address;
+  }
+
+  cancelDeleteAddress(): void {
+    this.addressPendingDelete = null;
+  }
+
+  confirmDeleteAddress(): void {
     if (!this.customerId) {
       return;
     }
 
-    if (!confirm('Are you sure you want to delete this address?')) {
+    if (!this.addressPendingDelete) {
       return;
     }
 
-    this.customersService.deleteAddress(this.customerId, addressId).subscribe({
+    this.customersService.deleteAddress(this.customerId, this.addressPendingDelete.addressId).subscribe({
       next: () => {
+        this.addressPendingDelete = null;
         this.getCustomerAddresses(this.customerId!);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to delete address', err);
         this.errorMessage = 'Failed to delete address.';
+        this.addressPendingDelete = null;
         this.cdr.detectChanges();
       }
     });
@@ -550,23 +562,33 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
-  deleteContact(contactId: number): void {
+  openDeleteContactModal(contact: CustomerContact): void {
+    this.contactPendingDelete = contact;
+  }
+
+  cancelDeleteContact(): void {
+    this.contactPendingDelete = null;
+  }
+
+  confirmDeleteContact(): void {
     if (!this.customerId) {
       return;
     }
 
-    if (!confirm('Are you sure you want to delete this contact?')) {
+    if (!this.contactPendingDelete) {
       return;
     }
 
-    this.customersService.deleteContact(this.customerId, contactId).subscribe({
+    this.customersService.deleteContact(this.customerId, this.contactPendingDelete.customerContactId).subscribe({
       next: () => {
+        this.contactPendingDelete = null;
         this.getCustomerContacts(this.customerId!);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to delete contact', err);
         this.errorMessage = 'Failed to delete contact.';
+        this.contactPendingDelete = null;
         this.cdr.detectChanges();
       }
     });

@@ -33,6 +33,7 @@ export class ProductFormComponent implements OnInit {
   sdsForm!: FormGroup;
   safetyDataSheets: SafetyDataSheet[] = [];
   isSdsFormOpen = false;
+  sdsPendingDelete: SafetyDataSheet | null = null;
   auditLogs: AuditLog[] = [];
   auditUnavailable = false;
 
@@ -278,23 +279,33 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  deleteSafetyDataSheet(sdsId: number): void {
+  openDeleteSdsModal(sds: SafetyDataSheet): void {
+    this.sdsPendingDelete = sds;
+  }
+
+  cancelDeleteSds(): void {
+    this.sdsPendingDelete = null;
+  }
+
+  confirmDeleteSds(): void {
     if (!this.productId) {
       return;
     }
 
-    if (!confirm('Delete this SDS record?')) {
+    if (!this.sdsPendingDelete) {
       return;
     }
 
-    this.productsService.deleteSafetyDataSheet(this.productId, sdsId).subscribe({
+    this.productsService.deleteSafetyDataSheet(this.productId, this.sdsPendingDelete.safetyDataSheetId).subscribe({
       next: () => {
+        this.sdsPendingDelete = null;
         this.loadSafetyDataSheets(this.productId!);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to delete SDS', err);
         this.errorMessage = 'Failed to delete SDS.';
+        this.sdsPendingDelete = null;
         this.cdr.detectChanges();
       }
     });
