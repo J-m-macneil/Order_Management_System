@@ -1,0 +1,22 @@
+<div class="detail-card">
+  <h2 class="app-section-title mb-6">
+    Status Actions
+  </h2>
+
+  <div *ngIf="allowedStatuses.length > 0; else noStatusActions" class="space-y-3">
+    <button *ngFor="let status of allowedStatuses"
+            type="button"
+            [disabled]="isChangingStatus"
+            (click)="onStatusChange(status.id)"
+            class="app-status-action-button w-full px-4 py-2 text-white"
+            [ngClass]="getStatusButtonClass(status.name)">
+      {{ getStatusActionLabel(status) }}
+    </button>
+  </div>
+
+  <ng-template #noStatusActions>
+    <p class="app-muted-text text-sm">
+      No available status actions.
+    </p>
+  </ng-template>
+</div>

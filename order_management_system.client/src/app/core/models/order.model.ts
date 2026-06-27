@@ -1,3 +1,4 @@
+import { Address } from './address.model';
 import { OrderItem } from './order-item.model';
 
 export interface Order {
@@ -9,6 +10,8 @@ export interface Order {
 
   deliveryAddressId: number;
   billingAddressId: number;
+  deliveryAddress?: Address | null;
+  billingAddress?: Address | null;
 
   warehouseId: number;
   warehouseName?: string;

@@ -1,0 +1,35 @@
+<div class="detail-card">
+  <h2 class="app-section-title mb-6">Logistics</h2>
+  <div class="space-y-4">
+    <div>
+      <p class="form-label">Carrier</p>
+      <p class="app-body-text mt-2">
+        {{ order.carrierName || (order.carrierId ? 'Carrier #' + order.carrierId : '-') }}
+      </p>
+    </div>
+    <div>
+      <p class="form-label">Delivery Address</p>
+      <div *ngIf="order.deliveryAddress; else deliveryAddressFallback" class="app-body-text mt-2 space-y-1">
+        <p class="app-strong-text">{{ order.deliveryAddress.siteName }}</p>
+        <p>{{ order.deliveryAddress.line1 }}</p>
+        <p *ngIf="order.deliveryAddress.line2">{{ order.deliveryAddress.line2 }}</p>
+        <p>{{ order.deliveryAddress.city }}, {{ order.deliveryAddress.postcode }}</p>
+      </div>
+      <ng-template #deliveryAddressFallback>
+        <p class="app-body-text mt-2">Address #{{ order.deliveryAddressId }}</p>
+      </ng-template>
+    </div>
+    <div>
+      <p class="form-label">Billing Address</p>
+      <div *ngIf="order.billingAddress; else billingAddressFallback" class="app-body-text mt-2 space-y-1">
+        <p class="app-strong-text">{{ order.billingAddress.siteName }}</p>
+        <p>{{ order.billingAddress.line1 }}</p>
+        <p *ngIf="order.billingAddress.line2">{{ order.billingAddress.line2 }}</p>
+        <p>{{ order.billingAddress.city }}, {{ order.billingAddress.postcode }}</p>
+      </div>
+      <ng-template #billingAddressFallback>
+        <p class="app-body-text mt-2">Address #{{ order.billingAddressId }}</p>
+      </ng-template>
+    </div>
+  </div>
+</div>

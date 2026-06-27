@@ -1,0 +1,28 @@
+<div class="detail-card">
+  <h2 class="app-section-title mb-6">
+    Status History
+  </h2>
+
+  <div *ngIf="history.length > 0; else noHistory" class="space-y-4">
+    <div *ngFor="let h of history"
+         class="border-l-2 app-divider pl-4">
+      <p class="text-sm app-strong-text">
+        {{ h.fromStatusName || '-' }} &rarr; {{ h.toStatusName }}
+      </p>
+
+      <p class="text-xs app-muted-text mt-1">
+        {{ h.changedByUserName }} &bull; {{ h.changedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}
+      </p>
+
+      <p *ngIf="h.reason" class="text-sm app-alert-text--danger mt-2">
+        Reason: {{ h.reason }}
+      </p>
+    </div>
+  </div>
+
+  <ng-template #noHistory>
+    <p class="app-muted-text text-sm">
+      No history available.
+    </p>
+  </ng-template>
+</div>

@@ -1,0 +1,65 @@
+<div class="detail-card">
+  <h2 class="app-section-title mb-6">Order Items</h2>
+
+  <div *ngIf="items.length > 0; else noOrderItems" class="app-table-scroll">
+    <table class="app-data-table">
+      <thead class="app-table-head">
+        <tr>
+          <th class="app-table-heading">
+            Product
+          </th>
+          <th class="app-table-heading app-table-heading--right">
+            Qty
+          </th>
+          <th class="app-table-heading app-table-heading--right">
+            Unit Price
+          </th>
+          <th class="app-table-heading app-table-heading--right">
+            Discount
+          </th>
+          <th class="app-table-heading app-table-heading--right">
+            Total
+          </th>
+        </tr>
+      </thead>
+      <tbody class="app-table-body">
+        <tr *ngFor="let item of items">
+          <td class="px-4 py-4">
+            <div class="app-strong-text">
+              {{ item.productName || 'Product #' + item.productId }}
+            </div>
+            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs app-muted-text">
+              <span *ngIf="item.productSku" class="font-mono">{{ item.productSku }}</span>
+              <span *ngIf="item.packSize">{{ item.packSize }}</span>
+              <span *ngIf="item.unNumber">{{ item.unNumber }}</span>
+              <span *ngIf="item.requiresSds"
+                    class="app-badge app-badge--warning">
+                SDS
+              </span>
+              <span *ngIf="item.isRestricted"
+                    class="app-badge app-badge--danger">
+                Restricted
+              </span>
+            </div>
+            <div *ngIf="item.notes" class="mt-1 text-xs app-muted-text">
+              {{ item.notes }}
+            </div>
+          </td>
+          <td class="px-4 py-4 text-right app-body-text">{{ item.quantity }}</td>
+          <td class="px-4 py-4 text-right app-body-text">{{ item.unitPrice | currency:currency:'symbol':'1.2-2':'en-GB' }}</td>
+          <td class="px-4 py-4 text-right app-body-text">
+            <span *ngIf="item.discountPercent">{{ item.discountPercent }}%</span>
+            <span *ngIf="!item.discountPercent">&mdash;</span>
+          </td>
+          <td class="px-4 py-4 text-right app-strong-text">{{ item.lineTotal | currency:currency:'symbol':'1.2-2':'en-GB' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noOrderItems>
+    <div class="text-center py-8">
+      <p class="app-muted-text">No order items found.</p>
+    </div>
+  </ng-template>
+</div>

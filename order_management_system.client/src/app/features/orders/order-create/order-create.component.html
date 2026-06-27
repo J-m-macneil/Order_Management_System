@@ -274,7 +274,7 @@
           >
             <option [ngValue]="null">Select project (optional)</option>
             <option *ngFor="let project of projects" [ngValue]="project.projectId">
-              {{ project.projectCode }} - {{ project.projectName }}
+              {{ project.projectCode }} - {{ project.name }}
             </option>
           </select>
         </div>

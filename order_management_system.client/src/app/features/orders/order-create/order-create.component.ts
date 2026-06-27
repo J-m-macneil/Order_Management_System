@@ -12,6 +12,9 @@ import { Customer } from '../../../core/models/customer.model';
 import { ProductList } from '../../../core/models/product-list.model';
 import { Order } from '../../../core/models/order.model';
 import { OrderStatus } from '../../../core/models/order-status.enum';
+import { Warehouse } from '../../../core/models/warehouse-model';
+import { Carrier } from '../../../core/models/carrier.model';
+import { Project } from '../../../core/models/project.model';
 
 @Component({
   selector: 'app-order-create',
@@ -33,9 +36,9 @@ export class OrderCreateComponent implements OnInit {
   billingAddresses: Address[] = [];
   deliveryAddresses: Address[] = [];
   products: ProductList[] = [];
-  warehouses: any[] = [];
-  carriers: any[] = [];
-  projects: any[] = [];
+  warehouses: Warehouse[] = [];
+  carriers: Carrier[] = [];
+  projects: Project[] = [];
 
   constructor(
     private fb: FormBuilder,

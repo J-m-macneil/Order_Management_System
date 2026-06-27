@@ -23,197 +23,35 @@
     </a>
   </div>
 
-  <!-- Status Strip -->
-  <div class="detail-card">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="space-y-3">
-        <div class="flex flex-wrap gap-2">
-          <span class="app-badge app-badge--info">
-            {{ currentOrder.orderStatusName || 'Status ' + currentOrder.orderStatusId }}
-          </span>
-          <span *ngIf="currentOrder.isPriorityOrder" class="app-badge app-badge--warning">
-            Priority Order
-          </span>
-        </div>
-        <p class="text-sm app-body-text">{{ getEditLockMessage() }}</p>
-      </div>
-      <div *ngIf="canEditOrder()" class="flex flex-wrap gap-2">
-        <a [routerLink]="['/orders', currentOrder.orderId, 'edit']"
-           class="app-primary-button px-4 py-2">
-          Edit
-        </a>
-        <button type="button"
-                (click)="discardDraft()"
-                [disabled]="isDiscardingDraft"
-                class="app-danger-button px-4 py-2">
-          {{ isDiscardingDraft ? 'Discarding...' : 'Discard Draft' }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-order-status-strip [order]="currentOrder"
+                          [isDiscardingDraft]="isDiscardingDraft"
+                          (discardDraft)="requestDiscardDraft()">
+  </app-order-status-strip>
 
   <!-- Main Content Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
     <!-- Main Content (2 columns) -->
     <div class="lg:col-span-2 space-y-6">
-      <!-- Order Information -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">Order Information</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <p class="form-label">Requested Delivery Date</p>
-            <p class="app-body-text mt-2">{{ currentOrder.requestedDeliveryDate | date:'dd MMM yyyy':'':'en-GB' }}</p>
-          </div>
-          <div>
-            <p class="form-label">PO Reference</p>
-            <p class="app-body-text mt-2">{{ currentOrder.purchaseOrderReference || '—' }}</p>
-          </div>
-          <div>
-            <p class="form-label">Project</p>
-            <p class="app-body-text mt-2">{{ currentOrder.projectName || '—' }}</p>
-          </div>
-          <div>
-            <p class="form-label">Warehouse</p>
-            <p class="app-body-text mt-2">{{ currentOrder.warehouseName || '—' }}</p>
-          </div>
-        </div>
-      </div>
+      <app-order-information-card [order]="currentOrder"></app-order-information-card>
+      <app-order-items-table [items]="currentOrder.items"
+                             [currency]="currentOrder.currency"
+                             class="block mt-6">
+      </app-order-items-table>
 
-      <!-- Order Items Table -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">Order Items</h2>
-        <div *ngIf="currentOrder.items && currentOrder.items.length > 0" class="app-table-scroll">
-          <table class="app-data-table">
-            <thead class="app-table-head">
-              <tr>
-                <th class="app-table-heading">
-                  Product
-                </th>
-                <th class="app-table-heading app-table-heading--right">
-                  Qty
-                </th>
-                <th class="app-table-heading app-table-heading--right">
-                  Unit Price
-                </th>
-                <th class="app-table-heading app-table-heading--right">
-                  Discount
-                </th>
-                <th class="app-table-heading app-table-heading--right">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody class="app-table-body">
-              <tr *ngFor="let item of currentOrder.items">
-                <td class="px-4 py-4">
-                  <div class="app-strong-text">
-                    {{ item.productName || 'Product #' + item.productId }}
-                  </div>
-                  <div class="mt-1 flex flex-wrap items-center gap-2 text-xs app-muted-text">
-                    <span *ngIf="item.productSku" class="font-mono">{{ item.productSku }}</span>
-                    <span *ngIf="item.packSize">{{ item.packSize }}</span>
-                    <span *ngIf="item.unNumber">{{ item.unNumber }}</span>
-                    <span *ngIf="item.requiresSds"
-                          class="app-badge app-badge--warning">
-                      SDS
-                    </span>
-                    <span *ngIf="item.isRestricted"
-                          class="app-badge app-badge--danger">
-                      Restricted
-                    </span>
-                  </div>
-                  <div *ngIf="item.notes" class="mt-1 text-xs app-muted-text">
-                    {{ item.notes }}
-                  </div>
-                </td>
-                <td class="px-4 py-4 text-right app-body-text">{{ item.quantity }}</td>
-                <td class="px-4 py-4 text-right app-body-text">{{ item.unitPrice | currency:currentOrder.currency:'symbol':'1.2-2':'en-GB' }}</td>
-                <td class="px-4 py-4 text-right app-body-text">
-                  <span *ngIf="item.discountPercent">{{ item.discountPercent }}%</span>
-                  <span *ngIf="!item.discountPercent">—</span>
-                </td>
-                <td class="px-4 py-4 text-right app-strong-text">{{ item.lineTotal | currency: currentOrder.currency }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div *ngIf="!currentOrder.items || currentOrder.items.length === 0" class="text-center py-8">
-          <p class="app-muted-text">No order items found.</p>
-        </div>
-      </div>
-
-      <!-- Notes Section -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">Notes</h2>
-        <div class="space-y-4">
-          <div *ngIf="currentOrder.specialInstructions">
-            <p class="form-label">Special Instructions</p>
-            <p class="app-body-text mt-2">{{ currentOrder.specialInstructions }}</p>
-          </div>
-          <div *ngIf="currentOrder.internalNotes">
-            <p class="form-label">Internal Notes</p>
-            <p class="app-body-text mt-2">{{ currentOrder.internalNotes }}</p>
-          </div>
-          <div *ngIf="currentOrder.failureReason">
-            <p class="text-xs uppercase tracking-wide app-alert-text--danger font-medium">Failure Reason</p>
-            <p class="app-body-text mt-2">{{ currentOrder.failureReason }}</p>
-          </div>
-          <div *ngIf="!currentOrder.specialInstructions && !currentOrder.internalNotes && !currentOrder.failureReason">
-            <p class="app-muted-text">No additional notes.</p>
-          </div>
-        </div>
-      </div>
+      <app-order-notes-card [order]="currentOrder"></app-order-notes-card>
     </div>
 
     <!-- Sidebar (1 column) -->
     <div class="space-y-6">
 
-      <!-- Status Actions -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">
-          Status Actions
-        </h2>
+      <app-order-status-actions [allowedStatuses]="allowedStatuses"
+                                [currentStatusId]="currentOrder.orderStatusId"
+                                [isChangingStatus]="isChangingStatus"
+                                (statusChange)="requestStatusChange($event)">
+      </app-order-status-actions>
 
-        <div *ngIf="allowedStatuses.length > 0; else noStatusActions" class="space-y-3">
-          <button *ngFor="let status of allowedStatuses"
-                  type="button"
-                  [disabled]="isChangingStatus"
-                  (click)="changeStatus(status.id)"
-                  class="app-status-action-button w-full px-4 py-2 text-white"
-                  [ngClass]="getStatusButtonClass(status.name)">
-            {{ getStatusActionLabel(status) }}
-          </button>
-        </div>
-
-        <ng-template #noStatusActions>
-          <p class="app-muted-text text-sm">
-            No available status actions.
-          </p>
-        </ng-template>
-      </div>
-
-      <!-- Summary Card -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">Summary</h2>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center pb-3 border-b app-divider">
-            <span class="app-muted-text">Subtotal</span>
-            <span class="app-strong-text">{{ currentOrder.subtotal | currency: currentOrder.currency }}</span>
-          </div>
-          <div class="flex justify-between items-center pb-3 border-b app-divider">
-            <span class="app-muted-text">Discount</span>
-            <span class="app-strong-text">-{{ currentOrder.discountAmount | currency: currentOrder.currency }}</span>
-          </div>
-          <div class="flex justify-between items-center pb-3 border-b app-divider">
-            <span class="app-muted-text">Tax</span>
-            <span class="app-strong-text">{{ currentOrder.taxAmount | currency: currentOrder.currency }}</span>
-          </div>
-          <div class="flex justify-between items-center pt-3">
-            <span class="text-lg app-strong-text">Total</span>
-            <span class="text-2xl font-light app-accent-text">{{ currentOrder.totalAmount | currency: currentOrder.currency }}</span>
-          </div>
-        </div>
-      </div>
+      <app-order-summary-card [order]="currentOrder"></app-order-summary-card>
 
       <!-- Documents -->
       <div class="mt-6">
@@ -221,73 +59,9 @@
         </app-order-documents-panel>
       </div>
 
-      <!-- Quick Info -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">Logistics</h2>
-        <div class="space-y-4">
-          <div>
-            <p class="form-label">Carrier</p>
-            <p class="app-body-text mt-2">{{ currentOrder.carrierName || '—' }}</p>
-          </div>
-          <div>
-            <p class="form-label">Delivery Address</p>
-            <p class="app-body-text mt-2">Address #{{ currentOrder.deliveryAddressId }}</p>
-          </div>
-          <div>
-            <p class="form-label">Billing Address</p>
-            <p class="app-body-text mt-2">Address #{{ currentOrder.billingAddressId }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Timestamps -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">Activity</h2>
-        <div class="space-y-4 text-sm">
-          <div>
-            <p class="form-label">Created</p>
-            <p class="app-body-text mt-1">{{ currentOrder.createdAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
-          </div>
-          <div>
-            <p class="form-label">Last Updated</p>
-            <p class="app-body-text mt-1">{{ currentOrder.updatedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
-          </div>
-          <div *ngIf="currentOrder.submittedAt">
-            <p class="form-label">Submitted</p>
-            <p class="app-body-text mt-1">{{ currentOrder.submittedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Status History -->
-      <div class="detail-card">
-        <h2 class="app-section-title mb-6">
-          Status History
-        </h2>
-
-        <div *ngIf="history.length > 0; else noHistory" class="space-y-4">
-          <div *ngFor="let h of history"
-               class="border-l-2 app-divider pl-4">
-            <p class="text-sm app-strong-text">
-              {{ h.fromStatusName || '—' }} → {{ h.toStatusName }}
-            </p>
-
-            <p class="text-xs app-muted-text mt-1">
-              {{ h.changedByUserName }} • {{ h.changedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}
-            </p>
-
-            <p *ngIf="h.reason" class="text-sm app-alert-text--danger mt-2">
-              Reason: {{ h.reason }}
-            </p>
-          </div>
-        </div>
-
-        <ng-template #noHistory>
-          <p class="app-muted-text text-sm">
-            No history available.
-          </p>
-        </ng-template>
-      </div>
+      <app-order-logistics-card [order]="currentOrder"></app-order-logistics-card>
+      <app-order-activity-card [order]="currentOrder"></app-order-activity-card>
+      <app-order-status-history [history]="history"></app-order-status-history>
 
       <!-- Processing Jobs -->
       <div class="mt-6">
@@ -301,13 +75,13 @@
   </div>
 </div>
 
-<app-confirmation-modal *ngIf="showConfirmationModal"
-                        [title]="confirmationModalTitle"
-                        [message]="confirmationModalMessage"
-                        [confirmText]="confirmationModalConfirmText"
-                        [variant]="confirmationModalVariant"
-                        [requireReason]="confirmationModalRequiresReason"
-                        [reasonPlaceholder]="confirmationModalReasonPlaceholder"
+<app-confirmation-modal *ngIf="confirmationModal.isOpen"
+                        [title]="confirmationModal.title"
+                        [message]="confirmationModal.message"
+                        [confirmText]="confirmationModal.confirmText"
+                        [variant]="confirmationModal.variant"
+                        [requireReason]="confirmationModal.requireReason"
+                        [reasonPlaceholder]="confirmationModal.reasonPlaceholder"
                         (confirm)="onConfirmationConfirm($event)"
                         (cancel)="onConfirmationCancel()">
 </app-confirmation-modal>

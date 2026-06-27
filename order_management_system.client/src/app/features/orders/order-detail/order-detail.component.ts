@@ -5,6 +5,11 @@ import { Order } from '../../../core/models/order.model';
 import { AllowedStatus } from '../../../core/models/allowed-status.model';
 import { OrderStatus } from '../../../core/models/order-status.enum';
 import { OrderStatusHistory } from '../../../core/models/order-status-history.model';
+import {
+  ConfirmationModalState,
+  ConfirmationModalVariant,
+  PendingConfirmationAction
+} from './order-detail-confirmation-modal.model';
 
 @Component({
   selector: 'app-order-detail',
@@ -12,6 +17,7 @@ import { OrderStatusHistory } from '../../../core/models/order-status-history.mo
   templateUrl: './order-detail.component.html',
   styleUrls: ['./order-detail.component.css']
 })
+
 export class OrderDetailComponent implements OnInit {
   order: Order | null = null;
   allowedStatuses: AllowedStatus[] = [];
@@ -22,14 +28,8 @@ export class OrderDetailComponent implements OnInit {
   isDiscardingDraft = false;
   errorMessage = '';
 
-  showConfirmationModal = false;
-  confirmationModalTitle = 'Confirm Action';
-  confirmationModalMessage = '';
-  confirmationModalConfirmText = 'Confirm';
-  confirmationModalVariant: 'default' | 'warning' | 'danger' = 'default';
-  confirmationModalRequiresReason = false;
-  confirmationModalReasonPlaceholder = 'Enter reason...';
-  pendingConfirmationAction: 'status' | 'discardDraft' | null = null;
+  confirmationModal: ConfirmationModalState = this.createDefaultConfirmationModal();
+  pendingConfirmationAction: PendingConfirmationAction | null = null;
   pendingStatus: OrderStatus | null = null;
 
   private orderId = 0;
@@ -55,16 +55,16 @@ export class OrderDetailComponent implements OnInit {
   }
 
   refresh(): void {
-    this.loadOrder(this.orderId);
-    this.loadAllowedStatuses(this.orderId);
-    this.loadHistory(this.orderId);
+    this.loadOrder();
+    this.loadAllowedStatuses();
+    this.loadHistory();
   }
 
-  loadOrder(orderId: number): void {
+  private loadOrder(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.ordersService.getOrderById(orderId).subscribe({
+    this.ordersService.getOrderById(this.orderId).subscribe({
       next: (data) => {
         this.order = data;
         this.isLoading = false;
@@ -78,8 +78,8 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
-  loadAllowedStatuses(orderId: number): void {
-    this.ordersService.getAllowedStatuses(orderId).subscribe({
+  private loadAllowedStatuses(): void {
+    this.ordersService.getAllowedStatuses(this.orderId).subscribe({
       next: (statuses) => {
         this.allowedStatuses = statuses;
         this.cdr.detectChanges();
@@ -91,8 +91,8 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
-  loadHistory(orderId: number): void {
-    this.ordersService.getOrderHistory(orderId).subscribe({
+  private loadHistory(): void {
+    this.ordersService.getOrderHistory(this.orderId).subscribe({
       next: (data) => {
         this.history = data;
         this.cdr.detectChanges();
@@ -104,7 +104,7 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
-  changeStatus(statusId: number): void {
+  requestStatusChange(statusId: number): void {
     if (!this.order || this.isChangingStatus) {
       return;
     }
@@ -112,19 +112,7 @@ export class OrderDetailComponent implements OnInit {
     const status = statusId as OrderStatus;
 
     if (this.requiresReason(status)) {
-      this.pendingStatus = status;
-      this.pendingConfirmationAction = 'status';
-      this.confirmationModalTitle = this.getReasonModalTitle(status);
-      this.confirmationModalMessage = '';
-      this.confirmationModalConfirmText = 'Confirm';
-      this.confirmationModalVariant = status === OrderStatus.Cancelled || status === OrderStatus.Failed
-        ? 'danger'
-        : 'warning';
-      this.confirmationModalRequiresReason = true;
-      this.confirmationModalReasonPlaceholder = this.getReasonModalPlaceholder(status);
-      this.showConfirmationModal = true;
-      this.errorMessage = '';
-      this.cdr.detectChanges();
+      this.openStatusReasonModal(status);
       return;
     }
 
@@ -133,30 +121,21 @@ export class OrderDetailComponent implements OnInit {
 
   onConfirmationConfirm(reason?: string): void {
     if (this.pendingConfirmationAction === 'discardDraft') {
-      this.showConfirmationModal = false;
-      this.pendingConfirmationAction = null;
-      this.executeDiscardDraft();
+      this.confirmDiscardDraft();
       return;
     }
 
-    if (!this.pendingStatus) {
-      return;
+    if (this.pendingConfirmationAction === 'status') {
+      this.confirmStatusChange(reason);
     }
-
-    this.showConfirmationModal = false;
-    this.executeStatusChange(this.pendingStatus, reason);
-    this.pendingStatus = null;
-    this.pendingConfirmationAction = null;
   }
 
   onConfirmationCancel(): void {
-    this.showConfirmationModal = false;
-    this.pendingStatus = null;
-    this.pendingConfirmationAction = null;
+    this.closeConfirmationModal();
     this.cdr.detectChanges();
   }
 
-  executeStatusChange(status: OrderStatus, reason?: string): void {
+  private executeStatusChange(status: OrderStatus, reason?: string): void {
     if (!this.order) {
       return;
     }
@@ -178,78 +157,12 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
-  getStatusButtonClass(statusName: string): string {
-    switch (statusName) {
-      case 'Submitted':
-      case 'Approved':
-        return 'bg-blue-600 hover:bg-blue-700';
-
-      case 'In Processing':
-      case 'Awaiting Dispatch':
-        return 'bg-amber-500 hover:bg-amber-600';
-
-      case 'Completed':
-        return 'bg-green-600 hover:bg-green-700';
-
-      case 'Failed':
-      case 'Cancelled':
-        return 'bg-red-600 hover:bg-red-700';
-
-      default:
-        return 'bg-slate-600 hover:bg-slate-700';
-    }
-  }
-
-  getStatusActionLabel(status: AllowedStatus): string {
-    if (!this.order) {
-      return `Move to ${status.name}`;
-    }
-
-    if (status.id === OrderStatus.Draft && this.order.orderStatusId === OrderStatus.Submitted) {
-      return 'Withdraw to Draft';
-    }
-
-    if (status.id === OrderStatus.Draft && this.order.orderStatusId === OrderStatus.PendingReview) {
-      return 'Return to Draft';
-    }
-
-    return `Move to ${status.name}`;
-  }
-
-  getEditLockMessage(): string {
-    if (!this.order) {
-      return '';
-    }
-
-    if (this.order.orderStatusId === OrderStatus.Draft) {
-      return 'Draft orders can be edited before submission.';
-    }
-
-    if (this.order.orderStatusId === OrderStatus.Submitted ||
-        this.order.orderStatusId === OrderStatus.PendingReview) {
-      return 'Return this order to Draft before making changes.';
-    }
-
-    return 'This order is locked. Cancel it and create a replacement if changes are required.';
-  }
-
-  canEditOrder(): boolean {
-    return this.order?.orderStatusId === OrderStatus.Draft;
-  }
-
-  discardDraft(): void {
+  requestDiscardDraft(): void {
     if (!this.order || this.isDiscardingDraft) {
       return;
     }
 
-    this.pendingConfirmationAction = 'discardDraft';
-    this.confirmationModalTitle = 'Discard Draft Order';
-    this.confirmationModalMessage = `Discard draft order ${this.order.orderNumber}? This will remove it from the active orders list.`;
-    this.confirmationModalConfirmText = 'Discard Draft';
-    this.confirmationModalVariant = 'danger';
-    this.confirmationModalRequiresReason = false;
-    this.confirmationModalReasonPlaceholder = '';
-    this.showConfirmationModal = true;
+    this.openDiscardDraftModal();
   }
 
   private executeDiscardDraft(): void {
@@ -273,10 +186,83 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
+  private confirmDiscardDraft(): void {
+    this.closeConfirmationModal();
+    this.executeDiscardDraft();
+  }
+
+  private confirmStatusChange(reason?: string): void {
+    if (!this.pendingStatus) {
+      return;
+    }
+
+    const status = this.pendingStatus;
+    this.closeConfirmationModal();
+    this.executeStatusChange(status, reason);
+  }
+
   private requiresReason(status: OrderStatus): boolean {
     return status === OrderStatus.Draft ||
       status === OrderStatus.Failed ||
       status === OrderStatus.Cancelled;
+  }
+
+  private openStatusReasonModal(status: OrderStatus): void {
+    this.pendingStatus = status;
+    this.pendingConfirmationAction = 'status';
+    this.errorMessage = '';
+    this.confirmationModal = {
+      isOpen: true,
+      title: this.getReasonModalTitle(status),
+      message: '',
+      confirmText: 'Confirm',
+      variant: this.getReasonModalVariant(status),
+      requireReason: true,
+      reasonPlaceholder: this.getReasonModalPlaceholder(status)
+    };
+    this.cdr.detectChanges();
+  }
+
+  private openDiscardDraftModal(): void {
+    if (!this.order) {
+      return;
+    }
+
+    this.pendingConfirmationAction = 'discardDraft';
+    this.pendingStatus = null;
+    this.confirmationModal = {
+      isOpen: true,
+      title: 'Discard Draft Order',
+      message: `Discard draft order ${this.order.orderNumber}? This will remove it from the active orders list.`,
+      confirmText: 'Discard Draft',
+      variant: 'danger',
+      requireReason: false,
+      reasonPlaceholder: ''
+    };
+  }
+
+  private closeConfirmationModal(): void {
+    this.confirmationModal = this.createDefaultConfirmationModal();
+    this.pendingStatus = null;
+    this.pendingConfirmationAction = null;
+  }
+
+  private createDefaultConfirmationModal(): ConfirmationModalState {
+    return {
+      isOpen: false,
+      title: 'Confirm Action',
+      message: '',
+      confirmText: 'Confirm',
+      variant: 'default',
+      requireReason: false,
+      reasonPlaceholder: 'Enter reason...'
+    };
+  }
+
+  private getReasonModalVariant(status: OrderStatus): ConfirmationModalVariant {
+    return status === OrderStatus.Cancelled || status === OrderStatus.Failed
+      ? 'danger'
+      : 'warning';
   }
 
   private getReasonModalTitle(status: OrderStatus): string {

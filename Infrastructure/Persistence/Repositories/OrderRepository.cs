@@ -23,6 +23,8 @@ public class OrderRepository : IOrderRepository
     {
         return await _db.Orders
             .Include(o => o.Customer)
+            .Include(o => o.DeliveryAddress)
+            .Include(o => o.BillingAddress)
             .Include(o => o.OrderStatus)
             .Include(o => o.Warehouse)
             .Include(o => o.Carrier)

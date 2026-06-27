@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Orders.DTOs;
+using Application.Features.Addresses.DTOs;
+
+namespace Application.Features.Orders.DTOs;
 
 public class OrderDto
 {
@@ -8,6 +10,8 @@ public class OrderDto
     public int CustomerId { get; set; }
     public int DeliveryAddressId { get; set; }
     public int BillingAddressId { get; set; }
+    public AddressDto? DeliveryAddress { get; set; }
+    public AddressDto? BillingAddress { get; set; }
 
     public int OrderStatusId { get; set; }
 
