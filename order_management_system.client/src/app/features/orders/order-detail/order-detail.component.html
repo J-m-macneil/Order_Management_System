@@ -62,7 +62,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <p class="form-label">Requested Delivery Date</p>
-            <p class="app-body-text mt-2">{{ currentOrder.requestedDeliveryDate | date: 'MMM d, yyyy' }}</p>
+            <p class="app-body-text mt-2">{{ currentOrder.requestedDeliveryDate | date:'dd MMM yyyy':'':'en-GB' }}</p>
           </div>
           <div>
             <p class="form-label">PO Reference</p>
@@ -127,7 +127,7 @@
                   </div>
                 </td>
                 <td class="px-4 py-4 text-right app-body-text">{{ item.quantity }}</td>
-                <td class="px-4 py-4 text-right app-body-text">{{ item.unitPrice | currency: currentOrder.currency }}</td>
+                <td class="px-4 py-4 text-right app-body-text">{{ item.unitPrice | currency:currentOrder.currency:'symbol':'1.2-2':'en-GB' }}</td>
                 <td class="px-4 py-4 text-right app-body-text">
                   <span *ngIf="item.discountPercent">{{ item.discountPercent }}%</span>
                   <span *ngIf="!item.discountPercent">—</span>
@@ -246,15 +246,15 @@
         <div class="space-y-4 text-sm">
           <div>
             <p class="form-label">Created</p>
-            <p class="app-body-text mt-1">{{ currentOrder.createdAt | date: 'MMM d, yyyy h:mm a' }}</p>
+            <p class="app-body-text mt-1">{{ currentOrder.createdAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
           </div>
           <div>
             <p class="form-label">Last Updated</p>
-            <p class="app-body-text mt-1">{{ currentOrder.updatedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+            <p class="app-body-text mt-1">{{ currentOrder.updatedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
           </div>
           <div *ngIf="currentOrder.submittedAt">
             <p class="form-label">Submitted</p>
-            <p class="app-body-text mt-1">{{ currentOrder.submittedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+            <p class="app-body-text mt-1">{{ currentOrder.submittedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
           </div>
         </div>
       </div>
@@ -273,7 +273,7 @@
             </p>
 
             <p class="text-xs app-muted-text mt-1">
-              {{ h.changedByUserName }} • {{ h.changedAt | date: 'MMM d, yyyy h:mm a' }}
+              {{ h.changedByUserName }} • {{ h.changedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}
             </p>
 
             <p *ngIf="h.reason" class="text-sm app-alert-text--danger mt-2">

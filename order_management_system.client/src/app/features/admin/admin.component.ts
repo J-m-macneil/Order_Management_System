@@ -32,7 +32,7 @@ export class AdminComponent implements OnInit {
   totalPages = 0;
   hasPreviousPage = false;
   hasNextPage = false;
-  pageSizeOptions = [25, 50, 100];
+  readonly pageSizeOptions = [25, 50, 100];
 
   searchTerm = '';
   roleFilter: number | null = null;
@@ -182,6 +182,13 @@ export class AdminComponent implements OnInit {
     this.roleFilter = null;
     this.statusFilter = '';
     this.applyFilters();
+  }
+
+  get activeFilterCount(): number {
+    return [
+      this.roleFilter,
+      this.statusFilter
+    ].filter(Boolean).length;
   }
 
   openCreateForm(): void {

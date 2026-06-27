@@ -52,6 +52,10 @@ export class CustomersService {
     return this.http.get<CustomerSummary>(`${this.baseUrl}/summary`);
   }
 
+  getIndustryTypes(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/industries`);
+  }
+
   getById(id: number): Observable<Customer> {
     return this.http.get<Customer>(`${this.baseUrl}/${id}`);
   }

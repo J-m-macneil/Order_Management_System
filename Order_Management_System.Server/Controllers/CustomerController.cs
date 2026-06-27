@@ -3,6 +3,7 @@ using Application.Features.Customers.Commands.UpdateCustomer;
 using Application.Features.Customers.DTOs;
 using Application.Features.Customers.Queries.GetCustomers;
 using Application.Features.Customers.Queries.GetCustomerById;
+using Application.Features.Customers.Queries.GetCustomerIndustryTypes;
 using Application.Features.Customers.Queries.GetCustomerSummary;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -35,6 +36,13 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> GetSummary(CancellationToken ct)
     {
         var result = await _mediator.Send(new GetCustomerSummaryQuery(), ct);
+        return Ok(result);
+    }
+
+    [HttpGet("industries")]
+    public async Task<IActionResult> GetIndustryTypes(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetCustomerIndustryTypesQuery(), ct);
         return Ok(result);
     }
 

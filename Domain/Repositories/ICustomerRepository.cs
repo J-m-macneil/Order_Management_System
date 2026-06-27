@@ -20,6 +20,8 @@ public interface ICustomerRepository
     Task<(int TotalCustomers, int ActiveCustomers, int InactiveCustomers)> GetSummaryAsync(
         CancellationToken ct);
 
+    Task<List<string>> GetIndustryTypesAsync(CancellationToken ct);
+
     Task<List<Customer>> GetPagedAsync(
         int skip,
         int take,

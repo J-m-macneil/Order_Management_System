@@ -242,6 +242,17 @@ export class AuditLogsComponent implements OnInit {
     }
   }
 
+  get activeFilterCount(): number {
+    return [
+      this.entityType,
+      this.action,
+      this.entityId,
+      this.performedByUserId,
+      this.from,
+      this.to
+    ].filter(Boolean).length;
+  }
+
   private isFailedAction(log: AuditLog): boolean {
     return log.action.toLowerCase().includes('failed')
       || (log.notes?.toLowerCase().includes('failed') ?? false);

@@ -23,7 +23,7 @@
     <div *ngFor="let metric of metrics" class="metric-card">
       <p class="metric-card-label">{{ metric.label }}</p>
       <strong class="metric-card-value">
-        {{ metric.type === 'totalValue' ? formatCurrency(metric.value) : (metric.value | number) }}
+        {{ metric.type === 'totalValue' ? (metric.value | currency:'GBP':'symbol':'1.0-0':'en-GB') : (metric.value | number) }}
       </strong>
     </div>
   </div>
@@ -102,7 +102,9 @@
                 {{ failure.reason }}
               </span>
             </td>
-            <td data-label="Date">{{ failure.date }}</td>
+            <td data-label="Date">
+              {{ failure.date ? (failure.date | date:'dd MMM yyyy':'':'en-GB') : '—' }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -137,7 +139,9 @@
                 {{ order.priority }}
               </span>
             </td>
-            <td data-label="Due Date">{{ order.dueDate }}</td>
+            <td data-label="Due Date">
+              {{ order.dueDate ? (order.dueDate | date:'dd MMM yyyy':'':'en-GB') : '—' }}
+            </td>
           </tr>
         </tbody>
       </table>

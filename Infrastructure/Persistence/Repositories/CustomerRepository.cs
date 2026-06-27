@@ -68,6 +68,17 @@ public class CustomerRepository : ICustomerRepository
         return (totalCustomers, activeCustomers, inactiveCustomers);
     }
 
+    public async Task<List<string>> GetIndustryTypesAsync(CancellationToken ct)
+    {
+        return await _db.Customers
+            .AsNoTracking()
+            .Where(c => c.DeletedAt == null && c.IndustryType != string.Empty)
+            .Select(c => c.IndustryType)
+            .Distinct()
+            .OrderBy(industry => industry)
+            .ToListAsync(ct);
+    }
+
     public async Task<List<Customer>> GetPagedAsync(
         int skip,
         int take,

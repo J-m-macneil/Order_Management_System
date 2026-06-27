@@ -59,7 +59,7 @@ export class DashboardComponent implements OnInit {
           orderNumber: x.orderNumber,
           customer: x.customer,
           reason: x.reason,
-          date: this.formatDate(x.date)
+          date: x.date
         }));
 
         this.priorityOrders = data.priorityOrders.map(x => ({
@@ -67,7 +67,7 @@ export class DashboardComponent implements OnInit {
           orderNumber: x.orderNumber,
           customer: x.customer,
           priority: x.priority,
-          dueDate: this.formatDate(x.dueDate)
+          dueDate: x.dueDate
         }));
 
         this.isLoading = false;
@@ -130,23 +130,5 @@ export class DashboardComponent implements OnInit {
     };
 
     return colors[priority.toLowerCase()] || colors['low'];
-  }
-
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      maximumFractionDigits: 0
-    }).format(value);
-  }
-
-  private formatDate(value: string | null): string {
-    if (!value) return '—';
-
-    return new Date(value).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
   }
 }

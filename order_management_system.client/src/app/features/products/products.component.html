@@ -34,40 +34,15 @@
   <div class="app-search-row">
 
     <!-- Search -->
-    <div class="relative flex-1">
-      <span class="app-search-icon absolute left-4 top-1/2 -translate-y-1/2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg></span>
-      <input type="text"
-             [(ngModel)]="searchTerm"
-             (input)="applyFilters()"
-             placeholder="Search by SKU, product name, pack size, category, unit, or hazard class..."
-             class="app-search-input" />
-    </div>
+    <app-search-input [(value)]="searchTerm"
+                      placeholder="Search by SKU, product name, pack size, category, unit, or hazard class..."
+                      (search)="applyFilters()">
+    </app-search-input>
 
     <!-- Filter Button -->
-    <button type="button"
-            (click)="toggleFilters()"
-            class="app-secondary-button gap-2 px-4 py-3">
-
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="20"
-           height="20"
-           viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
-      </svg>
-
-      <span>Filters</span>
-
-      <span *ngIf="activeFilter || restrictedFilter || hazardousFilter || categoryFilter || hazardClassFilter"
-            class="app-count-badge ml-1">
-        {{ (activeFilter ? 1 : 0) + (restrictedFilter ? 1 : 0) + (hazardousFilter ? 1 : 0) + (categoryFilter ? 1 : 0) + (hazardClassFilter ? 1 : 0) }}
-      </span>
-    </button>
+    <app-filter-button [activeFilterCount]="activeFilterCount"
+                       (toggle)="toggleFilters()">
+    </app-filter-button>
   </div>
 
   <!-- Filter Panel -->
@@ -185,7 +160,7 @@
         </tr>
       </thead>
       <tbody class="app-table-body">
-        <tr *ngFor="let product of filteredProducts">
+        <tr *ngFor="let product of products">
           <td class="px-6 py-4 app-strong-text font-mono text-xs">
             {{ product.sku }}
           </td>
@@ -199,7 +174,7 @@
             {{ product.packSize || '—' }}
           </td>
           <td class="px-6 py-4 text-right app-strong-text">
-            {{ product.basePrice | currency: 'GBP' }}
+            {{ product.basePrice | currency:'GBP':'symbol':'1.2-2':'en-GB' }}
           </td>
           <td class="px-6 py-4 text-center">
             <span *ngIf="product.isRestricted" class="app-badge app-badge--danger">
@@ -228,52 +203,22 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="filteredProducts.length === 0" class="app-empty-state">
+  <div *ngIf="products.length === 0" class="app-empty-state">
     <p>No products found.</p>
   </div>
 
-  <div class="app-table-footer">
-    <div class="text-sm app-muted-text">
-      Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
-      <span *ngIf="totalCount">({{ totalCount }} products)</span>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-3">
-      <label class="flex items-center gap-2 text-sm app-muted-text">
-        Page size
-        <select [(ngModel)]="pageSize"
-                (ngModelChange)="onPageSizeChange($event)"
-                class="form-input form-input--compact">
-          <option *ngFor="let option of pageSizeOptions"
-                  [ngValue]="option">
-            {{ option }}
-          </option>
-        </select>
-      </label>
-
-      <button type="button"
-              (click)="goToPreviousPage()"
-              [disabled]="!hasPreviousPage"
-              class="app-pagination-button"
-              aria-label="Previous page">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path d="M12 5L7 10L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M7.5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
-
-      <button type="button"
-              (click)="goToNextPage()"
-              [disabled]="!hasNextPage"
-              class="app-pagination-button"
-              aria-label="Next page">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path d="M8 5L13 10L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M12.5 10H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
-    </div>
-  </div>
+  <app-table-pagination [pageNumber]="pageNumber"
+                        [pageSize]="pageSize"
+                        [totalCount]="totalCount"
+                        [totalPages]="totalPages"
+                        [hasPreviousPage]="hasPreviousPage"
+                        [hasNextPage]="hasNextPage"
+                        [pageSizeOptions]="pageSizeOptions"
+                        itemLabel="products"
+                        (pageSizeChange)="onPageSizeChange($event)"
+                        (previousPage)="goToPreviousPage()"
+                        (nextPage)="goToNextPage()">
+  </app-table-pagination>
 </div>
 
 <app-confirmation-modal *ngIf="productPendingDelete"

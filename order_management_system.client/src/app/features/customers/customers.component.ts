@@ -10,7 +10,6 @@ import { CustomersService } from '../../core/services/customers.service';
 })
 export class CustomersComponent implements OnInit {
   customers: Customer[] = [];
-  filteredCustomers: Customer[] = [];
 
   isLoading = false;
   errorMessage = '';
@@ -41,6 +40,7 @@ export class CustomersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary();
+    this.loadIndustries();
     this.loadCustomers();
   }
 
@@ -86,7 +86,6 @@ export class CustomersComponent implements OnInit {
         this.totalPages = data.totalPages;
         this.hasPreviousPage = data.hasPreviousPage;
         this.hasNextPage = data.hasNextPage;
-        this.initialiseCustomerDashboard();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -118,16 +117,17 @@ export class CustomersComponent implements OnInit {
     this.applyFilters();
   }
 
-  private initialiseCustomerDashboard(): void {
-    this.filteredCustomers = this.customers;
-
-    this.industries = Array.from(
-      new Set(
-        this.customers
-          .map(customer => customer.industryType)
-          .filter((industry): industry is string => !!industry)
-      )
-    );
+  loadIndustries(): void {
+    this.customersService.getIndustryTypes().subscribe({
+      next: (industries) => {
+        this.industries = industries;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.industries = [];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private getActiveFilterValue(): boolean | null {
@@ -167,6 +167,14 @@ export class CustomersComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  get activeFilterCount(): number {
+    return [
+      this.industryFilter,
+      this.paymentTermsFilter,
+      this.activeFilter
+    ].filter(Boolean).length;
   }
 
   goToPreviousPage(): void {

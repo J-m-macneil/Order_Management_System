@@ -12,7 +12,6 @@ import { HazardClass } from '../../core/models/hazard-class.model';
 })
 export class ProductsComponent implements OnInit {
   products: ProductList[] = [];
-  filteredProducts: ProductList[] = [];
 
   pageNumber = 1;
   pageSize = 25;
@@ -38,10 +37,6 @@ export class ProductsComponent implements OnInit {
   categories: ProductCategory[] = [];
   hazardClasses: HazardClass[] = [];
   productPendingDelete: ProductList | null = null;
-
-  private isHazardous(product: ProductList): boolean {
-    return product.hazardClassName?.toLowerCase() !== 'non-hazardous';
-  }
 
   constructor(
     private productsService: ProductsService,
@@ -119,7 +114,6 @@ export class ProductsComponent implements OnInit {
         this.totalPages = data.totalPages;
         this.hasPreviousPage = data.hasPreviousPage;
         this.hasNextPage = data.hasNextPage;
-        this.initialiseProductDashboard();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -152,10 +146,6 @@ export class ProductsComponent implements OnInit {
     this.categoryFilter = null;
     this.hazardClassFilter = null;
     this.applyFilters();
-  }
-
-  private initialiseProductDashboard(): void {
-    this.filteredProducts = this.products;
   }
 
   openDeleteProductModal(product: ProductList): void {
@@ -248,5 +238,15 @@ export class ProductsComponent implements OnInit {
     }
 
     return null;
+  }
+
+  get activeFilterCount(): number {
+    return [
+      this.activeFilter,
+      this.restrictedFilter,
+      this.hazardousFilter,
+      this.categoryFilter,
+      this.hazardClassFilter
+    ].filter(Boolean).length;
   }
 }
