@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { AuthService } from '../../core/auth/auth.service';
 import { ProcessingJob } from '../../core/models/processing-job.model';
 import { ProcessingJobsService } from '../../core/services/processing-jobs.service';
 
@@ -19,6 +20,7 @@ export class ProcessingJobsPanelComponent implements OnChanges {
 
   constructor(
     private processingJobsService: ProcessingJobsService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -48,7 +50,7 @@ export class ProcessingJobsPanelComponent implements OnChanges {
   }
 
   canRetryJob(job: ProcessingJob): boolean {
-    return job.status === 'Failed';
+    return job.status === 'Failed' && this.authService.hasRole('Operations', 'Admin');
   }
 
   shouldShowMissingJobsWarning(): boolean {

@@ -19,7 +19,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = new ChangeOrderStatusCommandHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
         var order = CreateOrder(OrderStatusEnum.Draft);
 
         currentUser.UserId.Returns(7);
@@ -63,7 +63,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = new ChangeOrderStatusCommandHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
         var order = CreateOrder(OrderStatusEnum.Submitted);
 
         currentUser.UserId.Returns(7);
@@ -104,7 +104,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = new ChangeOrderStatusCommandHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
         var order = CreateOrder(OrderStatusEnum.PendingReview);
 
         currentUser.UserId.Returns(8);
@@ -142,7 +142,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = new ChangeOrderStatusCommandHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
         var order = CreateOrder(OrderStatusEnum.PendingReview);
 
         currentUser.UserId.Returns(8);
@@ -176,5 +176,19 @@ public class ChangeOrderStatusCommandHandlerTests
             OrderNumber = "ORD-TEST-001",
             OrderStatusId = (int)status
         };
+    }
+
+    private static ChangeOrderStatusCommandHandler CreateHandler(
+        IOrderRepository repo,
+        ICurrentUserService currentUser,
+        IProcessingJobQueueService jobQueue,
+        IAuditService audit)
+    {
+        return new ChangeOrderStatusCommandHandler(
+            repo,
+            currentUser,
+            jobQueue,
+            audit,
+            Substitute.For<IOrderReviewPolicy>());
     }
 }

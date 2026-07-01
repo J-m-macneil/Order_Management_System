@@ -11,15 +11,18 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
     private readonly AppDbContext _dbContext;
     private readonly IOrderDocumentService _documentService;
     private readonly IAuditService _auditService;
+    private readonly ISystemSettingsService _settingsService;
 
     public ProcessingJobProcessor(
         AppDbContext dbContext,
         IOrderDocumentService documentService,
-        IAuditService auditService)
+        IAuditService auditService,
+        ISystemSettingsService settingsService)
     {
         _dbContext = dbContext;
         _documentService = documentService;
         _auditService = auditService;
+        _settingsService = settingsService;
     }
 
     public async Task ProcessNextBatchAsync(CancellationToken cancellationToken)
@@ -198,6 +201,7 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
         DateTime now,
         CancellationToken cancellationToken)
     {
+        var maxAttempts = await _settingsService.GetIntAsync("BackgroundJobRetryLimit");
         var activeStatuses = new[] { (int)OrderStatusEnum.Approved, (int)OrderStatusEnum.InProcessing };
         var orders = await _dbContext.Orders
             .Include(o => o.OrderItems)
@@ -215,13 +219,13 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
 
                 if (!await HasActiveOrCompletedJobAsync(order.OrderId, jobType, cancellationToken))
                 {
-                    _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, jobType, now));
+                    _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, jobType, now, maxAttempts));
                 }
             }
 
             if (!await HasActiveOrCompletedJobAsync(order.OrderId, ProcessingJobType.PushToLogisticsProvider, cancellationToken))
             {
-                _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, ProcessingJobType.PushToLogisticsProvider, now));
+                _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, ProcessingJobType.PushToLogisticsProvider, now, maxAttempts));
             }
         }
 
@@ -242,7 +246,11 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             cancellationToken);
     }
 
-    private static ProcessingJob CreateRecoveryJob(int orderId, string jobType, DateTime now)
+    private static ProcessingJob CreateRecoveryJob(
+        int orderId,
+        string jobType,
+        DateTime now,
+        int maxAttempts)
     {
         return new ProcessingJob
         {
@@ -250,7 +258,7 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             JobType = jobType,
             Status = ProcessingJobStatus.Queued,
             AttemptCount = 0,
-            MaxAttempts = 3,
+            MaxAttempts = maxAttempts,
             CreatedAt = now
         };
     }
@@ -332,7 +340,12 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
 
         if (!await HasActiveOrCompletedJobAsync(order.OrderId, ProcessingJobType.PushToLogisticsProvider, cancellationToken))
         {
-            _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, ProcessingJobType.PushToLogisticsProvider, DateTime.UtcNow));
+            var maxAttempts = await _settingsService.GetIntAsync("BackgroundJobRetryLimit");
+            _dbContext.ProcessingJobs.Add(CreateRecoveryJob(
+                order.OrderId,
+                ProcessingJobType.PushToLogisticsProvider,
+                DateTime.UtcNow,
+                maxAttempts));
         }
 
         MoveOrderStatus(

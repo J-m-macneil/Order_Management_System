@@ -27,12 +27,12 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
         if (job == null)
             throw new Exception("Job not found");
 
-        if (job.Status != "Failed")
+        if (job.Status != ProcessingJobStatus.Failed)
             throw new Exception("Only failed jobs can be retried.");
 
         var oldValues = CreateSnapshot(job);
 
-        job.Status = "Queued";
+        job.Status = ProcessingJobStatus.Queued;
         job.AttemptCount = 0;
         job.NextAttemptAt = DateTime.UtcNow;
         job.LastRetryAt = DateTime.UtcNow;
