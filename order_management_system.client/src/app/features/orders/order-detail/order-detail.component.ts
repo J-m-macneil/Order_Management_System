@@ -165,6 +165,10 @@ export class OrderDetailComponent implements OnInit {
     this.openDiscardDraftModal();
   }
 
+  get restrictedItems() {
+    return this.order?.items.filter(item => item.isRestricted) ?? [];
+  }
+
   private executeDiscardDraft(): void {
     if (!this.order || this.isDiscardingDraft) {
       return;

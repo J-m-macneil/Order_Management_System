@@ -77,6 +77,7 @@ public class OrderRepository : IOrderRepository
         string? searchTerm,
         int? orderStatusId,
         bool? isPriorityOrder,
+        bool? hasRestrictedItems,
         DateTime? requestedDeliveryFrom,
         DateTime? requestedDeliveryTo,
         DateTime? createdFrom,
@@ -88,6 +89,7 @@ public class OrderRepository : IOrderRepository
                 searchTerm,
                 orderStatusId,
                 isPriorityOrder,
+                hasRestrictedItems,
                 requestedDeliveryFrom,
                 requestedDeliveryTo,
                 createdFrom,
@@ -101,6 +103,7 @@ public class OrderRepository : IOrderRepository
         string? searchTerm,
         int? orderStatusId,
         bool? isPriorityOrder,
+        bool? hasRestrictedItems,
         DateTime? requestedDeliveryFrom,
         DateTime? requestedDeliveryTo,
         DateTime? createdFrom,
@@ -116,10 +119,12 @@ public class OrderRepository : IOrderRepository
                     .Include(o => o.Carrier)
                     .Include(o => o.Project)
                     .Include(o => o.OrderItems)
+                        .ThenInclude(i => i.Product)
                     .Include(o => o.ProcessingJobs),
                 searchTerm,
                 orderStatusId,
                 isPriorityOrder,
+                hasRestrictedItems,
                 requestedDeliveryFrom,
                 requestedDeliveryTo,
                 createdFrom,
@@ -141,6 +146,7 @@ public class OrderRepository : IOrderRepository
         string? searchTerm,
         int? orderStatusId,
         bool? isPriorityOrder,
+        bool? hasRestrictedItems,
         DateTime? requestedDeliveryFrom,
         DateTime? requestedDeliveryTo,
         DateTime? createdFrom,
@@ -173,6 +179,14 @@ public class OrderRepository : IOrderRepository
         if (isPriorityOrder.HasValue)
         {
             query = query.Where(o => o.IsPriorityOrder == isPriorityOrder.Value);
+        }
+
+        if (hasRestrictedItems.HasValue)
+        {
+            query = query.Where(o =>
+                o.OrderItems.Any(i =>
+                    i.DeletedAt == null &&
+                    i.Product.IsRestricted) == hasRestrictedItems.Value);
         }
 
         if (requestedDeliveryFrom.HasValue)

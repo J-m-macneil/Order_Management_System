@@ -23,6 +23,7 @@ export class OrdersComponent implements OnInit {
 
   searchTerm = '';
   priorityFilter = '';
+  restrictedFilter = '';
   statusFilter = '';
   requestedDeliveryFrom = '';
   requestedDeliveryTo = '';
@@ -71,6 +72,7 @@ export class OrdersComponent implements OnInit {
       searchTerm: this.searchTerm.trim() || undefined,
       orderStatusId: this.statusFilter ? Number(this.statusFilter) : null,
       isPriorityOrder: this.getPriorityFilterValue(),
+      hasRestrictedItems: this.getRestrictedFilterValue(),
       requestedDeliveryFrom: this.requestedDeliveryFrom || undefined,
       requestedDeliveryTo: this.requestedDeliveryTo || undefined,
       createdFrom: this.createdFrom || undefined,
@@ -113,6 +115,7 @@ export class OrdersComponent implements OnInit {
 
   clearFilters(): void {
     this.priorityFilter = '';
+    this.restrictedFilter = '';
     this.statusFilter = '';
     this.requestedDeliveryFrom = '';
     this.requestedDeliveryTo = '';
@@ -149,9 +152,22 @@ export class OrdersComponent implements OnInit {
     return null;
   }
 
+  private getRestrictedFilterValue(): boolean | null {
+    if (this.restrictedFilter === 'restricted') {
+      return true;
+    }
+
+    if (this.restrictedFilter === 'standard') {
+      return false;
+    }
+
+    return null;
+  }
+
   get activeFilterCount(): number {
     return [
       this.priorityFilter,
+      this.restrictedFilter,
       this.statusFilter,
       this.requestedDeliveryFrom,
       this.requestedDeliveryTo,

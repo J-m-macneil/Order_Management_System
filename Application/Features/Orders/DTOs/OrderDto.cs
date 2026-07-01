@@ -50,6 +50,8 @@ public class OrderDto
     public string? FailureReason { get; set; }
 
     public bool IsPriorityOrder { get; set; }
+    public bool HasRestrictedItems { get; set; }
+    public List<string> ReviewReasons { get; set; } = new();
     public int FailedProcessingJobCount { get; set; }
 
     public List<OrderItemDto> Items { get; set; } = new();

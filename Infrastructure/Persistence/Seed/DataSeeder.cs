@@ -2483,7 +2483,7 @@ public class DataSeeder : IDataSeeder
         new ProcessingJob
         {
             OrderId = ordersByNumber["ORD-2026-001025"],
-            JobType = "GenerateDeliveryNote",
+            JobType = "GenerateOrderSummaryDocument",
             Status = "Completed",
             AttemptCount = 1,
             MaxAttempts = 3,
@@ -2702,7 +2702,6 @@ public class DataSeeder : IDataSeeder
 
                 CreateDocument(ordersByNumber, "ORD-2026-001025", "OrderSummary", new DateTime(2025, 12, 16, 17, 30, 0), null),
                 CreateDocument(ordersByNumber, "ORD-2026-001025", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 17, 31, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001025", "DeliveryNote", new DateTime(2025, 12, 17, 16, 4, 0), null),
 
                 CreateDocument(ordersByNumber, "ORD-2026-001026", "OrderSummary", new DateTime(2025, 12, 17, 6, 30, 0), null),
                 CreateDocument(ordersByNumber, "ORD-2026-001026", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 6, 31, 0), null),
@@ -2711,7 +2710,6 @@ public class DataSeeder : IDataSeeder
 
                 CreateDocument(ordersByNumber, "ORD-2026-001028", "OrderSummary", new DateTime(2025, 12, 16, 18, 30, 0), null),
                 CreateDocument(ordersByNumber, "ORD-2026-001028", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 18, 31, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001028", "DeliveryNote", new DateTime(2025, 12, 17, 6, 10, 0), null),
 
                 CreateDocument(ordersByNumber, "ORD-2026-001029", "OrderSummary", new DateTime(2025, 12, 17, 20, 30, 0), null),
                 CreateDocument(ordersByNumber, "ORD-2026-001029", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 20, 31, 0), null),

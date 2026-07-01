@@ -140,19 +140,22 @@
       <thead class="app-table-head">
         <tr>
           <th class="app-table-heading">
-            SKU
+            Product
           </th>
           <th class="app-table-heading">
-            Product Name
+            Category
           </th>
           <th class="app-table-heading">
-            Pack Size
+            Hazard Class
           </th>
           <th class="app-table-heading app-table-heading--right">
             Base Price
           </th>
           <th class="app-table-heading app-table-heading--center">
-            Restricted
+            Compliance
+          </th>
+          <th class="app-table-heading app-table-heading--center">
+            Status
           </th>
           <th class="app-table-heading app-table-heading--center">
             Actions
@@ -161,27 +164,47 @@
       </thead>
       <tbody class="app-table-body">
         <tr *ngFor="let product of products">
-          <td class="px-6 py-4 app-strong-text font-mono text-xs">
-            {{ product.sku }}
-          </td>
           <td class="px-6 py-4">
             <a [routerLink]="['/products/edit', product.productId]"
                class="app-link-button">
               {{ product.productName }}
             </a>
+            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs app-muted-text">
+              <span class="font-mono">{{ product.sku }}</span>
+              <span *ngIf="product.packSize">{{ product.packSize }}</span>
+              <span *ngIf="product.unitOfMeasureName">{{ product.unitOfMeasureName }}</span>
+            </div>
           </td>
           <td class="px-6 py-4 app-body-text">
-            {{ product.packSize || '—' }}
+            {{ product.productCategoryName || '&mdash;' }}
+          </td>
+          <td class="px-6 py-4">
+            <span *ngIf="product.hazardClassName; else noHazardClass"
+                  [class]="getHazardClassBadge(product.hazardClassName)">
+              {{ product.hazardClassName }}
+            </span>
+            <ng-template #noHazardClass>
+              <span class="app-muted-text text-xs">&mdash;</span>
+            </ng-template>
           </td>
           <td class="px-6 py-4 text-right app-strong-text">
             {{ product.basePrice | currency:'GBP':'symbol':'1.2-2':'en-GB' }}
           </td>
           <td class="px-6 py-4 text-center">
-            <span *ngIf="product.isRestricted" class="app-badge app-badge--danger">
-              Yes
-            </span>
-            <span *ngIf="!product.isRestricted" class="app-muted-text text-xs">
-              No
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <span *ngIf="product.isRestricted"
+                    class="app-badge app-badge--danger">
+                Restricted
+              </span>
+              <span *ngIf="!product.isRestricted"
+                    class="app-badge app-badge--success">
+                Standard
+              </span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <span [class]="product.isActive ? 'app-badge app-badge--success' : 'app-badge app-badge--neutral'">
+              {{ product.isActive ? 'Active' : 'Inactive' }}
             </span>
           </td>
           <td class="px-6 py-4 text-center">
@@ -229,3 +252,4 @@
                         (confirm)="confirmDeleteProduct()"
                         (cancel)="cancelDeleteProduct()">
 </app-confirmation-modal>
+

@@ -6,5 +6,8 @@
 }
 
 .login-page {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: auto;
   background: var(--app-page-bg);
 }

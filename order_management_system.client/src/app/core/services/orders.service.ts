@@ -25,6 +25,7 @@ export class OrdersService {
     searchTerm?: string;
     orderStatusId?: number | null;
     isPriorityOrder?: boolean | null;
+    hasRestrictedItems?: boolean | null;
     requestedDeliveryFrom?: string;
     requestedDeliveryTo?: string;
     createdFrom?: string;
@@ -44,6 +45,10 @@ export class OrdersService {
 
     if (query.isPriorityOrder !== undefined && query.isPriorityOrder !== null) {
       params = params.set('isPriorityOrder', query.isPriorityOrder);
+    }
+
+    if (query.hasRestrictedItems !== undefined && query.hasRestrictedItems !== null) {
+      params = params.set('hasRestrictedItems', query.hasRestrictedItems);
     }
 
     if (query.requestedDeliveryFrom) {

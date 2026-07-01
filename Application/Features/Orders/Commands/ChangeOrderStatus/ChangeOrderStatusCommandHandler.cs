@@ -14,17 +14,20 @@ public class ChangeOrderStatusCommandHandler
     private readonly ICurrentUserService _currentUser;
     private readonly IProcessingJobQueueService _jobQueue;
     private readonly IAuditService _audit;
+    private readonly IOrderReviewPolicy _reviewPolicy;
 
     public ChangeOrderStatusCommandHandler(
         IOrderRepository repo,
         ICurrentUserService currentUser,
         IProcessingJobQueueService jobQueue,
-        IAuditService audit)
+        IAuditService audit,
+        IOrderReviewPolicy reviewPolicy)
     {
         _repo = repo;
         _currentUser = currentUser;
         _jobQueue = jobQueue;
         _audit = audit;
+        _reviewPolicy = reviewPolicy;
     }
 
     public async Task<bool> Handle(
@@ -53,6 +56,14 @@ public class ChangeOrderStatusCommandHandler
         {
             throw new InvalidOperationException(
                 $"A reason is required to move an order from {fromStatus} to {toStatus}.");
+        }
+
+        if (toStatus == OrderStatusEnum.Approved &&
+            fromStatus != OrderStatusEnum.PendingReview &&
+            _reviewPolicy.RequiresManualReview(order))
+        {
+            throw new InvalidOperationException(
+                "Orders containing restricted products must be reviewed before approval.");
         }
 
         order.ChangeStatus(request.StatusId, userId, request.Reason);

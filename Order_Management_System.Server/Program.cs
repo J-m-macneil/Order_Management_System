@@ -4,6 +4,7 @@ using Application.Features.Orders.Commands.CreateOrder;
 using Application.Features.Pricing.Queries;
 using Application.Interfaces;
 using Domain.Repositories;
+using Infrastructure.BackgroundServices;
 using Infrastructure.DependencyInjection;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
@@ -79,7 +80,9 @@ public static class Program
         builder.Services.AddScoped<IAuditService, AuditService>();
 
         builder.Services.AddScoped<IProcessingJobQueueService, ProcessingJobQueueService>();
+        builder.Services.AddScoped<IProcessingJobProcessor, ProcessingJobProcessor>();
         builder.Services.AddScoped<IOrderDocumentGenerator, OrderDocumentGenerator>();
+        builder.Services.AddScoped<IOrderDocumentService, OrderDocumentService>();
 
         // Background jobs
         builder.Services.AddHostedService<JobProcessingService>();
@@ -190,9 +193,6 @@ public static class Program
         // Middleware
         app.UseMiddleware<ExceptionMiddleware>();
 
-        app.UseDefaultFiles();
-        app.MapStaticAssets();
-
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -206,7 +206,6 @@ public static class Program
         app.UseAuthorization();
 
         app.MapControllers();
-        app.MapFallbackToFile("/index.html");
 
         // Data seeding
         using (var scope = app.Services.CreateScope())

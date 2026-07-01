@@ -240,6 +240,12 @@ export class ProductsComponent implements OnInit {
     return null;
   }
 
+  getHazardClassBadge(hazardClassName: string): string {
+    return hazardClassName && hazardClassName !== 'Non-Hazardous'
+      ? 'app-badge app-badge--warning'
+      : 'app-badge app-badge--neutral';
+  }
+
   get activeFilterCount(): number {
     return [
       this.activeFilter,

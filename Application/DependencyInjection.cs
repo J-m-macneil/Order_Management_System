@@ -9,6 +9,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IAuditChangeFormatter, AuditChangeFormatter>();
+        services.AddScoped<IOrderReviewPolicy, OrderReviewPolicy>();
 
         return services;
     }

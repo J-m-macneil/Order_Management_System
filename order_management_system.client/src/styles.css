@@ -902,6 +902,7 @@ html.dark .app-secondary-button {
 /* Base global styles */
 html {
   height: 100%;
+  overflow: hidden;
   scroll-behavior: smooth;
 }
 
@@ -909,8 +910,16 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: var(--app-body-bg);
+}
+
+app-root {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 select.form-input {

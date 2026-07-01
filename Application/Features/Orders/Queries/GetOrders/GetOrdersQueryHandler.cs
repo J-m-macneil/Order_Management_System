@@ -1,5 +1,6 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Features.Orders.DTOs;
+using Application.Interfaces;
 using Domain.Repositories;
 using MediatR;
 
@@ -9,10 +10,14 @@ public class GetOrdersQueryHandler
     : IRequestHandler<GetOrdersQuery, PagedResult<OrderDto>>
 {
     private readonly IOrderRepository _repo;
+    private readonly IOrderReviewPolicy _reviewPolicy;
 
-    public GetOrdersQueryHandler(IOrderRepository repo)
+    public GetOrdersQueryHandler(
+        IOrderRepository repo,
+        IOrderReviewPolicy reviewPolicy)
     {
         _repo = repo;
+        _reviewPolicy = reviewPolicy;
     }
 
     public async Task<PagedResult<OrderDto>> Handle(GetOrdersQuery request, CancellationToken ct)
@@ -21,6 +26,7 @@ public class GetOrdersQueryHandler
             request.SearchTerm,
             request.OrderStatusId,
             request.IsPriorityOrder,
+            request.HasRestrictedItems,
             request.RequestedDeliveryFrom,
             request.RequestedDeliveryTo,
             request.CreatedFrom,
@@ -33,6 +39,7 @@ public class GetOrdersQueryHandler
             request.SearchTerm,
             request.OrderStatusId,
             request.IsPriorityOrder,
+            request.HasRestrictedItems,
             request.RequestedDeliveryFrom,
             request.RequestedDeliveryTo,
             request.CreatedFrom,
@@ -43,6 +50,7 @@ public class GetOrdersQueryHandler
         {
             var failedProcessingJobCount = o.ProcessingJobs.Count(j => j.Status == "Failed");
             var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : o.OrderStatusId;
+            var reviewReasons = _reviewPolicy.GetReviewReasons(o);
 
             return new OrderDto
             {
@@ -85,6 +93,8 @@ public class GetOrdersQueryHandler
                 FailureReason = o.FailureReason,
 
                 IsPriorityOrder = o.IsPriorityOrder,
+                HasRestrictedItems = reviewReasons.Count > 0,
+                ReviewReasons = reviewReasons.ToList(),
                 FailedProcessingJobCount = failedProcessingJobCount
             };
         }).ToList();
@@ -98,3 +108,5 @@ public class GetOrdersQueryHandler
         };
     }
 }
+
+

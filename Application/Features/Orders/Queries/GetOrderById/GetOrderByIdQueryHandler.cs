@@ -1,5 +1,6 @@
 using Application.Features.Addresses.DTOs;
 using Application.Features.Orders.DTOs;
+using Application.Interfaces;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -9,10 +10,14 @@ namespace Application.Features.Orders.Queries.GetOrderById;
 public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, OrderDto>
 {
     private readonly IOrderRepository _repo;
+    private readonly IOrderReviewPolicy _reviewPolicy;
 
-    public GetOrderByIdQueryHandler(IOrderRepository repo)
+    public GetOrderByIdQueryHandler(
+        IOrderRepository repo,
+        IOrderReviewPolicy reviewPolicy)
     {
         _repo = repo;
+        _reviewPolicy = reviewPolicy;
     }
 
     public async Task<OrderDto> Handle(GetOrderByIdQuery request, CancellationToken ct)
@@ -24,6 +29,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
 
         var failedProcessingJobCount = order.ProcessingJobs.Count(j => j.Status == "Failed");
         var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : order.OrderStatusId;
+        var reviewReasons = _reviewPolicy.GetReviewReasons(order);
 
         return new OrderDto
         {
@@ -72,6 +78,8 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             FailureReason = order.FailureReason,
 
             IsPriorityOrder = order.IsPriorityOrder,
+            HasRestrictedItems = reviewReasons.Count > 0,
+            ReviewReasons = reviewReasons.ToList(),
             FailedProcessingJobCount = failedProcessingJobCount,
 
             Items = order.OrderItems?.Select(i => new OrderItemDto

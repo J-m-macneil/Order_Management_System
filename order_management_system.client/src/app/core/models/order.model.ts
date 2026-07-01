@@ -47,6 +47,8 @@ export interface Order {
   failureReason?: string | null;
 
   isPriorityOrder: boolean;
+  hasRestrictedItems: boolean;
+  reviewReasons: string[];
   failedProcessingJobCount: number;
 
   items: OrderItem[];

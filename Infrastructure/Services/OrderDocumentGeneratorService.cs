@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
+using Domain.Entities.Documents;
 using Domain.Entities.Orders;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -68,12 +69,7 @@ public class OrderDocumentGenerator : IOrderDocumentGenerator
 
                     AddOrderSummary(column, order);
 
-                    if (documentType == "DeliveryNote")
-                    {
-                        AddDeliveryNote(column, order);
-                    }
-
-                    if (documentType == "SafetyDataSheetBundle")
+                    if (documentType == DocumentType.SafetyDataSheetBundle)
                     {
                         AddSdsBundle(column, order);
                     }
@@ -127,15 +123,6 @@ public class OrderDocumentGenerator : IOrderDocumentGenerator
             AddRow(table, "Requested Delivery", order.RequestedDeliveryDate.ToString("yyyy-MM-dd") ?? "—");
             AddRow(table, "Priority", order.IsPriorityOrder ? "Yes" : "No");
         });
-    }
-
-    private static void AddDeliveryNote(ColumnDescriptor column, Order order)
-    {
-        column.Item().Text("Delivery Information").FontSize(14).SemiBold();
-
-        column.Item().Text($"Delivery Address ID: {order.DeliveryAddressId}");
-        column.Item().Text($"Billing Address ID: {order.BillingAddressId}");
-        column.Item().Text($"Special Instructions: {order.SpecialInstructions ?? "—"}");
     }
 
     private static void AddSdsBundle(ColumnDescriptor column, Order order)
