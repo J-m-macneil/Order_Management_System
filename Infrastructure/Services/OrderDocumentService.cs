@@ -22,13 +22,13 @@ public class OrderDocumentService : IOrderDocumentService
         _auditService = auditService;
     }
 
-    public async Task GenerateForJobAsync(
-        ProcessingJob job,
+    public async Task GenerateAsync(
+        int orderId,
+        string documentType,
         CancellationToken cancellationToken)
     {
-        var documentType = GetDocumentType(job.JobType);
         var document = await _documentGenerator.GenerateAsync(
-            job.OrderId,
+            orderId,
             documentType,
             cancellationToken);
 
@@ -40,7 +40,7 @@ public class OrderDocumentService : IOrderDocumentService
             new
             {
                 document.DocumentId,
-                job.OrderId,
+                orderId,
                 DocumentType = documentType
             },
             $"{documentType} generated as PDF by background job.");
@@ -79,26 +79,6 @@ public class OrderDocumentService : IOrderDocumentService
         return requiredDocumentTypes
             .Except(generatedDocumentTypes)
             .ToList();
-    }
-
-    public string GetGenerationJobType(string documentType)
-    {
-        return documentType switch
-        {
-            DocumentType.OrderSummary => ProcessingJobType.GenerateOrderSummaryDocument,
-            DocumentType.SafetyDataSheetBundle => ProcessingJobType.GenerateSdsBundle,
-            _ => throw new InvalidOperationException($"No job type configured for document type '{documentType}'.")
-        };
-    }
-
-    private static string GetDocumentType(string jobType)
-    {
-        return jobType switch
-        {
-            ProcessingJobType.GenerateOrderSummaryDocument => DocumentType.OrderSummary,
-            ProcessingJobType.GenerateSdsBundle => DocumentType.SafetyDataSheetBundle,
-            _ => throw new InvalidOperationException($"Job type '{jobType}' does not generate a document.")
-        };
     }
 
     private static List<string> GetRequiredApprovalDocumentTypes(Order order)

@@ -4,8 +4,9 @@ namespace Application.Interfaces;
 
 public interface IOrderDocumentService
 {
-    Task GenerateForJobAsync(
-        ProcessingJob job,
+    Task GenerateAsync(
+        int orderId,
+        string documentType,
         CancellationToken cancellationToken);
 
     Task<bool> RequiredApprovalDocumentsExistAsync(
@@ -15,6 +16,4 @@ public interface IOrderDocumentService
     Task<IReadOnlyCollection<string>> GetMissingApprovalDocumentTypesAsync(
         Order order,
         CancellationToken cancellationToken);
-
-    string GetGenerationJobType(string documentType);
 }

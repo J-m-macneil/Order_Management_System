@@ -1,5 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Features.Addresses.DTOs;
+using Application.Features.Orders;
 using Application.Features.Orders.DTOs;
 using Application.Interfaces;
 using Domain.Entities.Customers;
@@ -28,8 +29,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
         if (order == null)
             throw new NotFoundException("Order", request.OrderId);
 
-        var failedProcessingJobCount = order.ProcessingJobs.Count(j => j.Status == "Failed");
-        var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : order.OrderStatusId;
+        var effectiveStatus = OrderEffectiveStatus.From(order);
         var reviewReasons = _reviewPolicy.GetReviewReasons(order);
 
         return new OrderDto
@@ -54,8 +54,8 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             ProjectId = order.ProjectId,
             ProjectName = order.Project?.ProjectName,
 
-            OrderStatusId = effectiveStatusId,
-            OrderStatusName = failedProcessingJobCount > 0 ? "Failed" : order.OrderStatus?.Name,
+            OrderStatusId = effectiveStatus.StatusId,
+            OrderStatusName = effectiveStatus.StatusName,
 
             CreatedByUserId = order.CreatedByUserId,
             AssignedToUserId = order.AssignedToUserId,
@@ -81,7 +81,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             IsPriorityOrder = order.IsPriorityOrder,
             HasRestrictedItems = reviewReasons.Count > 0,
             ReviewReasons = reviewReasons.ToList(),
-            FailedProcessingJobCount = failedProcessingJobCount,
+            FailedProcessingJobCount = effectiveStatus.FailedProcessingJobCount,
 
             Items = order.OrderItems?.Select(i => new OrderItemDto
             {

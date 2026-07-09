@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Features.Orders;
 using Application.Features.Orders.DTOs;
 using Application.Interfaces;
 using Domain.Repositories;
@@ -48,8 +49,7 @@ public class GetOrdersQueryHandler
 
         var items = orders.Select(o =>
         {
-            var failedProcessingJobCount = o.ProcessingJobs.Count(j => j.Status == "Failed");
-            var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : o.OrderStatusId;
+            var effectiveStatus = OrderEffectiveStatus.From(o);
             var reviewReasons = _reviewPolicy.GetReviewReasons(o);
 
             return new OrderDto
@@ -60,8 +60,8 @@ public class GetOrdersQueryHandler
                 CustomerId = o.CustomerId,
                 CustomerName = o.Customer?.CompanyName,
 
-                OrderStatusId = effectiveStatusId,
-                OrderStatusName = failedProcessingJobCount > 0 ? "Failed" : o.OrderStatus?.Name,
+                OrderStatusId = effectiveStatus.StatusId,
+                OrderStatusName = effectiveStatus.StatusName,
 
                 WarehouseId = o.WarehouseId,
                 WarehouseName = o.Warehouse?.Name,
@@ -95,7 +95,7 @@ public class GetOrdersQueryHandler
                 IsPriorityOrder = o.IsPriorityOrder,
                 HasRestrictedItems = reviewReasons.Count > 0,
                 ReviewReasons = reviewReasons.ToList(),
-                FailedProcessingJobCount = failedProcessingJobCount
+                FailedProcessingJobCount = effectiveStatus.FailedProcessingJobCount
             };
         }).ToList();
 
