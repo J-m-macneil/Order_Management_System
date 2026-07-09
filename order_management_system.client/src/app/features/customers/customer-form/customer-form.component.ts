@@ -14,8 +14,7 @@ import { forkJoin, map, switchMap } from 'rxjs';
 @Component({
   selector: 'app-customer-form',
   standalone: false,
-  templateUrl: './customer-form.component.html',
-  styleUrls: ['./customer-form.component.css']
+  templateUrl: './customer-form.component.html'
 })
 export class CustomerFormComponent implements OnInit {
   form!: FormGroup;
@@ -349,7 +348,6 @@ export class CustomerFormComponent implements OnInit {
   getCustomerAddresses(id: number, customer?: Customer): void {
     this.customersService.getAddresses(id).subscribe({
       next: (data) => {
-        console.log('Addresses from API:', data);
         this.addresses = data;
 
         if (customer) {
