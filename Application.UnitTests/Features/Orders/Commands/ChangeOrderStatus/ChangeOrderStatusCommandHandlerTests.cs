@@ -12,14 +12,15 @@ namespace Application.UnitTests.Features.Orders.Commands.ChangeOrderStatus;
 public class ChangeOrderStatusCommandHandlerTests
 {
     [Fact]
-    public async Task Handle_WhenSalesSubmitsDraft_ChangesStatusQueuesJobsAndWritesAuditLog()
+    public async Task Handle_WhenSalesSubmitsDraft_ChangesStatusCreatesNotificationAndWritesAuditLog()
     {
         // Arrange
         var repo = Substitute.For<IOrderRepository>();
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
+        var notificationService = Substitute.For<INotificationService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit, notificationService);
         var order = CreateOrder(OrderStatusEnum.Draft);
 
         currentUser.UserId.Returns(7);
@@ -43,7 +44,8 @@ public class ChangeOrderStatusCommandHandlerTests
         order.OrderStatusHistory.Single().ChangedByUserId.Should().Be(7);
 
         await repo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await jobQueue.Received(1).QueueSubmissionJobsAsync(order.OrderId);
+        await notificationService.Received(1)
+            .CreateOrderSubmittedNotificationAsync(order.OrderId, Arg.Any<CancellationToken>());
         await jobQueue.DidNotReceive().QueueApprovalJobsAsync(Arg.Any<int>());
         await audit.Received(1).LogAsync(
             Arg.Is<string>(value => value == "Order"),
@@ -63,7 +65,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit: audit);
         var order = CreateOrder(OrderStatusEnum.Submitted);
 
         currentUser.UserId.Returns(7);
@@ -104,7 +106,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit: audit);
         var order = CreateOrder(OrderStatusEnum.PendingReview);
 
         currentUser.UserId.Returns(8);
@@ -142,7 +144,7 @@ public class ChangeOrderStatusCommandHandlerTests
         var currentUser = Substitute.For<ICurrentUserService>();
         var jobQueue = Substitute.For<IProcessingJobQueueService>();
         var audit = Substitute.For<IAuditService>();
-        var handler = CreateHandler(repo, currentUser, jobQueue, audit);
+        var handler = CreateHandler(repo, currentUser, jobQueue, audit: audit);
         var order = CreateOrder(OrderStatusEnum.PendingReview);
 
         currentUser.UserId.Returns(8);
@@ -182,12 +184,14 @@ public class ChangeOrderStatusCommandHandlerTests
         IOrderRepository repo,
         ICurrentUserService currentUser,
         IProcessingJobQueueService jobQueue,
-        IAuditService audit)
+        IAuditService audit,
+        INotificationService? notificationService = null)
     {
         return new ChangeOrderStatusCommandHandler(
             repo,
             currentUser,
             jobQueue,
+            notificationService ?? Substitute.For<INotificationService>(),
             audit,
             Substitute.For<IOrderReviewPolicy>());
     }

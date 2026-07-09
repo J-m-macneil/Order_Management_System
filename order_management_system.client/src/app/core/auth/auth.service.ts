@@ -79,7 +79,9 @@ export class AuthService {
 
   hasRole(...roles: string[]): boolean {
     const userRole = this.getUserRole();
-    return !!userRole && roles.includes(userRole);
+    return !!userRole && roles.some(role =>
+      role.toLowerCase() === userRole.toLowerCase()
+    );
   }
 
   private setCurrentUser(user: AuthUser | null): void {

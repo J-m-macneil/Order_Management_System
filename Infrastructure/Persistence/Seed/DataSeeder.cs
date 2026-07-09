@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Customers;
 using Domain.Entities.Orders;
@@ -1077,273 +1077,6 @@ public class DataSeeder : IDataSeeder
             await _dbContext.CustomerProductPrices.AddRangeAsync(items);
             await _dbContext.SaveChangesAsync();
         }
-
-        // =========================
-        // 6. Safety Data Sheets
-        // =========================
-        if (!await _dbContext.SafetyDataSheets.AnyAsync())
-        {
-            var items = new List<SafetyDataSheet>
-            {
-                new SafetyDataSheet
-                {
-                    ProductId = 1,
-                    FileName = "acet_25_sds_v2.pdf",
-                    FilePath = "/sds/acet_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 11, 19),
-                    UploadedAt = new DateTime(2026, 2, 12, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 2,
-                    FileName = "ipa_20_sds_v2.pdf",
-                    FilePath = "/sds/ipa_20_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 7, 8),
-                    UploadedAt = new DateTime(2026, 2, 11, 10, 0, 0),
-                    UploadedByUserId = 1,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 3,
-                    FileName = "meth_25_sds_v1.pdf",
-                    FilePath = "/sds/meth_25_sds_v1.pdf",
-                    Version = "V1",
-                    EffectiveDate = new DateTime(2025, 7, 8),
-                    UploadedAt = new DateTime(2026, 2, 13, 10, 0, 0),
-                    UploadedByUserId = 9,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 4,
-                    FileName = "ethd_205_sds_v2.pdf",
-                    FilePath = "/sds/ethd_205_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 1, 18),
-                    UploadedAt = new DateTime(2026, 2, 14, 10, 0, 0),
-                    UploadedByUserId = 1,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 5,
-                    FileName = "ws_25_sds_v2.pdf",
-                    FilePath = "/sds/ws_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 3, 26),
-                    UploadedAt = new DateTime(2026, 4, 11, 10, 0, 0),
-                    UploadedByUserId = 9,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 6,
-                    FileName = "xyle_20_sds_v3.pdf",
-                    FilePath = "/sds/xyle_20_sds_v3.pdf",
-                    Version = "V3",
-                    EffectiveDate = new DateTime(2025, 10, 11),
-                    UploadedAt = new DateTime(2026, 4, 10, 10, 0, 0),
-                    UploadedByUserId = 9,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 7,
-                    FileName = "hcl_32_25_sds_v2.pdf",
-                    FilePath = "/sds/hcl_32_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 9, 15),
-                    UploadedAt = new DateTime(2026, 2, 12, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 8,
-                    FileName = "h2so4_96_25_sds_v2.pdf",
-                    FilePath = "/sds/h2so4_96_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 5, 25),
-                    UploadedAt = new DateTime(2026, 2, 14, 10, 0, 0),
-                    UploadedByUserId = 7,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 9,
-                    FileName = "hno3_10_10_sds_v3.pdf",
-                    FilePath = "/sds/hno3_10_10_sds_v3.pdf",
-                    Version = "V3",
-                    EffectiveDate = new DateTime(2025, 8, 21),
-                    UploadedAt = new DateTime(2026, 2, 5, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 10,
-                    FileName = "phos_85_25_sds_v1.pdf",
-                    FilePath = "/sds/phos_85_25_sds_v1.pdf",
-                    Version = "V1",
-                    EffectiveDate = new DateTime(2025, 12, 10),
-                    UploadedAt = new DateTime(2026, 2, 5, 10, 0, 0),
-                    UploadedByUserId = 7,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 12,
-                    FileName = "naoh_25_sds_v2.pdf",
-                    FilePath = "/sds/naoh_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 9, 3),
-                    UploadedAt = new DateTime(2026, 2, 3, 10, 0, 0),
-                    UploadedByUserId = 2,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 13,
-                    FileName = "koh_25_sds_v2.pdf",
-                    FilePath = "/sds/koh_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 12, 5),
-                    UploadedAt = new DateTime(2026, 2, 2, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 14,
-                    FileName = "caus_25_sds_v2.pdf",
-                    FilePath = "/sds/caus_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 6, 18),
-                    UploadedAt = new DateTime(2026, 4, 7, 10, 0, 0),
-                    UploadedByUserId = 1,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 15,
-                    FileName = "hypo_25_sds_v1.pdf",
-                    FilePath = "/sds/hypo_25_sds_v1.pdf",
-                    Version = "V1",
-                    EffectiveDate = new DateTime(2025, 7, 13),
-                    UploadedAt = new DateTime(2026, 1, 14, 10, 0, 0),
-                    UploadedByUserId = 9,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 16,
-                    FileName = "ferr_25_sds_v2.pdf",
-                    FilePath = "/sds/ferr_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 8, 1),
-                    UploadedAt = new DateTime(2026, 3, 5, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 20,
-                    FileName = "degr_20_sds_v2.pdf",
-                    FilePath = "/sds/degr_20_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 9, 24),
-                    UploadedAt = new DateTime(2026, 2, 8, 10, 0, 0),
-                    UploadedByUserId = 2,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 23,
-                    FileName = "sani_10_sds_v2.pdf",
-                    FilePath = "/sds/sani_10_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 7, 16),
-                    UploadedAt = new DateTime(2026, 1, 7, 10, 0, 0),
-                    UploadedByUserId = 7,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 24,
-                    FileName = "cip_25_sds_v3.pdf",
-                    FilePath = "/sds/cip_25_sds_v3.pdf",
-                    Version = "V3",
-                    EffectiveDate = new DateTime(2025, 11, 26),
-                    UploadedAt = new DateTime(2026, 4, 12, 10, 0, 0),
-                    UploadedByUserId = 2,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 25,
-                    FileName = "fgdesc_20_sds_v2.pdf",
-                    FilePath = "/sds/fgdesc_20_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 3, 20),
-                    UploadedAt = new DateTime(2026, 1, 7, 10, 0, 0),
-                    UploadedByUserId = 9,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 31,
-                    FileName = "kno3_5_sds_v3.pdf",
-                    FilePath = "/sds/kno3_5_sds_v3.pdf",
-                    Version = "V3",
-                    EffectiveDate = new DateTime(2025, 11, 1),
-                    UploadedAt = new DateTime(2026, 1, 11, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 32,
-                    FileName = "fgcc_20_sds_v1.pdf",
-                    FilePath = "/sds/fgcc_20_sds_v1.pdf",
-                    Version = "V1",
-                    EffectiveDate = new DateTime(2025, 8, 6),
-                    UploadedAt = new DateTime(2026, 1, 5, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 41,
-                    FileName = "biocide_20_sds_v2.pdf",
-                    FilePath = "/sds/biocide_20_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 4, 15),
-                    UploadedAt = new DateTime(2026, 3, 6, 10, 0, 0),
-                    UploadedByUserId = 8,
-                    IsActive = true
-                },
-                new SafetyDataSheet
-                {
-                    ProductId = 44,
-                    FileName = "wtph_25_sds_v2.pdf",
-                    FilePath = "/sds/wtph_25_sds_v2.pdf",
-                    Version = "V2",
-                    EffectiveDate = new DateTime(2025, 7, 9),
-                    UploadedAt = new DateTime(2026, 1, 8, 10, 0, 0),
-                    UploadedByUserId = 1,
-                    IsActive = true
-                }
-            };
-
-            await _dbContext.SafetyDataSheets.AddRangeAsync(items);
-            await _dbContext.SaveChangesAsync();
-        }
-
         // =========================
         // X. Orders
         // =========================
@@ -2399,185 +2132,18 @@ public class DataSeeder : IDataSeeder
                 new OrderStatusHistory { OrderId = 29, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 18, 22, 30, 0), Reason = null },
                 new OrderStatusHistory { OrderId = 29, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 19, 0, 30, 0), Reason = null },
 
-                // ORD-2026-001030 (Failed example)
+                // ORD-2026-001030
                 new OrderStatusHistory { OrderId = 30, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = new DateTime(2025, 12, 18, 1, 30, 0), Reason = null },
                 new OrderStatusHistory { OrderId = 30, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 18, 3, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 30, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 18, 7, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 30, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 18, 22, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 30, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 18, 20, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 30, FromStatusId = 5, ToStatusId = 8, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 19, 14, 30, 0), Reason = "Carrier API timeout while booking hazardous shipment." }
+                new OrderStatusHistory { OrderId = 30, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 18, 7, 30, 0), Reason = null }
             };
 
             await _dbContext.OrderStatusHistories.AddRangeAsync(historyRows);
             await _dbContext.SaveChangesAsync();
         }
 
-        // =========================
-        // X. Processing Jobs
-        // =========================
-        if (!await _dbContext.ProcessingJobs.AnyAsync())
-        {
-            var ordersByNumber = await _dbContext.Orders
-                .ToDictionaryAsync(o => o.OrderNumber, o => o.OrderId);
-
-            var processingJobs = new List<ProcessingJob>
-    {
-        // Submitted / Pending Review examples
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001011"],
-            JobType = "GenerateOrderSummaryDocument",
-            Status = "Completed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 17, 23, 35, 0),
-            StartedAt = new DateTime(2025, 12, 17, 23, 36, 0),
-            CompletedAt = new DateTime(2025, 12, 17, 23, 38, 0)
-        },
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001012"],
-            JobType = "GenerateSdsBundle",
-            Status = "Completed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 17, 17, 35, 0),
-            StartedAt = new DateTime(2025, 12, 17, 17, 36, 0),
-            CompletedAt = new DateTime(2025, 12, 17, 17, 41, 0),
-            PayloadJson = "{\"reason\":\"Order contains products requiring SDS documentation\"}"
-        },
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001013"],
-            JobType = "CreateSubmissionNotification",
-            Status = "Completed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 17, 7, 35, 0),
-            StartedAt = new DateTime(2025, 12, 17, 7, 36, 0),
-            CompletedAt = new DateTime(2025, 12, 17, 7, 37, 0)
-        },
-
-        // Pending review jobs still queued
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001020"],
-            JobType = "GenerateOrderSummaryDocument",
-            Status = "Queued",
-            AttemptCount = 0,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 16, 14, 35, 0)
-        },
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001021"],
-            JobType = "GenerateSdsBundle",
-            Status = "Queued",
-            AttemptCount = 0,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 16, 18, 35, 0),
-            PayloadJson = "{\"reason\":\"Customer order requires SDS bundle validation\"}"
-        },
-
-        // Approved / processing examples
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001025"],
-            JobType = "GenerateOrderSummaryDocument",
-            Status = "Completed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 16, 16, 0, 0),
-            StartedAt = new DateTime(2025, 12, 16, 16, 1, 0),
-            CompletedAt = new DateTime(2025, 12, 16, 16, 4, 0)
-        },
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001025"],
-            JobType = "PushToLogisticsProvider",
-            Status = "Completed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 16, 16, 5, 0),
-            StartedAt = new DateTime(2025, 12, 16, 16, 6, 0),
-            CompletedAt = new DateTime(2025, 12, 16, 16, 10, 0),
-            PayloadJson = "{\"provider\":\"Simulated Logistics\",\"shipmentReference\":\"SHP-2026-001025\"}"
-        },
-
-        // Failed job visible to Operations
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001026"],
-            JobType = "PushToLogisticsProvider",
-            Status = "Failed",
-            AttemptCount = 3,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 17, 9, 0, 0),
-            StartedAt = new DateTime(2025, 12, 17, 9, 20, 0),
-            FailedAt = new DateTime(2025, 12, 17, 9, 22, 0),
-            LastRetryAt = new DateTime(2025, 12, 17, 9, 15, 0),
-            ErrorMessage = "Simulated logistics provider rejected shipment because delivery postcode could not be validated.",
-            PayloadJson = "{\"provider\":\"Simulated Logistics\",\"reason\":\"Invalid delivery postcode\"}"
-        },
-
-        // Retryable failed job
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001027"],
-            JobType = "GenerateSdsBundle",
-            Status = "Failed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 17, 19, 0, 0),
-            StartedAt = new DateTime(2025, 12, 17, 19, 1, 0),
-            FailedAt = new DateTime(2025, 12, 17, 19, 2, 0),
-            NextAttemptAt = new DateTime(2025, 12, 17, 19, 7, 0),
-            ErrorMessage = "SDS bundle generation failed because one restricted product did not have an SDS template.",
-            PayloadJson = "{\"documentType\":\"SdsBundle\"}"
-        },
-
-        // In-progress example
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001028"],
-            JobType = "ProcessLogisticsEvent",
-            Status = "Processing",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 17, 6, 20, 0),
-            StartedAt = new DateTime(2025, 12, 17, 6, 21, 0),
-            PayloadJson = "{\"eventType\":\"DISPATCHED\",\"shipmentReference\":\"SHP-2026-001028\"}"
-        },
-
-        // Queued webhook/logistics event
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001029"],
-            JobType = "ProcessLogisticsEvent",
-            Status = "Queued",
-            AttemptCount = 0,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 22, 20, 35, 0),
-            PayloadJson = "{\"eventType\":\"DELIVERED\",\"shipmentReference\":\"SHP-2026-001029\"}"
-        },
-
-        // Notification example
-        new ProcessingJob
-        {
-            OrderId = ordersByNumber["ORD-2026-001030"],
-            JobType = "CreateApprovalNotification",
-            Status = "Completed",
-            AttemptCount = 1,
-            MaxAttempts = 3,
-            CreatedAt = new DateTime(2025, 12, 18, 4, 0, 0),
-            StartedAt = new DateTime(2025, 12, 18, 4, 1, 0),
-            CompletedAt = new DateTime(2025, 12, 18, 4, 2, 0)
-        }
-    };
-
-            await _dbContext.ProcessingJobs.AddRangeAsync(processingJobs);
-            await _dbContext.SaveChangesAsync();
-        }
+        // Processing jobs are runtime workflow records.
+        // They are intentionally not seeded so the background processor remains the source of truth.
 
         // =========================
         // X. Audit Logs
@@ -2621,107 +2187,12 @@ public class DataSeeder : IDataSeeder
                     OldValuesJson = "{\"status\":\"Draft\"}",
                     NewValuesJson = "{\"status\":\"Submitted\"}",
                     Notes = "Sales submitted the order for review."
-                },
-                new AuditLog
-                {
-                    EntityType = "ProcessingJob",
-                    EntityId = 1,
-                    Action = "Completed",
-                    PerformedByUserId = null,
-                    PerformedAt = new DateTime(2025, 12, 17, 23, 38, 0),
-                    OldValuesJson = "{\"status\":\"Processing\"}",
-                    NewValuesJson = "{\"status\":\"Completed\",\"jobType\":\"GenerateOrderSummaryDocument\"}",
-                    Notes = "System background worker completed order summary generation."
-                },
-                new AuditLog
-                {
-                    EntityType = "ProcessingJob",
-                    EntityId = 8,
-                    Action = "Failed",
-                    PerformedByUserId = null,
-                    PerformedAt = new DateTime(2025, 12, 17, 9, 22, 0),
-                    OldValuesJson = "{\"status\":\"Processing\"}",
-                    NewValuesJson = "{\"status\":\"Failed\",\"attemptCount\":3}",
-                    Notes = "System background worker failed after reaching retry limit."
                 }
             };
 
             await _dbContext.AuditLogs.AddRangeAsync(auditLogs);
             await _dbContext.SaveChangesAsync();
         }
-
-        // =========================
-        // X. Documents
-        // =========================
-        if (!await _dbContext.Documents.AnyAsync())
-        {
-            var ordersByNumber = await _dbContext.Orders
-                .ToDictionaryAsync(o => o.OrderNumber, o => o.OrderId);
-
-            static Document CreateDocument(
-                Dictionary<string, int> ordersByNumber,
-                string orderNumber,
-                string documentType,
-                DateTime createdAt,
-                int? createdByUserId)
-            {
-                var safeType = documentType.ToLowerInvariant();
-
-                return new Document
-                {
-                    OrderId = ordersByNumber[orderNumber],
-                    DocumentType = documentType,
-                    FileName = $"{orderNumber.ToLowerInvariant()}_{safeType}.pdf",
-                    FilePath = $"/documents/{orderNumber.ToLowerInvariant()}_{safeType}.pdf",
-                    CreatedAt = createdAt,
-                    CreatedByUserId = createdByUserId
-                };
-            }
-
-            var documents = new List<Document>
-            {
-                CreateDocument(ordersByNumber, "ORD-2026-001011", "OrderSummary", new DateTime(2025, 12, 18, 1, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001011", "SafetyDataSheetBundle", new DateTime(2025, 12, 18, 1, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001012", "OrderSummary", new DateTime(2025, 12, 17, 19, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001012", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 19, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001013", "OrderSummary", new DateTime(2025, 12, 17, 9, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001013", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 9, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001014", "OrderSummary", new DateTime(2025, 12, 18, 2, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001014", "SafetyDataSheetBundle", new DateTime(2025, 12, 18, 2, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001015", "OrderSummary", new DateTime(2025, 12, 18, 3, 30, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001016", "OrderSummary", new DateTime(2025, 12, 17, 9, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001016", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 9, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001020", "OrderSummary", new DateTime(2025, 12, 16, 16, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001020", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 16, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001025", "OrderSummary", new DateTime(2025, 12, 16, 17, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001025", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 17, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001026", "OrderSummary", new DateTime(2025, 12, 17, 6, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001026", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 6, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001027", "OrderSummary", new DateTime(2025, 12, 17, 20, 30, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001028", "OrderSummary", new DateTime(2025, 12, 16, 18, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001028", "SafetyDataSheetBundle", new DateTime(2025, 12, 16, 18, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001029", "OrderSummary", new DateTime(2025, 12, 17, 20, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001029", "SafetyDataSheetBundle", new DateTime(2025, 12, 17, 20, 31, 0), null),
-
-                CreateDocument(ordersByNumber, "ORD-2026-001030", "OrderSummary", new DateTime(2025, 12, 18, 6, 30, 0), null),
-                CreateDocument(ordersByNumber, "ORD-2026-001030", "SafetyDataSheetBundle", new DateTime(2025, 12, 18, 6, 31, 0), null)
-            };
-
-            await _dbContext.Documents.AddRangeAsync(documents);
-            await _dbContext.SaveChangesAsync();
-        }
-
         // =========================
         // X. Notifications
         // =========================
@@ -2737,8 +2208,7 @@ public class DataSeeder : IDataSeeder
                 string type,
                 DateTime createdAt,
                 string status,
-                DateTime? sentAt = null,
-                string? failure = null)
+                DateTime? sentAt = null)
             {
                 return new Notification
                 {
@@ -2749,7 +2219,7 @@ public class DataSeeder : IDataSeeder
                     CreatedAt = createdAt,
                     SentAt = sentAt,
                     Status = status,
-                    FailureReason = failure
+                    FailureReason = null
                 };
             }
 
@@ -2786,37 +2256,8 @@ public class DataSeeder : IDataSeeder
                 CreateNotification(ordersByNumber, "ORD-2026-001013", "purchasing8@seftonfacilities.co.uk", "OrderSubmitted",
                     new DateTime(2025, 12, 17, 23, 25, 0), "Queued"),
 
-                // =========================
-                // ORD-2026-001014 (failed)
-                // =========================
-                CreateNotification(ordersByNumber, "ORD-2026-001014", "purchasing4@pennineindustrial.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 17, 18, 20, 0), "Failed", null,
-                    "SMTP timeout"),
-
-                CreateNotification(ordersByNumber, "ORD-2026-001014", "purchasing25@unionprocessmaterials.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 17, 14, 20, 0), "Failed", null,
-                    "Invalid email domain"),
-
-                // =========================
-                // ORD-2026-001020
-                // =========================
-                CreateNotification(ordersByNumber, "ORD-2026-001020", "purchasing2@merseywatersolutions.co.uk", "OrderApproved",
-                    new DateTime(2025, 12, 17, 5, 25, 0), "Sent",
-                    new DateTime(2025, 12, 17, 5, 30, 0)),
-
-                CreateNotification(ordersByNumber, "ORD-2026-001020", "purchasing15@medilabconsumables.co.uk", "OrderApproved",
-                    new DateTime(2025, 12, 16, 17, 25, 0), "Sent",
-                    new DateTime(2025, 12, 16, 17, 30, 0)),
-
-                // =========================
-                // ORD-2026-001025
-                // =========================
-                CreateNotification(ordersByNumber, "ORD-2026-001025", "purchasing12@westcoastengineering.co.uk", "OrderCompleted",
-                    new DateTime(2025, 12, 18, 10, 25, 0), "Sent",
-                    new DateTime(2025, 12, 18, 10, 30, 0)),
-
-                CreateNotification(ordersByNumber, "ORD-2026-001025", "purchasing13@liverpoolindustrial.co.uk", "OrderCompleted",
-                    new DateTime(2025, 12, 18, 10, 20, 0), "Queued")
+                // Runtime approval/completion notifications are intentionally not seeded.
+                // They are created by the background processor when orders move through the workflow.
             };
 
             await _dbContext.Notifications.AddRangeAsync(notifications);
@@ -2847,3 +2288,4 @@ public class DataSeeder : IDataSeeder
         await _dbContext.SaveChangesAsync();
     }
 }
+

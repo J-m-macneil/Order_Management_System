@@ -13,6 +13,7 @@ public class ChangeOrderStatusCommandHandler
     private readonly IOrderRepository _repo;
     private readonly ICurrentUserService _currentUser;
     private readonly IProcessingJobQueueService _jobQueue;
+    private readonly INotificationService _notificationService;
     private readonly IAuditService _audit;
     private readonly IOrderReviewPolicy _reviewPolicy;
 
@@ -20,12 +21,14 @@ public class ChangeOrderStatusCommandHandler
         IOrderRepository repo,
         ICurrentUserService currentUser,
         IProcessingJobQueueService jobQueue,
+        INotificationService notificationService,
         IAuditService audit,
         IOrderReviewPolicy reviewPolicy)
     {
         _repo = repo;
         _currentUser = currentUser;
         _jobQueue = jobQueue;
+        _notificationService = notificationService;
         _audit = audit;
         _reviewPolicy = reviewPolicy;
     }
@@ -90,7 +93,7 @@ public class ChangeOrderStatusCommandHandler
 
         if (toStatus == OrderStatusEnum.Submitted)
         {
-            await _jobQueue.QueueSubmissionJobsAsync(order.OrderId);
+            await _notificationService.CreateOrderSubmittedNotificationAsync(order.OrderId, ct);
         }
 
         if (toStatus == OrderStatusEnum.Approved)
