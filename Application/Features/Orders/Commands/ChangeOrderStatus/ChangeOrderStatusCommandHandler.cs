@@ -55,7 +55,7 @@ public class ChangeOrderStatusCommandHandler
                 $"Invalid transition from {fromStatus} to {toStatus}");
         }
 
-        if (RequiresReason(fromStatus, toStatus) && string.IsNullOrWhiteSpace(request.Reason))
+        if (OrderStatusTransitions.RequiresReason(fromStatus, toStatus) && string.IsNullOrWhiteSpace(request.Reason))
         {
             throw new InvalidOperationException(
                 $"A reason is required to move an order from {fromStatus} to {toStatus}.");
@@ -102,12 +102,5 @@ public class ChangeOrderStatusCommandHandler
         }
 
         return true;
-    }
-
-    private static bool RequiresReason(OrderStatusEnum fromStatus, OrderStatusEnum toStatus)
-    {
-        return toStatus is OrderStatusEnum.Cancelled or OrderStatusEnum.Failed
-            || (toStatus == OrderStatusEnum.Draft &&
-                fromStatus is OrderStatusEnum.Submitted or OrderStatusEnum.PendingReview);
     }
 }

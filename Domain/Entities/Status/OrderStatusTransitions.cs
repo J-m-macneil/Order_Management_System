@@ -33,6 +33,13 @@ public static class OrderStatusTransitions
         return CanTransition(from, to) && HasRolePermission(from, to, roles);
     }
 
+    public static bool RequiresReason(OrderStatusEnum from, OrderStatusEnum to)
+    {
+        return to is OrderStatusEnum.Cancelled or OrderStatusEnum.Failed
+            || (to == OrderStatusEnum.Draft &&
+                from is OrderStatusEnum.Submitted or OrderStatusEnum.PendingReview);
+    }
+
     public static IEnumerable<OrderStatusEnum> GetAllowed(OrderStatusEnum from)
     {
         if (IsTerminal(from))
