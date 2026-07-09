@@ -13,4 +13,6 @@ public class SafetyDataSheetDto
     public DateTime UploadedAt { get; set; }
 
     public int UploadedByUserId { get; set; }
+    public string? UploadedByUserName { get; set; }
+    public bool IsActive { get; set; }
 }

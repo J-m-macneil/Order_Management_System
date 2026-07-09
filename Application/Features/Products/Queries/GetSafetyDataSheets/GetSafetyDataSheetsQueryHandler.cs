@@ -27,7 +27,9 @@ public class GetSafetyDataSheetsQueryHandler
             Version = x.Version,
             EffectiveDate = x.EffectiveDate,
             UploadedAt = x.UploadedAt,
-            UploadedByUserId = x.UploadedByUserId
+            UploadedByUserId = x.UploadedByUserId,
+            UploadedByUserName = x.UploadedByUser.FullName,
+            IsActive = x.IsActive
         }).ToList();
     }
 }

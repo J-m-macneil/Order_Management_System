@@ -122,18 +122,22 @@
       </div>
     </div>
 
-    <div *ngIf="isEditMode && form.get('requiresSds')?.value && (safetyDataSheets.length > 0 || isSdsFormOpen)" class="form-card">
+    <div *ngIf="isEditMode && form.get('requiresSds')?.value && safetyDataSheets.length > 0" class="form-card">
       <div class="flex items-center justify-between gap-4 mb-6">
         <div>
           <h2 class="app-section-title">Safety Data Sheets</h2>
           <p class="text-xs app-muted-text mt-1">{{ safetyDataSheets.length }} total</p>
         </div>
 
-        <button type="button"
-                (click)="openSdsForm()"
-                class="app-secondary-button px-4 py-2">
-          Add SDS
-        </button>
+        <div class="flex flex-wrap items-center gap-3">
+          <button *ngIf="canGenerateSds"
+                  type="button"
+                  (click)="generateSafetyDataSheet()"
+                  [disabled]="isGeneratingSds"
+                  class="app-primary-button px-4 py-2">
+            {{ isGeneratingSds ? 'Generating...' : 'Generate SDS' }}
+          </button>
+        </div>
       </div>
 
       <div class="mb-6">
@@ -155,8 +159,17 @@
                 <td class="px-6 py-4 app-body-text">{{ sds.version }}</td>
                 <td class="px-6 py-4 app-body-text">{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
                 <td class="px-6 py-4 app-body-text">{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="px-6 py-4 app-body-text">{{ sds.uploadedByUserId }}</td>
+                <td class="px-6 py-4 app-body-text">
+                  {{ sds.uploadedByUserName || ('User #' + sds.uploadedByUserId) }}
+                </td>
                 <td class="px-6 py-4 text-center">
+                  <a [href]="getSafetyDataSheetViewUrl(sds)"
+                     target="_blank"
+                     rel="noopener"
+                     class="app-link-button text-xs mr-3">
+                    View
+                  </a>
+
                   <button type="button"
                           (click)="openDeleteSdsModal(sds)"
                           class="app-danger-link text-xs">
@@ -172,57 +185,9 @@
           No SDS records found for this product.
         </div>
       </div>
-
-      <div *ngIf="isSdsFormOpen" class="border-t app-divider pt-6">
-        <div [formGroup]="sdsForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="form-label">File Name</label>
-            <input type="text" formControlName="fileName" class="form-input" />
-          </div>
-
-          <div>
-            <label class="form-label">File Path</label>
-            <input type="text" formControlName="filePath" class="form-input" />
-          </div>
-
-          <div>
-            <label class="form-label">Version</label>
-            <input type="text" formControlName="version" class="form-input" />
-          </div>
-
-          <div>
-            <label class="form-label">Effective Date</label>
-            <input type="date" formControlName="effectiveDate" class="form-input" />
-          </div>
-
-          <div>
-            <label class="form-label">Uploaded At</label>
-            <input type="datetime-local" formControlName="uploadedAt" class="form-input" />
-          </div>
-
-          <div>
-            <label class="form-label">Uploaded By User Id</label>
-            <input type="number" formControlName="uploadedByUserId" class="form-input" />
-          </div>
-
-          <div class="sm:col-span-2 flex gap-2">
-            <button type="button"
-                    (click)="createSafetyDataSheet()"
-                    class="app-secondary-button px-4 py-2">
-              Add SDS
-            </button>
-
-            <button type="button"
-                    (click)="cancelSdsForm()"
-                    class="app-secondary-button px-4 py-2">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <div *ngIf="isEditMode && form.get('requiresSds')?.value && safetyDataSheets.length === 0 && !isSdsFormOpen" class="form-card">
+    <div *ngIf="isEditMode && form.get('requiresSds')?.value && safetyDataSheets.length === 0" class="form-card">
       <div class="flex items-center justify-between gap-4">
         <div>
           <h2 class="app-section-title">Safety Data Sheets</h2>
@@ -234,10 +199,12 @@
             Required
           </span>
 
-          <button type="button"
-                  (click)="openSdsForm()"
-                  class="app-secondary-button px-4 py-2">
-            Add SDS
+          <button *ngIf="canGenerateSds"
+                  type="button"
+                  (click)="generateSafetyDataSheet()"
+                  [disabled]="isGeneratingSds"
+                  class="app-primary-button px-4 py-2">
+            {{ isGeneratingSds ? 'Generating...' : 'Generate SDS' }}
           </button>
         </div>
       </div>

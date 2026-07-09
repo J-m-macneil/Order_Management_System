@@ -6,8 +6,9 @@ import { HazardClass } from '../../../core/models/hazard-class.model';
 import { ProductCategory } from '../../../core/models/product-category.model';
 import { Product } from '../../../core/models/product.model';
 import { AuditLog } from '../../../core/models/audit-log.model';
-import { SafetyDataSheet, CreateSafetyDataSheetRequest } from '../../../core/models/safety-data-sheet-model';
+import { SafetyDataSheet } from '../../../core/models/safety-data-sheet-model';
 import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
+import { AuthService } from '../../../core/auth/auth.service';
 import { AuditLogsService } from '../../../core/services/audit-logs.service';
 import { ProductsService } from '../../../core/services/products.service';
 
@@ -30,9 +31,8 @@ export class ProductFormComponent implements OnInit {
   unitsOfMeasure: UnitOfMeasure[] = [];
   hazardClasses: HazardClass[] = [];
 
-  sdsForm!: FormGroup;
   safetyDataSheets: SafetyDataSheet[] = [];
-  isSdsFormOpen = false;
+  isGeneratingSds = false;
   sdsPendingDelete: SafetyDataSheet | null = null;
   auditLogs: AuditLog[] = [];
   auditUnavailable = false;
@@ -40,6 +40,7 @@ export class ProductFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private productsService: ProductsService,
+    private authService: AuthService,
     private auditLogsService: AuditLogsService,
     private route: ActivatedRoute,
     private router: Router,
@@ -64,15 +65,6 @@ export class ProductFormComponent implements OnInit {
       isActive: [true]
     });
 
-    this.sdsForm = this.fb.group({
-      fileName: ['', Validators.required],
-      filePath: ['', Validators.required],
-      version: ['', Validators.required],
-      effectiveDate: ['', Validators.required],
-      uploadedAt: ['', Validators.required],
-      uploadedByUserId: [1, Validators.required]
-    });
-
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : null;
 
@@ -85,6 +77,10 @@ export class ProductFormComponent implements OnInit {
       this.loadSafetyDataSheets(id);
       this.loadProductAuditHistory(id);
     }
+  }
+
+  get canGenerateSds(): boolean {
+    return this.authService.hasRole('Operations', 'Admin');
   }
 
   loadLookups(): void {
@@ -171,37 +167,35 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  createSafetyDataSheet(): void {
-    if (!this.productId) {
+  generateSafetyDataSheet(): void {
+    if (!this.productId || !this.form.get('requiresSds')?.value) {
       return;
     }
 
-    if (this.sdsForm.invalid) {
-      this.sdsForm.markAllAsTouched();
-      return;
-    }
+    this.isGeneratingSds = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.cdr.detectChanges();
 
-    const request: CreateSafetyDataSheetRequest = {
-      fileName: this.sdsForm.value.fileName,
-      filePath: this.sdsForm.value.filePath,
-      version: this.sdsForm.value.version,
-      effectiveDate: this.sdsForm.value.effectiveDate,
-      uploadedAt: this.sdsForm.value.uploadedAt,
-      uploadedByUserId: this.sdsForm.value.uploadedByUserId
-    };
-
-    this.productsService.createSafetyDataSheet(this.productId, request).subscribe({
+    this.productsService.generateSafetyDataSheet(this.productId).subscribe({
       next: () => {
-        this.cancelSdsForm();
+        this.successMessage = 'SDS generated.';
+        this.isGeneratingSds = false;
         this.loadSafetyDataSheets(this.productId!);
+        this.loadProductAuditHistory(this.productId!);
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Failed to create SDS', err);
-        this.errorMessage = 'Failed to create SDS.';
+        console.error('Failed to generate SDS', err);
+        this.errorMessage = err?.error?.error || 'Failed to generate SDS.';
+        this.isGeneratingSds = false;
         this.cdr.detectChanges();
       }
     });
+  }
+
+  getSafetyDataSheetViewUrl(sds: SafetyDataSheet): string {
+    return this.productsService.getSafetyDataSheetViewUrl(sds.productId, sds.safetyDataSheetId);
   }
 
   loadProductAuditHistory(productId: number): void {
@@ -251,32 +245,6 @@ export class ProductFormComponent implements OnInit {
 
   getAuditDescription(log: AuditLog): string {
     return log.changeSummary || log.notes || 'No audit note recorded';
-  }
-
-  openSdsForm(): void {
-    this.isSdsFormOpen = true;
-
-    this.sdsForm.reset({
-      fileName: '',
-      filePath: '',
-      version: '',
-      effectiveDate: '',
-      uploadedAt: '',
-      uploadedByUserId: 1
-    });
-  }
-
-  cancelSdsForm(): void {
-    this.isSdsFormOpen = false;
-
-    this.sdsForm.reset({
-      fileName: '',
-      filePath: '',
-      version: '',
-      effectiveDate: '',
-      uploadedAt: '',
-      uploadedByUserId: 1
-    });
   }
 
   openDeleteSdsModal(sds: SafetyDataSheet): void {

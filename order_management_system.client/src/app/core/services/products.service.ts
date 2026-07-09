@@ -102,6 +102,14 @@ export class ProductsService {
     return this.http.post<SafetyDataSheet>(`${this.baseUrl}/${productId}/sds`, request);
   }
 
+  generateSafetyDataSheet(productId: number): Observable<SafetyDataSheet> {
+    return this.http.post<SafetyDataSheet>(`${this.baseUrl}/${productId}/sds/generate`, {});
+  }
+
+  getSafetyDataSheetViewUrl(productId: number, sdsId: number): string {
+    return `${this.baseUrl}/${productId}/sds/${sdsId}/view`;
+  }
+
   updateSafetyDataSheet(productId: number, sdsId: number, request: UpdateSafetyDataSheetRequest): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${productId}/sds/${sdsId}`, request);
   }

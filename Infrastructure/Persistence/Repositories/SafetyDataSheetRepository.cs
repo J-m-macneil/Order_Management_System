@@ -17,6 +17,7 @@ public class SafetyDataSheetRepository : ISafetyDataSheetRepository
     public async Task<List<SafetyDataSheet>> GetByProductIdAsync(int productId, CancellationToken ct)
     {
         return await _db.SafetyDataSheets
+            .Include(x => x.UploadedByUser)
             .Where(x => x.ProductId == productId && x.IsActive && x.DeletedAt == null)
             .AsNoTracking()
             .ToListAsync(ct);

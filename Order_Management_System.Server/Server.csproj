@@ -28,6 +28,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="..\order_management_system.client\public\login-logo-light.svg"
+				 Link="Assets\login-logo-light.svg"
+				 CopyToOutputDirectory="PreserveNewest"
+				 CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Folder Include="Extensions\" />
 	</ItemGroup>
 

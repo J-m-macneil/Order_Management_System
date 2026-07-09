@@ -2,6 +2,7 @@
 
 public interface IFileStorageService
 {
-    Task<byte[]> GetFileAsync(string fileName, CancellationToken ct);
-    bool FileExists(string fileName);
+    Task SaveFileAsync(string key, byte[] content, CancellationToken ct);
+    Task<byte[]> GetFileAsync(string key, CancellationToken ct);
+    bool FileExists(string key);
 }

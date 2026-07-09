@@ -54,7 +54,9 @@ public class CreateSafetyDataSheetCommandHandler
             Version = item.Version,
             EffectiveDate = item.EffectiveDate,
             UploadedAt = item.UploadedAt,
-            UploadedByUserId = item.UploadedByUserId
+            UploadedByUserId = item.UploadedByUserId,
+            UploadedByUserName = null,
+            IsActive = item.IsActive
         };
     }
 

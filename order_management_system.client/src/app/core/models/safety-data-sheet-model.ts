@@ -7,6 +7,7 @@ export interface SafetyDataSheet {
   effectiveDate: string;
   uploadedAt: string;
   uploadedByUserId: number;
+  uploadedByUserName?: string | null;
   isActive: boolean;
 }
 
