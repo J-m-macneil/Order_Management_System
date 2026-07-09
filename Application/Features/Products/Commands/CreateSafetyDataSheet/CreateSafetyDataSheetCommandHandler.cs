@@ -39,10 +39,10 @@ public class CreateSafetyDataSheetCommandHandler
         await _audit.LogAsync(
             "SafetyDataSheet",
             item.SafetyDataSheetId,
-            "Added",
+            "Created",
             null,
             CreateSnapshot(item),
-            $"Safety data sheet added for product #{item.ProductId}: {item.FileName}.",
+            $"Safety data sheet created for product #{item.ProductId}: {item.FileName}.",
             ct);
 
         return new SafetyDataSheetDto

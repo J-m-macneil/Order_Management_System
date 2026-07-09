@@ -10,18 +10,15 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
     private readonly IUserRepository _repo;
     private readonly IPasswordService _passwordService;
     private readonly IAuditService _audit;
-    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateUserCommandHandler(
         IUserRepository repo,
         IPasswordService passwordService,
-        IAuditService audit,
-        IAuditChangeFormatter changeFormatter)
+        IAuditService audit)
     {
         _repo = repo;
         _passwordService = passwordService;
         _audit = audit;
-        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateUserRequest request, CancellationToken ct)
@@ -71,7 +68,6 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
         await _repo.SaveChangesAsync(ct);
 
         var newValues = CreateSnapshot(user);
-        var changes = _changeFormatter.GetChanges(oldValues, newValues);
 
         await _audit.LogAsync(
             "User",
@@ -79,7 +75,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
             "Updated",
             oldValues,
             newValues,
-            _changeFormatter.CreateUpdateNote("User", user.FullName, changes),
+            $"User updated: {user.FullName}.",
             ct);
 
         return Unit.Value;

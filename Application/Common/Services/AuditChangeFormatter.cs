@@ -11,17 +11,6 @@ public class AuditChangeFormatter : IAuditChangeFormatter
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public IReadOnlyList<AuditFieldChange> GetChanges(object? oldValues, object? newValues)
-    {
-        if (oldValues == null || newValues == null)
-            return [];
-
-        var oldElement = JsonSerializer.SerializeToElement(oldValues, JsonOptions);
-        var newElement = JsonSerializer.SerializeToElement(newValues, JsonOptions);
-
-        return GetChanges(oldElement, newElement);
-    }
-
     public string? CreateChangeSummary(string? oldValuesJson, string? newValuesJson)
     {
         if (string.IsNullOrWhiteSpace(oldValuesJson) || string.IsNullOrWhiteSpace(newValuesJson))
@@ -44,23 +33,11 @@ public class AuditChangeFormatter : IAuditChangeFormatter
         }
     }
 
-    public string? CreateChangeSummary(IReadOnlyCollection<AuditFieldChange> changes)
+    private static string? CreateChangeSummary(IReadOnlyCollection<AuditFieldChange> changes)
     {
         return changes.Count == 0
             ? null
             : string.Join("; ", changes.Select(x => $"{x.DisplayName} changed from {x.OldValue} to {x.NewValue}"));
-    }
-
-    public string CreateUpdateNote(
-        string entityName,
-        string displayName,
-        IReadOnlyCollection<AuditFieldChange> changes)
-    {
-        var summary = CreateChangeSummary(changes);
-
-        return summary == null
-            ? $"{entityName} updated: {displayName}."
-            : $"{entityName} updated: {displayName}; {summary}.";
     }
 
     private static IReadOnlyList<AuditFieldChange> GetChanges(JsonElement oldElement, JsonElement newElement)

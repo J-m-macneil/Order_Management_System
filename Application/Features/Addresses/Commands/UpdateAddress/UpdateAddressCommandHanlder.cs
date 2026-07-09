@@ -9,16 +9,13 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
 {
     private readonly IAddressRepository _repo;
     private readonly IAuditService _audit;
-    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateAddressCommandHanlder(
         IAddressRepository repo,
-        IAuditService audit,
-        IAuditChangeFormatter changeFormatter)
+        IAuditService audit)
     {
         _repo = repo;
         _audit = audit;
-        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateAddressCommand request, CancellationToken ct)
@@ -46,7 +43,6 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
         await _repo.SaveChangesAsync(ct);
 
         var newValues = CreateSnapshot(address);
-        var changes = _changeFormatter.GetChanges(oldValues, newValues);
 
         await _audit.LogAsync(
             "Address",
@@ -54,10 +50,7 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
             "Updated",
             oldValues,
             newValues,
-            _changeFormatter.CreateUpdateNote(
-                "Address",
-                $"{address.SiteName} for customer #{address.CustomerId}",
-                changes),
+            $"Address updated: {address.SiteName} for customer #{address.CustomerId}.",
             ct);
 
         return Unit.Value;

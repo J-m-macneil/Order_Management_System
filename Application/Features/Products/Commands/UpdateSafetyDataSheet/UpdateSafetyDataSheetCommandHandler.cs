@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Repositories;
@@ -10,16 +11,13 @@ public class UpdateSafetyDataSheetCommandHandler
 {
     private readonly ISafetyDataSheetRepository _repo;
     private readonly IAuditService _audit;
-    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateSafetyDataSheetCommandHandler(
         ISafetyDataSheetRepository repo,
-        IAuditService audit,
-        IAuditChangeFormatter changeFormatter)
+        IAuditService audit)
     {
         _repo = repo;
         _audit = audit;
-        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateSafetyDataSheetCommand request, CancellationToken ct)
@@ -30,7 +28,7 @@ public class UpdateSafetyDataSheetCommandHandler
             ct);
 
         if (item == null)
-            throw new Exception("Safety data sheet not found");
+            throw new NotFoundException("Safety data sheet was not found.");
 
         var oldValues = CreateSnapshot(item);
 
@@ -45,7 +43,6 @@ public class UpdateSafetyDataSheetCommandHandler
         await _repo.SaveChangesAsync(ct);
 
         var newValues = CreateSnapshot(item);
-        var changes = _changeFormatter.GetChanges(oldValues, newValues);
 
         await _audit.LogAsync(
             "SafetyDataSheet",
@@ -53,10 +50,7 @@ public class UpdateSafetyDataSheetCommandHandler
             "Updated",
             oldValues,
             newValues,
-            _changeFormatter.CreateUpdateNote(
-                "Safety data sheet",
-                $"{item.FileName} for product #{item.ProductId}",
-                changes),
+            $"Safety data sheet updated: {item.FileName} for product #{item.ProductId}.",
             ct);
 
         return Unit.Value;

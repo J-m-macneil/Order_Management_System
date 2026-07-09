@@ -80,7 +80,7 @@ public class SafetyDataSheetDocumentGenerator : ISafetyDataSheetDocumentGenerato
         _dbContext.SafetyDataSheets.Add(safetyDataSheet);
 
         _auditService.AddUserAction(
-            "SafetyDataSheet",
+            "Product",
             product.ProductId,
             "Generated",
             oldValues: null,

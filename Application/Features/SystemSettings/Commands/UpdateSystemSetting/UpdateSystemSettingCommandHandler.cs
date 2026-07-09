@@ -9,16 +9,13 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
 {
     private readonly ISystemSettingRepository _repo;
     private readonly IAuditService _audit;
-    private readonly IAuditChangeFormatter _changeFormatter;
 
     public UpdateSystemSettingCommandHandler(
         ISystemSettingRepository repo,
-        IAuditService audit,
-        IAuditChangeFormatter changeFormatter)
+        IAuditService audit)
     {
         _repo = repo;
         _audit = audit;
-        _changeFormatter = changeFormatter;
     }
 
     public async Task<Unit> Handle(UpdateSystemSettingRequest request, CancellationToken ct)
@@ -39,7 +36,6 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
         await _repo.SaveChangesAsync(ct);
 
         var newValues = CreateSnapshot(setting);
-        var changes = _changeFormatter.GetChanges(oldValues, newValues);
 
         await _audit.LogAsync(
             "SystemSetting",
@@ -47,7 +43,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
             "Updated",
             oldValues,
             newValues,
-            _changeFormatter.CreateUpdateNote("System setting", setting.SettingKey, changes),
+            $"System setting updated: {setting.SettingKey}.",
             ct);
 
         return Unit.Value;

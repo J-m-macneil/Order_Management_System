@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Repositories;
@@ -27,7 +28,7 @@ public class DeleteSafetyDataSheetCommandHandler
             ct);
 
         if (item == null)
-            throw new Exception("Safety data sheet not found");
+            throw new NotFoundException("Safety data sheet was not found.");
 
         var oldValues = CreateSnapshot(item);
 
