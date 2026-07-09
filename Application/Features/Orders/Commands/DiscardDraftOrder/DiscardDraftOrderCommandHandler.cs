@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Interfaces;
 using Domain.Entities.Orders;
@@ -28,13 +29,13 @@ public class DiscardDraftOrderCommandHandler : IRequestHandler<DiscardDraftOrder
         var order = await _orders.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
-            throw new KeyNotFoundException($"Order {request.OrderId} not found");
+            throw new NotFoundException("Order", request.OrderId);
 
         if (!CanDiscardDraftOrder(_currentUser.Roles))
-            throw new InvalidOperationException("Only Sales or Admin users can discard draft orders.");
+            throw new ForbiddenException("Only Sales or Admin users can discard draft orders.");
 
         _ = _currentUser.UserId
-            ?? throw new InvalidOperationException("User not authenticated.");
+            ?? throw new UnauthorizedException("User is not authenticated.");
 
         var oldValues = CreateSnapshot(order);
 

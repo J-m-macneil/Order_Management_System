@@ -1,4 +1,5 @@
-﻿using System.Net;
+using Application.Common.Exceptions;
+using System.Net;
 using System.Text.Json;
 
 public class ExceptionMiddleware
@@ -20,17 +21,50 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            if (ex is not BadRequestException
+                and not ConflictException
+                and not ForbiddenException
+                and not NotFoundException
+                and not UnauthorizedException)
+            {
+                _logger.LogError(ex, "Unhandled exception");
+            }
 
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = GetStatusCode(ex);
 
             var response = new
             {
-                error = "An unexpected error occurred"
+                message = GetMessage(ex)
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
+    }
+
+    private static int GetStatusCode(Exception exception)
+    {
+        return exception switch
+        {
+            BadRequestException => (int)HttpStatusCode.BadRequest,
+            ConflictException => (int)HttpStatusCode.Conflict,
+            ForbiddenException => (int)HttpStatusCode.Forbidden,
+            NotFoundException => (int)HttpStatusCode.NotFound,
+            UnauthorizedException => (int)HttpStatusCode.Unauthorized,
+            _ => (int)HttpStatusCode.InternalServerError
+        };
+    }
+
+    private static string GetMessage(Exception exception)
+    {
+        return exception switch
+        {
+            BadRequestException
+                or ConflictException
+                or ForbiddenException
+                or NotFoundException
+                or UnauthorizedException => exception.Message,
+            _ => "An unexpected error occurred."
+        };
     }
 }

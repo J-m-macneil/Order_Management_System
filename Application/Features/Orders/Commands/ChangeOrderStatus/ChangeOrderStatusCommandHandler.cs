@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Interfaces;
 using Domain.Enums;
@@ -40,24 +41,23 @@ public class ChangeOrderStatusCommandHandler
         var order = await _repo.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
-            throw new KeyNotFoundException(
-                $"Order {request.OrderId} not found");
+            throw new NotFoundException("Order", request.OrderId);
 
         var userId = _currentUser.UserId
-            ?? throw new Exception("User not authenticated");
+            ?? throw new UnauthorizedException("User is not authenticated.");
 
         var fromStatus = (OrderStatusEnum)order.OrderStatusId;
         var toStatus = (OrderStatusEnum)request.StatusId;
 
         if (!OrderStatusTransitions.CanTransition(fromStatus, toStatus, _currentUser.Roles))
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 $"Invalid transition from {fromStatus} to {toStatus}");
         }
 
         if (OrderStatusTransitions.RequiresReason(fromStatus, toStatus) && string.IsNullOrWhiteSpace(request.Reason))
         {
-            throw new InvalidOperationException(
+            throw new BadRequestException(
                 $"A reason is required to move an order from {fromStatus} to {toStatus}.");
         }
 
@@ -65,7 +65,7 @@ public class ChangeOrderStatusCommandHandler
             fromStatus != OrderStatusEnum.PendingReview &&
             _reviewPolicy.RequiresManualReview(order))
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 "Orders containing restricted products must be reviewed before approval.");
         }
 

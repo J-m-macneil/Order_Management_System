@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Features.Addresses.DTOs;
 using Application.Features.Orders.DTOs;
 using Application.Interfaces;
@@ -25,7 +26,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
         var order = await _repo.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
-            throw new KeyNotFoundException($"Order {request.OrderId} not found");
+            throw new NotFoundException("Order", request.OrderId);
 
         var failedProcessingJobCount = order.ProcessingJobs.Count(j => j.Status == "Failed");
         var effectiveStatusId = failedProcessingJobCount > 0 ? 8 : order.OrderStatusId;

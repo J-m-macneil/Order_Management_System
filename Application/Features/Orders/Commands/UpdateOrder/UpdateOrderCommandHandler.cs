@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Interfaces;
 using Domain.Entities.Orders;
@@ -28,16 +29,16 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
         var order = await _orders.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
-            throw new KeyNotFoundException($"Order {request.OrderId} not found");
+            throw new NotFoundException("Order", request.OrderId);
 
         if ((OrderStatusEnum)order.OrderStatusId != OrderStatusEnum.Draft)
-            throw new InvalidOperationException("Only draft orders can be edited.");
+            throw new ConflictException("Only draft orders can be edited.");
 
         if (!CanEditDraftOrder(_currentUser.Roles))
-            throw new InvalidOperationException("Only Sales or Admin users can edit draft orders.");
+            throw new ForbiddenException("Only Sales or Admin users can edit draft orders.");
 
         if (request.Items.Count == 0)
-            throw new InvalidOperationException("An order must have at least one order line.");
+            throw new BadRequestException("An order must have at least one order line.");
 
         var oldValues = CreateSnapshot(order);
 

@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Interfaces;
 using Domain.Repositories;
 using MediatR;
@@ -22,13 +23,13 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
         var job = await _repo.GetByIdAsync(request.Id, ct);
 
         if (job == null)
-            throw new Exception("Job not found");
+            throw new NotFoundException("Processing job", request.Id);
 
         if (job.Status != ProcessingJobStatus.Failed)
-            throw new Exception("Only failed jobs can be retried.");
+            throw new ConflictException("Only failed jobs can be retried.");
 
         if (job.AttemptCount >= job.MaxAttempts)
-            throw new Exception("This processing job has reached the retry limit.");
+            throw new ConflictException("This processing job has reached the retry limit.");
 
         var oldValues = CreateSnapshot(job);
 

@@ -34,39 +34,17 @@ public class OrdersController : ControllerBase
     [Authorize(Policy = "SalesOrAdmin")]
     public async Task<IActionResult> Update(int id, UpdateOrderCommand command, CancellationToken ct)
     {
-        try
-        {
-            command.OrderId = id;
-            await _mediator.Send(command, ct);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        command.OrderId = id;
+        await _mediator.Send(command, ct);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "SalesOrAdmin")]
     public async Task<IActionResult> DiscardDraft(int id, CancellationToken ct)
     {
-        try
-        {
-            await _mediator.Send(new DiscardDraftOrderCommand { OrderId = id }, ct);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        await _mediator.Send(new DiscardDraftOrderCommand { OrderId = id }, ct);
+        return NoContent();
     }
 
     [HttpGet("{id}")]
@@ -87,20 +65,9 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Sales,Operations,Admin")]
     public async Task<IActionResult> ChangeStatus(int id, ChangeOrderStatusCommand command)
     {
-        try
-        {
-            command.OrderId = id;
-            await _mediator.Send(command);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        command.OrderId = id;
+        await _mediator.Send(command);
+        return NoContent();
     }
 
     [HttpGet("{id}/history")]

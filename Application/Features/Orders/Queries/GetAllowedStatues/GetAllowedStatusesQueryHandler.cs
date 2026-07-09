@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Features.Orders.DTOs;
 using Domain.Enums;
 using Domain.Repositories;
@@ -28,7 +29,7 @@ public class GetAllowedStatusesQueryHandler
         var order = await _repo.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
-            throw new Exception("Order not found");
+            throw new NotFoundException("Order", request.OrderId);
 
         var roles = _currentUser.Roles;
 

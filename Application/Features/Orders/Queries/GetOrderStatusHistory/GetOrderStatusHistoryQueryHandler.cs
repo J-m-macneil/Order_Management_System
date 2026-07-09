@@ -1,4 +1,5 @@
-﻿using Application.Features.Orders.DTOs;
+using Application.Common.Exceptions;
+using Application.Features.Orders.DTOs;
 using Domain.Repositories;
 using MediatR;
 
@@ -21,7 +22,7 @@ public class GetOrderStatusHistoryQueryHandler
         var order = await _repo.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
-            throw new KeyNotFoundException($"Order {request.OrderId} not found");
+            throw new NotFoundException("Order", request.OrderId);
 
         return order.OrderStatusHistory
             .OrderByDescending(x => x.ChangedAt)
