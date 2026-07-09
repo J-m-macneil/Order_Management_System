@@ -8,16 +8,13 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
 {
     private readonly IProcessingJobRepository _repo;
     private readonly IAuditService _audit;
-    private readonly IAuditChangeFormatter _changeFormatter;
 
     public RetryProcessingJobCommandHandler(
         IProcessingJobRepository repo,
-        IAuditService audit,
-        IAuditChangeFormatter changeFormatter)
+        IAuditService audit)
     {
         _repo = repo;
         _audit = audit;
-        _changeFormatter = changeFormatter;
     }
 
     public async Task Handle(RetryProcessingJobCommand request, CancellationToken ct)
@@ -30,10 +27,12 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
         if (job.Status != ProcessingJobStatus.Failed)
             throw new Exception("Only failed jobs can be retried.");
 
+        if (job.AttemptCount >= job.MaxAttempts)
+            throw new Exception("This processing job has reached the retry limit.");
+
         var oldValues = CreateSnapshot(job);
 
         job.Status = ProcessingJobStatus.Queued;
-        job.AttemptCount = 0;
         job.NextAttemptAt = DateTime.UtcNow;
         job.LastRetryAt = DateTime.UtcNow;
         job.ErrorMessage = null;
@@ -42,7 +41,6 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
         await _repo.SaveChangesAsync(ct);
 
         var newValues = CreateSnapshot(job);
-        var changes = _changeFormatter.GetChanges(oldValues, newValues);
 
         await _audit.LogAsync(
             "ProcessingJob",
@@ -50,10 +48,7 @@ public class RetryProcessingJobCommandHandler : IRequestHandler<RetryProcessingJ
             "RetryQueued",
             oldValues,
             newValues,
-            _changeFormatter.CreateUpdateNote(
-                "Processing job",
-                $"{job.JobType} for order #{job.OrderId}",
-                changes),
+            $"Processing job retry queued: {job.JobType}.",
             ct);
     }
 

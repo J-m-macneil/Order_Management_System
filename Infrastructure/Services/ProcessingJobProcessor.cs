@@ -1,5 +1,5 @@
+using Application.Common.Exceptions;
 using Application.Interfaces;
-using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -9,40 +9,58 @@ namespace Infrastructure.Services;
 public class ProcessingJobProcessor : IProcessingJobProcessor
 {
     private readonly AppDbContext _dbContext;
-    private readonly IOrderDocumentService _documentService;
+    private readonly IReadOnlyDictionary<string, IProcessingJobHandler> _handlers;
     private readonly IAuditService _auditService;
-    private readonly ISystemSettingsService _settingsService;
+    private readonly IOrderStatusWorkflowService _orderStatusWorkflow;
+    private readonly IProcessingJobWorkflowPolicy _workflowPolicy;
 
     public ProcessingJobProcessor(
         AppDbContext dbContext,
-        IOrderDocumentService documentService,
+        IEnumerable<IProcessingJobHandler> handlers,
         IAuditService auditService,
-        ISystemSettingsService settingsService)
+        IOrderStatusWorkflowService orderStatusWorkflow,
+        IProcessingJobWorkflowPolicy workflowPolicy)
     {
         _dbContext = dbContext;
-        _documentService = documentService;
+        _handlers = handlers.ToDictionary(h => h.JobType);
         _auditService = auditService;
-        _settingsService = settingsService;
+        _orderStatusWorkflow = orderStatusWorkflow;
+        _workflowPolicy = workflowPolicy;
     }
 
     public async Task ProcessNextBatchAsync(CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
-
         await MarkOrdersWithFailedJobsAsync(cancellationToken);
-        await EnsureApprovalWorkflowJobsAsync(now, cancellationToken);
 
-        var jobs = await _dbContext.ProcessingJobs
-            .Where(j => j.Status == ProcessingJobStatus.Queued)
-            .Where(j => j.NextAttemptAt == null || j.NextAttemptAt <= now)
-            .OrderBy(j => j.CreatedAt)
-            .Take(5)
-            .ToListAsync(cancellationToken);
+        var jobs = await GetNextJobsToProcessAsync(DateTime.UtcNow, cancellationToken);
 
         foreach (var job in jobs)
         {
             await ProcessJobAsync(job, cancellationToken);
         }
+    }
+
+    private async Task<List<ProcessingJob>> GetNextJobsToProcessAsync(
+        DateTime now,
+        CancellationToken cancellationToken)
+    {
+        var queuedJobs = await _dbContext.ProcessingJobs
+            .Where(j => j.Status == ProcessingJobStatus.Queued)
+            .Where(j => j.NextAttemptAt == null || j.NextAttemptAt <= now)
+            .Where(j => !_dbContext.ProcessingJobs.Any(f =>
+                f.OrderId == j.OrderId &&
+                f.Status == ProcessingJobStatus.Failed))
+            .ToListAsync(cancellationToken);
+
+        return queuedJobs
+            .OrderBy(j => j.OrderId)
+            .ThenBy(j => _workflowPolicy.GetProcessingPriority(j.JobType))
+            .ThenBy(j => j.CreatedAt)
+            .ThenBy(j => j.ProcessingJobId)
+            .GroupBy(j => j.OrderId)
+            .Select(g => g.First())
+            .Take(5)
+            .ToList();
     }
 
     private async Task ProcessJobAsync(
@@ -51,67 +69,19 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
     {
         try
         {
-            if (job.JobType == ProcessingJobType.PushToLogisticsProvider &&
-                !await _documentService.RequiredApprovalDocumentsExistAsync(job.OrderId, cancellationToken))
-            {
-                job.NextAttemptAt = DateTime.UtcNow.AddSeconds(15);
-                await _dbContext.SaveChangesAsync(cancellationToken);
-                return;
-            }
-
-            job.Status = ProcessingJobStatus.Processing;
-            job.StartedAt = DateTime.UtcNow;
-            job.AttemptCount++;
-            job.ErrorMessage = null;
+            await MoveOrderIntoProcessingAsync(job.OrderId, cancellationToken);
+            MarkJobAsProcessing(job);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            switch (job.JobType)
-            {
-                case ProcessingJobType.GenerateOrderSummaryDocument:
-                case ProcessingJobType.GenerateSdsBundle:
-                    await _documentService.GenerateForJobAsync(job, cancellationToken);
-                    break;
+            var handler = GetHandler(job.JobType);
 
-                case ProcessingJobType.CreateSubmissionNotification:
-                    await CreateNotificationAsync(job, "OrderSubmitted", cancellationToken);
-                    break;
+            await handler.HandleAsync(job, cancellationToken);
 
-                case ProcessingJobType.CreateApprovalNotification:
-                    await CreateNotificationAsync(job, "OrderApproved", cancellationToken);
-                    break;
+            MarkJobAsCompleted(job);
+            AuditJobCompleted(job);
 
-                case ProcessingJobType.PushToLogisticsProvider:
-                    await PushToLogisticsProviderAsync(job, cancellationToken);
-                    break;
-
-                case ProcessingJobType.ProcessLogisticsEvent:
-                    await ProcessLogisticsEventAsync(job, cancellationToken);
-                    break;
-
-                default:
-                    throw new InvalidOperationException($"Unknown job type '{job.JobType}'.");
-            }
-
-            job.Status = ProcessingJobStatus.Completed;
-            job.CompletedAt = DateTime.UtcNow;
-            job.FailedAt = null;
-            job.ErrorMessage = null;
-
-            _auditService.AddSystemAction(
-                "ProcessingJob",
-                job.ProcessingJobId,
-                "Completed",
-                null,
-                new
-                {
-                    Status = ProcessingJobStatus.Completed,
-                    job.JobType
-                },
-                $"Background job completed: {job.JobType}."
-            );
-
-            await ResumeFailedOrderAfterSuccessfulJobAsync(job, cancellationToken);
+            await ReactivateLaterCancelledJobsAsync(job, cancellationToken);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
@@ -121,31 +91,75 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
         }
     }
 
+    private IProcessingJobHandler GetHandler(string jobType)
+    {
+        if (_handlers.TryGetValue(jobType, out var handler))
+        {
+            return handler;
+        }
+
+        throw new InvalidOperationException($"Unknown job type '{jobType}'.");
+    }
+
+    private async Task MoveOrderIntoProcessingAsync(
+        int orderId,
+        CancellationToken cancellationToken)
+    {
+        var orderStatusId = await _dbContext.Orders
+            .Where(o => o.OrderId == orderId)
+            .Select(o => o.OrderStatusId)
+            .FirstAsync(cancellationToken);
+
+        if (orderStatusId is (int)OrderStatusEnum.Approved or (int)OrderStatusEnum.Failed)
+        {
+            await _orderStatusWorkflow.MoveToStatusAsync(
+                orderId,
+                OrderStatusEnum.InProcessing,
+                "Order moved to In Processing while background fulfilment work is being completed.",
+                cancellationToken);
+        }
+    }
+
+    private static void MarkJobAsProcessing(ProcessingJob job)
+    {
+        job.Status = ProcessingJobStatus.Processing;
+        job.StartedAt = DateTime.UtcNow;
+        job.AttemptCount++;
+        job.ErrorMessage = null;
+        job.NextAttemptAt = null;
+    }
+
+    private static void MarkJobAsCompleted(ProcessingJob job)
+    {
+        job.Status = ProcessingJobStatus.Completed;
+        job.CompletedAt = DateTime.UtcNow;
+        job.FailedAt = null;
+        job.ErrorMessage = null;
+    }
+
     private async Task HandleFailedJobAsync(
         ProcessingJob job,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        job.ErrorMessage = exception.Message;
+        var safeErrorMessage = GetSafeErrorMessage(job, exception);
 
-        if (job.AttemptCount >= job.MaxAttempts)
+        job.ErrorMessage = safeErrorMessage;
+
+        if (ShouldFailJob(job, exception))
         {
             job.Status = ProcessingJobStatus.Failed;
             job.FailedAt = DateTime.UtcNow;
             job.NextAttemptAt = null;
+            job.LastRetryAt = DateTime.UtcNow;
 
-            var order = await _dbContext.Orders
-                .FirstOrDefaultAsync(o => o.OrderId == job.OrderId, cancellationToken);
+            await _orderStatusWorkflow.MoveToStatusAsync(
+                job.OrderId,
+                OrderStatusEnum.Failed,
+                $"Background job failed: {job.JobType}. {safeErrorMessage}",
+                cancellationToken);
 
-            if (order != null)
-            {
-                order.FailureReason = $"Background job failed: {job.JobType}. {exception.Message}";
-
-                MoveOrderStatus(
-                    order,
-                    OrderStatusEnum.Failed,
-                    order.FailureReason);
-            }
+            await CancelLaterJobsAsync(job, safeErrorMessage, cancellationToken);
         }
         else
         {
@@ -154,21 +168,98 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             job.NextAttemptAt = DateTime.UtcNow.AddMinutes(1);
         }
 
-        _auditService.AddSystemAction(
-            "ProcessingJob",
-            job.ProcessingJobId,
-            job.Status == ProcessingJobStatus.Failed ? "Failed" : "RetryQueued",
-            new { Status = ProcessingJobStatus.Processing },
-            new
-            {
-                job.Status,
-                job.AttemptCount,
-                Error = exception.Message
-            },
-            $"Background job {job.JobType} failed: {exception.Message}"
-        );
+        AuditJobFailed(job, safeErrorMessage);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private bool ShouldFailJob(ProcessingJob job, Exception exception)
+    {
+        return _workflowPolicy.IsOperatorActionRequiredFailure(job, exception) ||
+            job.AttemptCount >= job.MaxAttempts;
+    }
+
+    private async Task CancelLaterJobsAsync(
+        ProcessingJob failedJob,
+        string failureReason,
+        CancellationToken cancellationToken)
+    {
+        var laterJobTypes = _workflowPolicy.GetLaterJobTypes(failedJob.JobType);
+
+        if (laterJobTypes.Count == 0)
+        {
+            return;
+        }
+
+        var laterJobs = await _dbContext.ProcessingJobs
+            .Where(j => j.OrderId == failedJob.OrderId)
+            .Where(j => j.ProcessingJobId != failedJob.ProcessingJobId)
+            .Where(j => laterJobTypes.Contains(j.JobType))
+            .Where(j => j.Status == ProcessingJobStatus.Queued ||
+                        j.Status == ProcessingJobStatus.Processing)
+            .ToListAsync(cancellationToken);
+
+        foreach (var laterJob in laterJobs)
+        {
+            var oldStatus = laterJob.Status;
+
+            laterJob.Status = ProcessingJobStatus.Cancelled;
+            laterJob.ErrorMessage = $"Cancelled because required job {failedJob.JobType} failed: {failureReason}";
+            laterJob.NextAttemptAt = null;
+
+            _auditService.AddSystemAction(
+                "ProcessingJob",
+                laterJob.ProcessingJobId,
+                "Cancelled",
+                new { Status = oldStatus },
+                new
+                {
+                    Status = ProcessingJobStatus.Cancelled,
+                    laterJob.JobType,
+                    BlockedByJobType = failedJob.JobType
+                },
+                $"Background job cancelled because required job {failedJob.JobType} failed.");
+        }
+    }
+
+    private async Task ReactivateLaterCancelledJobsAsync(
+        ProcessingJob completedJob,
+        CancellationToken cancellationToken)
+    {
+        var laterJobTypes = _workflowPolicy.GetLaterJobTypes(completedJob.JobType);
+
+        if (laterJobTypes.Count == 0)
+        {
+            return;
+        }
+
+        var laterJobs = await _dbContext.ProcessingJobs
+            .Where(j => j.OrderId == completedJob.OrderId)
+            .Where(j => laterJobTypes.Contains(j.JobType))
+            .Where(j => j.Status == ProcessingJobStatus.Cancelled)
+            .ToListAsync(cancellationToken);
+
+        foreach (var laterJob in laterJobs)
+        {
+            var oldStatus = laterJob.Status;
+
+            laterJob.Status = ProcessingJobStatus.Queued;
+            laterJob.ErrorMessage = null;
+            laterJob.NextAttemptAt = null;
+
+            _auditService.AddSystemAction(
+                "ProcessingJob",
+                laterJob.ProcessingJobId,
+                "Requeued",
+                new { Status = oldStatus },
+                new
+                {
+                    Status = ProcessingJobStatus.Queued,
+                    laterJob.JobType,
+                    ResumedAfterJobType = completedJob.JobType
+                },
+                $"Background job requeued after required job {completedJob.JobType} completed.");
+        }
     }
 
     private async Task MarkOrdersWithFailedJobsAsync(CancellationToken cancellationToken)
@@ -181,14 +272,15 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
 
         foreach (var job in failedJobs)
         {
-            var order = job.Order;
+            var safeErrorMessage = GetSafeStoredErrorMessage(job);
 
-            order.FailureReason = $"Background job failed: {job.JobType}. {job.ErrorMessage}";
-
-            MoveOrderStatus(
-                order,
+            await _orderStatusWorkflow.MoveToStatusAsync(
+                job.OrderId,
                 OrderStatusEnum.Failed,
-                order.FailureReason);
+                $"Background job failed: {job.JobType}. {safeErrorMessage}",
+                cancellationToken);
+
+            await CancelLaterJobsAsync(job, safeErrorMessage, cancellationToken);
         }
 
         if (failedJobs.Count > 0)
@@ -197,276 +289,82 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
         }
     }
 
-    private async Task EnsureApprovalWorkflowJobsAsync(
-        DateTime now,
-        CancellationToken cancellationToken)
+    private void AuditJobCompleted(ProcessingJob job)
     {
-        var maxAttempts = await _settingsService.GetIntAsync("BackgroundJobRetryLimit");
-        var activeStatuses = new[] { (int)OrderStatusEnum.Approved, (int)OrderStatusEnum.InProcessing };
-        var orders = await _dbContext.Orders
-            .Include(o => o.OrderItems)
-                .ThenInclude(i => i.Product)
-            .Where(o => activeStatuses.Contains(o.OrderStatusId))
-            .ToListAsync(cancellationToken);
-
-        foreach (var order in orders)
-        {
-            var missingDocumentTypes = await _documentService.GetMissingApprovalDocumentTypesAsync(order, cancellationToken);
-
-            foreach (var documentType in missingDocumentTypes)
-            {
-                var jobType = _documentService.GetGenerationJobType(documentType);
-
-                if (!await HasActiveOrCompletedJobAsync(order.OrderId, jobType, cancellationToken))
-                {
-                    _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, jobType, now, maxAttempts));
-                }
-            }
-
-            if (!await HasActiveOrCompletedJobAsync(order.OrderId, ProcessingJobType.PushToLogisticsProvider, cancellationToken))
-            {
-                _dbContext.ProcessingJobs.Add(CreateRecoveryJob(order.OrderId, ProcessingJobType.PushToLogisticsProvider, now, maxAttempts));
-            }
-        }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task<bool> HasActiveOrCompletedJobAsync(
-        int orderId,
-        string jobType,
-        CancellationToken cancellationToken)
-    {
-        return await _dbContext.ProcessingJobs.AnyAsync(j =>
-            j.OrderId == orderId &&
-            j.JobType == jobType &&
-            (j.Status == ProcessingJobStatus.Queued ||
-             j.Status == ProcessingJobStatus.Processing ||
-             j.Status == ProcessingJobStatus.Completed),
-            cancellationToken);
-    }
-
-    private static ProcessingJob CreateRecoveryJob(
-        int orderId,
-        string jobType,
-        DateTime now,
-        int maxAttempts)
-    {
-        return new ProcessingJob
-        {
-            OrderId = orderId,
-            JobType = jobType,
-            Status = ProcessingJobStatus.Queued,
-            AttemptCount = 0,
-            MaxAttempts = maxAttempts,
-            CreatedAt = now
-        };
-    }
-
-    private async Task CreateNotificationAsync(
-        ProcessingJob job,
-        string notificationType,
-        CancellationToken cancellationToken)
-    {
-        var order = await _dbContext.Orders
-            .Include(o => o.Customer)
-            .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);
-
-        var recipientEmail = $"purchasing{order.CustomerId}@simulated-customer.co.uk";
-
-        var notification = new Notification
-        {
-            OrderId = order.OrderId,
-            RecipientEmail = recipientEmail,
-            NotificationType = notificationType,
-            Subject = $"Confirmation for {order.OrderNumber}",
-            CreatedAt = DateTime.UtcNow,
-            SentAt = DateTime.UtcNow,
-            Status = "Sent"
-        };
-
-        _dbContext.Notifications.Add(notification);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
         _auditService.AddSystemAction(
-            "Notification",
-            notification.NotificationId,
-            "Sent",
+            "ProcessingJob",
+            job.ProcessingJobId,
+            "Completed",
             null,
             new
             {
-                notification.NotificationId,
-                order.OrderId,
-                NotificationType = notificationType,
-                RecipientEmail = recipientEmail
+                Status = ProcessingJobStatus.Completed,
+                job.JobType
             },
-            $"{notificationType} notification simulated by background job."
-        );
+            $"Background job completed: {job.JobType}.");
     }
 
-    private async Task ResumeFailedOrderAfterSuccessfulJobAsync(
-        ProcessingJob completedJob,
-        CancellationToken cancellationToken)
+    private void AuditJobFailed(ProcessingJob job, string safeErrorMessage)
     {
-        if (completedJob.JobType == ProcessingJobType.PushToLogisticsProvider)
-            return;
-
-        var order = await _dbContext.Orders
-            .Include(o => o.OrderItems)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(o => o.OrderId == completedJob.OrderId, cancellationToken);
-
-        if (order == null || order.OrderStatusId != (int)OrderStatusEnum.Failed)
-            return;
-
-        var hasOtherFailedJobs = await _dbContext.ProcessingJobs.AnyAsync(j =>
-            j.OrderId == completedJob.OrderId &&
-            j.ProcessingJobId != completedJob.ProcessingJobId &&
-            j.Status == ProcessingJobStatus.Failed,
-            cancellationToken);
-
-        if (hasOtherFailedJobs || !await _documentService.RequiredApprovalDocumentsExistAsync(order.OrderId, cancellationToken))
-            return;
-
-        if (await HasCompletedJobAsync(order.OrderId, ProcessingJobType.PushToLogisticsProvider, cancellationToken))
-        {
-            MoveOrderStatus(
-                order,
-                OrderStatusEnum.AwaitingDispatch,
-                "Order recovered to Awaiting Dispatch after failed background work was retried successfully.");
-
-            return;
-        }
-
-        if (!await HasActiveOrCompletedJobAsync(order.OrderId, ProcessingJobType.PushToLogisticsProvider, cancellationToken))
-        {
-            var maxAttempts = await _settingsService.GetIntAsync("BackgroundJobRetryLimit");
-            _dbContext.ProcessingJobs.Add(CreateRecoveryJob(
-                order.OrderId,
-                ProcessingJobType.PushToLogisticsProvider,
-                DateTime.UtcNow,
-                maxAttempts));
-        }
-
-        MoveOrderStatus(
-            order,
-            OrderStatusEnum.InProcessing,
-            "Order recovered to In Processing after failed background work was retried successfully.");
-    }
-
-    private async Task PushToLogisticsProviderAsync(
-        ProcessingJob job,
-        CancellationToken cancellationToken)
-    {
-        var order = await _dbContext.Orders
-            .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);
-
-        MoveOrderStatus(
-            order,
-            OrderStatusEnum.InProcessing,
-            "Order moved to In Processing while background fulfilment work is being completed.");
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
-
-        MoveOrderStatus(
-            order,
-            OrderStatusEnum.AwaitingDispatch,
-            "Order moved to Awaiting Dispatch after simulated logistics provider push.");
-    }
-
-    private async Task ProcessLogisticsEventAsync(
-        ProcessingJob job,
-        CancellationToken cancellationToken)
-    {
-        var order = await _dbContext.Orders
-            .FirstAsync(o => o.OrderId == job.OrderId, cancellationToken);
-
-        if (job.PayloadJson?.Contains("DELIVERED", StringComparison.OrdinalIgnoreCase) == true &&
-            order.OrderStatusId == (int)OrderStatusEnum.AwaitingDispatch)
-        {
-            MoveOrderStatus(
-                order,
-                OrderStatusEnum.Completed,
-                "Order completed after simulated delivered logistics event.");
-        }
-    }
-
-    private async Task<bool> HasCompletedJobAsync(
-        int orderId,
-        string jobType,
-        CancellationToken cancellationToken)
-    {
-        return await _dbContext.ProcessingJobs.AnyAsync(j =>
-            j.OrderId == orderId &&
-            j.JobType == jobType &&
-            j.Status == ProcessingJobStatus.Completed,
-            cancellationToken);
-    }
-
-    private void MoveOrderStatus(
-        Domain.Entities.Orders.Order order,
-        OrderStatusEnum toStatus,
-        string reason)
-    {
-        var oldStatusId = order.OrderStatusId;
-        var toStatusId = (int)toStatus;
-
-        if (oldStatusId == toStatusId)
-            return;
-
-        order.OrderStatusId = toStatusId;
-        order.UpdatedAt = DateTime.UtcNow;
-
-        AddStatusHistory(
-            order.OrderId,
-            oldStatusId,
-            toStatusId,
-            order.CreatedByUserId,
-            reason);
-
         _auditService.AddSystemAction(
-            "Order",
-            order.OrderId,
-            $"StatusChanged:{GetStatusName(toStatus)}",
-            new { StatusId = oldStatusId },
+            "ProcessingJob",
+            job.ProcessingJobId,
+            job.Status == ProcessingJobStatus.Failed ? "Failed" : "RetryQueued",
+            new { Status = ProcessingJobStatus.Processing },
             new
             {
-                StatusId = toStatusId,
-                Status = GetStatusName(toStatus)
+                job.Status,
+                job.AttemptCount,
+                Error = safeErrorMessage
             },
-            reason
-        );
+            $"Background job {job.JobType} failed: {safeErrorMessage}");
     }
 
-    private static string GetStatusName(OrderStatusEnum status)
+    private static string GetSafeErrorMessage(ProcessingJob job, Exception exception)
     {
-        return status switch
+        if (exception is OperatorActionRequiredException)
         {
-            OrderStatusEnum.InProcessing => "In Processing",
-            OrderStatusEnum.AwaitingDispatch => "Awaiting Dispatch",
-            OrderStatusEnum.Completed => "Completed",
-            OrderStatusEnum.Failed => "Failed",
-            _ => status.ToString()
-        };
+            return exception.Message;
+        }
+
+        if (job.JobType == ProcessingJobType.GenerateSdsBundle &&
+            exception is IOException or UnauthorizedAccessException)
+        {
+            return "SDS bundle generation failed because one or more product SDS PDF files could not be read. Regenerate the product SDS and retry the job.";
+        }
+
+        return GetSafeStoredErrorMessage(exception.Message);
     }
 
-    private void AddStatusHistory(
-        int orderId,
-        int fromStatusId,
-        int toStatusId,
-        int changedByUserId,
-        string? reason)
+    private static string GetSafeStoredErrorMessage(ProcessingJob job)
     {
-        _dbContext.OrderStatusHistories.Add(new Domain.Entities.Status.OrderStatusHistory
+        if (job.JobType == ProcessingJobType.GenerateSdsBundle &&
+            ContainsFilePath(job.ErrorMessage))
         {
-            OrderId = orderId,
-            FromStatusId = fromStatusId,
-            ToStatusId = toStatusId,
-            ChangedByUserId = changedByUserId,
-            ChangedAt = DateTime.UtcNow,
-            Reason = reason
-        });
+            return "SDS bundle generation failed because one or more product SDS PDF files could not be read. Regenerate the product SDS and retry the job.";
+        }
+
+        return GetSafeStoredErrorMessage(job.ErrorMessage);
+    }
+
+    private static string GetSafeStoredErrorMessage(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return "The background job failed.";
+        }
+
+        return ContainsFilePath(message)
+            ? "The background job failed because a required file could not be read."
+            : message;
+    }
+
+    private static bool ContainsFilePath(string? message)
+    {
+        return !string.IsNullOrWhiteSpace(message) &&
+            (message.Contains(@":\", StringComparison.OrdinalIgnoreCase) ||
+             message.Contains(@":/", StringComparison.OrdinalIgnoreCase) ||
+             message.Contains("/documents/", StringComparison.OrdinalIgnoreCase) ||
+             message.Contains("\\documents\\", StringComparison.OrdinalIgnoreCase));
     }
 }

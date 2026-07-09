@@ -1,9 +1,6 @@
-﻿public static class ProcessingJobType
+public static class ProcessingJobType
 {
     public const string GenerateOrderSummaryDocument = "GenerateOrderSummaryDocument";
     public const string GenerateSdsBundle = "GenerateSdsBundle";
     public const string PushToLogisticsProvider = "PushToLogisticsProvider";
-    public const string ProcessLogisticsEvent = "ProcessLogisticsEvent";
-    public const string CreateSubmissionNotification = "CreateSubmissionNotification";
-    public const string CreateApprovalNotification = "CreateApprovalNotification";
 }

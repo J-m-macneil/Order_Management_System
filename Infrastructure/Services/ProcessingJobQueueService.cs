@@ -18,57 +18,46 @@ public class ProcessingJobQueueService : IProcessingJobQueueService
         _settings = settings;
     }
 
-    public async Task QueueSubmissionJobsAsync(int orderId)
-    {
-        var maxAttempts = await _settings.GetIntAsync("BackgroundJobRetryLimit");
-
-        var jobs = new List<ProcessingJob>
-        {
-            CreateJob(orderId, ProcessingJobType.GenerateOrderSummaryDocument, maxAttempts),
-            CreateJob(orderId, ProcessingJobType.CreateSubmissionNotification, maxAttempts)
-        };
-
-        _context.ProcessingJobs.AddRange(jobs);
-        await _context.SaveChangesAsync();
-    }
-
     public async Task QueueApprovalJobsAsync(int orderId)
     {
         var maxAttempts = await _settings.GetIntAsync("BackgroundJobRetryLimit");
-        var requiresSdsBundle = await _context.Orders
-            .Where(o => o.OrderId == orderId)
-            .Select(o => o.OrderItems.Any(i =>
-                i.DeletedAt == null &&
-                i.Product.RequiresSds))
-            .FirstAsync();
+        var requiredJobTypes = await GetRequiredApprovalJobTypesAsync(orderId);
 
-        var jobs = new List<ProcessingJob>();
-
-        if (await ShouldQueueDocumentJobAsync(orderId, DocumentType.OrderSummary, ProcessingJobType.GenerateOrderSummaryDocument))
+        foreach (var jobType in requiredJobTypes)
         {
-            jobs.Add(CreateJob(orderId, ProcessingJobType.GenerateOrderSummaryDocument, maxAttempts));
+            if (await ShouldQueueJobAsync(orderId, jobType))
+            {
+                _context.ProcessingJobs.Add(CreateJob(orderId, jobType, maxAttempts));
+            }
         }
 
-        if (requiresSdsBundle &&
-            await ShouldQueueDocumentJobAsync(orderId, DocumentType.SafetyDataSheetBundle, ProcessingJobType.GenerateSdsBundle))
-        {
-            jobs.Add(CreateJob(orderId, ProcessingJobType.GenerateSdsBundle, maxAttempts));
-        }
-
-        jobs.Add(CreateJob(orderId, ProcessingJobType.PushToLogisticsProvider, maxAttempts));
-        jobs.Add(CreateJob(orderId, ProcessingJobType.CreateApprovalNotification, maxAttempts));
-
-        _context.ProcessingJobs.AddRange(jobs);
         await _context.SaveChangesAsync();
     }
 
-    private async Task<bool> ShouldQueueDocumentJobAsync(int orderId, string documentType, string jobType)
+    private async Task<List<string>> GetRequiredApprovalJobTypesAsync(int orderId)
     {
-        var documentExists = await _context.Documents.AnyAsync(d =>
-            d.OrderId == orderId &&
-            d.DocumentType == documentType);
+        var jobTypes = new List<string>
+        {
+            ProcessingJobType.GenerateOrderSummaryDocument
+        };
 
-        if (documentExists)
+        var requiresSdsBundle = await _context.OrderItems
+            .Where(i => i.OrderId == orderId && i.DeletedAt == null)
+            .AnyAsync(i => i.Product.RequiresSds);
+
+        if (requiresSdsBundle)
+        {
+            jobTypes.Add(ProcessingJobType.GenerateSdsBundle);
+        }
+
+        jobTypes.Add(ProcessingJobType.PushToLogisticsProvider);
+
+        return jobTypes;
+    }
+
+    private async Task<bool> ShouldQueueJobAsync(int orderId, string jobType)
+    {
+        if (await DocumentExistsForJobAsync(orderId, jobType))
         {
             return false;
         }
@@ -81,6 +70,21 @@ public class ProcessingJobQueueService : IProcessingJobQueueService
              j.Status == ProcessingJobStatus.Completed));
 
         return !jobExists;
+    }
+
+    private async Task<bool> DocumentExistsForJobAsync(int orderId, string jobType)
+    {
+        var documentType = jobType switch
+        {
+            ProcessingJobType.GenerateOrderSummaryDocument => DocumentType.OrderSummary,
+            ProcessingJobType.GenerateSdsBundle => DocumentType.SafetyDataSheetBundle,
+            _ => null
+        };
+
+        return documentType != null &&
+            await _context.Documents.AnyAsync(d =>
+                d.OrderId == orderId &&
+                d.DocumentType == documentType);
     }
 
     private static ProcessingJob CreateJob(int orderId, string jobType, int maxAttempts)

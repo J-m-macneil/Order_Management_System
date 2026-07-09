@@ -1,4 +1,5 @@
-﻿using Application.Features.ProcessingJobs.Commands.RetryProcessingJob;
+using Application.Features.ProcessingJobs.Commands.RetryProcessingJob;
+using Application.Features.ProcessingJobs.DTOs;
 using Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -27,25 +28,7 @@ public class ProcessingJobsController : ControllerBase
     public async Task<IActionResult> GetFailedJobs(CancellationToken ct)
     {
         var jobs = await _repo.GetFailedJobsAsync(ct);
-
-        var result = jobs.Select(j => new
-        {
-            j.ProcessingJobId,
-            j.OrderId,
-            OrderNumber = j.Order.OrderNumber,
-            j.JobType,
-            j.Status,
-            j.AttemptCount,
-            j.MaxAttempts,
-            j.ErrorMessage,
-            j.CreatedAt,
-            j.StartedAt,
-            j.CompletedAt,
-            j.FailedAt,
-            j.LastRetryAt,
-            j.NextAttemptAt,
-            j.PayloadJson
-        });
+        var result = jobs.Select(j => ProcessingJobDto.FromEntity(j, j.Order.OrderNumber));
 
         return Ok(result);
     }
@@ -54,24 +37,7 @@ public class ProcessingJobsController : ControllerBase
     public async Task<IActionResult> GetJobsForOrder(int orderId, CancellationToken ct)
     {
         var jobs = await _repo.GetByOrderIdAsync(orderId, ct);
-
-        var result = jobs.Select(j => new
-        {
-            j.ProcessingJobId,
-            j.OrderId,
-            j.JobType,
-            j.Status,
-            j.AttemptCount,
-            j.MaxAttempts,
-            j.ErrorMessage,
-            j.CreatedAt,
-            j.StartedAt,
-            j.CompletedAt,
-            j.FailedAt,
-            j.LastRetryAt,
-            j.NextAttemptAt,
-            j.PayloadJson
-        });
+        var result = jobs.Select(j => ProcessingJobDto.FromEntity(j));
 
         return Ok(result);
     }

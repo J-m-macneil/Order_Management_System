@@ -10,6 +10,7 @@ using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
+using Infrastructure.Services.ProcessingJobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -78,11 +79,18 @@ public static class Program
         builder.Services.AddScoped<IPricingService, PricingService>();
         builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
         builder.Services.AddScoped<IAuditService, AuditService>();
+        builder.Services.AddScoped<INotificationService, NotificationService>();
+        builder.Services.AddScoped<IOrderStatusWorkflowService, OrderStatusWorkflowService>();
 
         builder.Services.AddScoped<IProcessingJobQueueService, ProcessingJobQueueService>();
         builder.Services.AddScoped<IProcessingJobProcessor, ProcessingJobProcessor>();
+        builder.Services.AddScoped<IProcessingJobHandler, GenerateOrderSummaryJobHandler>();
+        builder.Services.AddScoped<IProcessingJobHandler, GenerateSdsBundleJobHandler>();
+        builder.Services.AddScoped<IProcessingJobHandler, PushToLogisticsProviderJobHandler>();
+        builder.Services.AddSingleton<IProcessingJobWorkflowPolicy, ProcessingJobWorkflowPolicy>();
         builder.Services.AddScoped<IOrderDocumentGenerator, OrderDocumentGenerator>();
         builder.Services.AddScoped<IOrderDocumentService, OrderDocumentService>();
+        builder.Services.AddScoped<ISafetyDataSheetDocumentGenerator, SafetyDataSheetDocumentGenerator>();
 
         // Background jobs
         builder.Services.AddHostedService<JobProcessingService>();

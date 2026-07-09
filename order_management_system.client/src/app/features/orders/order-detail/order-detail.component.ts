@@ -169,6 +169,10 @@ export class OrderDetailComponent implements OnInit {
     return this.order?.items.filter(item => item.isRestricted) ?? [];
   }
 
+  get requiresSdsBundle(): boolean {
+    return this.order?.items.some(item => item.requiresSds) ?? false;
+  }
+
   private executeDiscardDraft(): void {
     if (!this.order || this.isDiscardingDraft) {
       return;
