@@ -17,7 +17,7 @@ public class ProcessingJobRepository : IProcessingJobRepository
     {
         return await _db.ProcessingJobs
             .Include(j => j.Order)
-            .Where(j => j.Status == "Failed")
+            .Where(j => j.Status == ProcessingJobStatus.Failed)
             .OrderByDescending(j => j.FailedAt ?? j.CreatedAt)
             .AsNoTracking()
             .ToListAsync(ct);

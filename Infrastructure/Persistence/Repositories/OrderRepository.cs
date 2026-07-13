@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Entities.Orders;
 using Domain.Entities.Status;
+using Domain.Enums;
 using Domain.Repositories;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -165,11 +166,11 @@ public class OrderRepository : IOrderRepository
                 (o.PurchaseOrderReference != null && o.PurchaseOrderReference.Contains(term)));
         }
 
-        if (orderStatusId == 8)
+        if (orderStatusId == (int)OrderStatusEnum.Failed)
         {
             query = query.Where(o =>
-                o.OrderStatusId == 8 ||
-                o.ProcessingJobs.Any(j => j.Status == "Failed"));
+                o.OrderStatusId == (int)OrderStatusEnum.Failed ||
+                o.ProcessingJobs.Any(j => j.Status == ProcessingJobStatus.Failed));
         }
         else if (orderStatusId.HasValue)
         {

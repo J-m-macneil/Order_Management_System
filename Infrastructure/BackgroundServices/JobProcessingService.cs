@@ -7,6 +7,8 @@ namespace Infrastructure.BackgroundServices;
 
 public class JobProcessingService : BackgroundService
 {
+    private static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(10);
+
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<JobProcessingService> _logger;
 
@@ -40,7 +42,7 @@ public class JobProcessingService : BackgroundService
                 _logger.LogError(ex, "Unexpected error while processing background jobs.");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(PollingInterval, stoppingToken);
         }
     }
 }

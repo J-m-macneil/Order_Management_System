@@ -8,6 +8,9 @@ namespace Infrastructure.Services;
 
 public class ProcessingJobProcessor : IProcessingJobProcessor
 {
+    private const int BatchSize = 5;
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromMinutes(1);
+
     private readonly AppDbContext _dbContext;
     private readonly IReadOnlyDictionary<string, IProcessingJobHandler> _handlers;
     private readonly IAuditService _auditService;
@@ -59,7 +62,7 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             .ThenBy(j => j.ProcessingJobId)
             .GroupBy(j => j.OrderId)
             .Select(g => g.First())
-            .Take(5)
+            .Take(BatchSize)
             .ToList();
     }
 
@@ -80,8 +83,6 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
 
             MarkJobAsCompleted(job);
             AuditJobCompleted(job);
-
-            await ReactivateLaterCancelledJobsAsync(job, cancellationToken);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
@@ -142,9 +143,9 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var safeErrorMessage = GetSafeErrorMessage(job, exception);
+        var failureMessage = GetFailureMessage(exception);
 
-        job.ErrorMessage = safeErrorMessage;
+        job.ErrorMessage = failureMessage;
 
         if (ShouldFailJob(job, exception))
         {
@@ -156,19 +157,17 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             await _orderStatusWorkflow.MoveToStatusAsync(
                 job.OrderId,
                 OrderStatusEnum.Failed,
-                $"Background job failed: {job.JobType}. {safeErrorMessage}",
+                $"Background job failed: {job.JobType}. {failureMessage}",
                 cancellationToken);
-
-            await CancelLaterJobsAsync(job, safeErrorMessage, cancellationToken);
         }
         else
         {
             job.Status = ProcessingJobStatus.Queued;
             job.LastRetryAt = DateTime.UtcNow;
-            job.NextAttemptAt = DateTime.UtcNow.AddMinutes(1);
+            job.NextAttemptAt = DateTime.UtcNow.Add(RetryDelay);
         }
 
-        AuditJobFailed(job, safeErrorMessage);
+        AuditJobFailed(job, failureMessage);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
@@ -177,89 +176,6 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
     {
         return _workflowPolicy.IsOperatorActionRequiredFailure(job, exception) ||
             job.AttemptCount >= job.MaxAttempts;
-    }
-
-    private async Task CancelLaterJobsAsync(
-        ProcessingJob failedJob,
-        string failureReason,
-        CancellationToken cancellationToken)
-    {
-        var laterJobTypes = _workflowPolicy.GetLaterJobTypes(failedJob.JobType);
-
-        if (laterJobTypes.Count == 0)
-        {
-            return;
-        }
-
-        var laterJobs = await _dbContext.ProcessingJobs
-            .Where(j => j.OrderId == failedJob.OrderId)
-            .Where(j => j.ProcessingJobId != failedJob.ProcessingJobId)
-            .Where(j => laterJobTypes.Contains(j.JobType))
-            .Where(j => j.Status == ProcessingJobStatus.Queued ||
-                        j.Status == ProcessingJobStatus.Processing)
-            .ToListAsync(cancellationToken);
-
-        foreach (var laterJob in laterJobs)
-        {
-            var oldStatus = laterJob.Status;
-
-            laterJob.Status = ProcessingJobStatus.Cancelled;
-            laterJob.ErrorMessage = $"Cancelled because required job {failedJob.JobType} failed: {failureReason}";
-            laterJob.NextAttemptAt = null;
-
-            _auditService.AddSystemAction(
-                "ProcessingJob",
-                laterJob.ProcessingJobId,
-                "Cancelled",
-                new { Status = oldStatus },
-                new
-                {
-                    Status = ProcessingJobStatus.Cancelled,
-                    laterJob.JobType,
-                    BlockedByJobType = failedJob.JobType
-                },
-                $"Background job cancelled because required job {failedJob.JobType} failed.");
-        }
-    }
-
-    private async Task ReactivateLaterCancelledJobsAsync(
-        ProcessingJob completedJob,
-        CancellationToken cancellationToken)
-    {
-        var laterJobTypes = _workflowPolicy.GetLaterJobTypes(completedJob.JobType);
-
-        if (laterJobTypes.Count == 0)
-        {
-            return;
-        }
-
-        var laterJobs = await _dbContext.ProcessingJobs
-            .Where(j => j.OrderId == completedJob.OrderId)
-            .Where(j => laterJobTypes.Contains(j.JobType))
-            .Where(j => j.Status == ProcessingJobStatus.Cancelled)
-            .ToListAsync(cancellationToken);
-
-        foreach (var laterJob in laterJobs)
-        {
-            var oldStatus = laterJob.Status;
-
-            laterJob.Status = ProcessingJobStatus.Queued;
-            laterJob.ErrorMessage = null;
-            laterJob.NextAttemptAt = null;
-
-            _auditService.AddSystemAction(
-                "ProcessingJob",
-                laterJob.ProcessingJobId,
-                "Requeued",
-                new { Status = oldStatus },
-                new
-                {
-                    Status = ProcessingJobStatus.Queued,
-                    laterJob.JobType,
-                    ResumedAfterJobType = completedJob.JobType
-                },
-                $"Background job requeued after required job {completedJob.JobType} completed.");
-        }
     }
 
     private async Task MarkOrdersWithFailedJobsAsync(CancellationToken cancellationToken)
@@ -272,15 +188,13 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
 
         foreach (var job in failedJobs)
         {
-            var safeErrorMessage = GetSafeStoredErrorMessage(job);
+            var failureMessage = GetStoredFailureMessage(job);
 
             await _orderStatusWorkflow.MoveToStatusAsync(
                 job.OrderId,
                 OrderStatusEnum.Failed,
-                $"Background job failed: {job.JobType}. {safeErrorMessage}",
+                $"Background job failed: {job.JobType}. {failureMessage}",
                 cancellationToken);
-
-            await CancelLaterJobsAsync(job, safeErrorMessage, cancellationToken);
         }
 
         if (failedJobs.Count > 0)
@@ -304,7 +218,7 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             $"Background job completed: {job.JobType}.");
     }
 
-    private void AuditJobFailed(ProcessingJob job, string safeErrorMessage)
+    private void AuditJobFailed(ProcessingJob job, string failureMessage)
     {
         _auditService.AddSystemAction(
             "ProcessingJob",
@@ -315,56 +229,25 @@ public class ProcessingJobProcessor : IProcessingJobProcessor
             {
                 job.Status,
                 job.AttemptCount,
-                Error = safeErrorMessage
+                Error = failureMessage
             },
-            $"Background job {job.JobType} failed: {safeErrorMessage}");
+            $"Background job {job.JobType} failed: {failureMessage}");
     }
 
-    private static string GetSafeErrorMessage(ProcessingJob job, Exception exception)
+    private static string GetFailureMessage(Exception exception)
     {
         if (exception is OperatorActionRequiredException)
         {
             return exception.Message;
         }
 
-        if (job.JobType == ProcessingJobType.GenerateSdsBundle &&
-            exception is IOException or UnauthorizedAccessException)
-        {
-            return "SDS bundle generation failed because one or more product SDS PDF files could not be read. Regenerate the product SDS and retry the job.";
-        }
-
-        return GetSafeStoredErrorMessage(exception.Message);
+        return "The background job failed. Check the system logs for technical details and retry if appropriate.";
     }
 
-    private static string GetSafeStoredErrorMessage(ProcessingJob job)
+    private static string GetStoredFailureMessage(ProcessingJob job)
     {
-        if (job.JobType == ProcessingJobType.GenerateSdsBundle &&
-            ContainsFilePath(job.ErrorMessage))
-        {
-            return "SDS bundle generation failed because one or more product SDS PDF files could not be read. Regenerate the product SDS and retry the job.";
-        }
-
-        return GetSafeStoredErrorMessage(job.ErrorMessage);
-    }
-
-    private static string GetSafeStoredErrorMessage(string? message)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            return "The background job failed.";
-        }
-
-        return ContainsFilePath(message)
-            ? "The background job failed because a required file could not be read."
-            : message;
-    }
-
-    private static bool ContainsFilePath(string? message)
-    {
-        return !string.IsNullOrWhiteSpace(message) &&
-            (message.Contains(@":\", StringComparison.OrdinalIgnoreCase) ||
-             message.Contains(@":/", StringComparison.OrdinalIgnoreCase) ||
-             message.Contains("/documents/", StringComparison.OrdinalIgnoreCase) ||
-             message.Contains("\\documents\\", StringComparison.OrdinalIgnoreCase));
+        return string.IsNullOrWhiteSpace(job.ErrorMessage)
+            ? "The background job failed."
+            : job.ErrorMessage;
     }
 }
