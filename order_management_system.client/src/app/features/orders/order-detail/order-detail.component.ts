@@ -5,6 +5,7 @@ import { Order } from '../../../core/models/order.model';
 import { AllowedStatus } from '../../../core/models/allowed-status.model';
 import { OrderStatus } from '../../../core/models/order-status.enum';
 import { OrderStatusHistory } from '../../../core/models/order-status-history.model';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
 import {
   ConfirmationModalState,
   ConfirmationModalVariant,
@@ -150,7 +151,7 @@ export class OrderDetailComponent implements OnInit {
       },
       error: (err) => {
         this.errorMessage =
-          err.error?.message || 'Failed to change order status.';
+          getApiErrorMessage(err, 'Failed to change order status.');
         this.isChangingStatus = false;
         this.cdr.detectChanges();
       }
@@ -187,7 +188,7 @@ export class OrderDetailComponent implements OnInit {
         this.router.navigate(['/orders']);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to discard draft order.';
+        this.errorMessage = getApiErrorMessage(err, 'Failed to discard draft order.');
         this.isDiscardingDraft = false;
         this.cdr.detectChanges();
       }

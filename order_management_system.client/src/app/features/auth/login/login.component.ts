@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
   selector: 'app-login',
@@ -47,7 +48,7 @@ export class LoginComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.errorMessage = err?.error?.message || 'Invalid username/email or password.';
+        this.errorMessage = getApiErrorMessage(err, 'Invalid username/email or password.');
       }
     });
   }

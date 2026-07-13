@@ -15,6 +15,7 @@ import { OrderStatus } from '../../../core/models/order-status.enum';
 import { Warehouse } from '../../../core/models/warehouse-model';
 import { Carrier } from '../../../core/models/carrier.model';
 import { Project } from '../../../core/models/project.model';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
   selector: 'app-order-create',
@@ -371,7 +372,7 @@ export class OrderCreateComponent implements OnInit {
           this.router.navigate(['/orders', this.orderId]);
         },
         error: (err) => {
-          this.errorMessage = err.error?.message || 'Failed to update order.';
+          this.errorMessage = getApiErrorMessage(err, 'Failed to update order.');
           this.cdr.detectChanges();
         }
       });
@@ -380,11 +381,11 @@ export class OrderCreateComponent implements OnInit {
     }
 
     this.ordersService.createOrder(dto).subscribe({
-      next: (orderId) => {
-        this.router.navigate(['/orders', orderId]);
+      next: (result) => {
+        this.router.navigate(['/orders', result.orderId]);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to create order.';
+        this.errorMessage = getApiErrorMessage(err, 'Failed to create order.');
         this.cdr.detectChanges();
       }
     });

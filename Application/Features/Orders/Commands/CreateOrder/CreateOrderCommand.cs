@@ -2,7 +2,7 @@
 
 namespace Application.Features.Orders.Commands.CreateOrder;
 
-public class CreateOrderCommand : IRequest<int>
+public class CreateOrderCommand : IRequest<CreateOrderResponse>
 {
     public int CustomerId { get; set; }
     public int DeliveryAddressId { get; set; }

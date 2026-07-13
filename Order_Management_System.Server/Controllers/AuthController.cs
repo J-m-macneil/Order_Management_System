@@ -28,7 +28,12 @@ public class AuthController : ControllerBase
 
         if (result is null)
         {
-            return Unauthorized(new { message = "Invalid username/email or password." });
+            return Unauthorized(new ProblemDetails
+            {
+                Title = "Unauthorized",
+                Status = StatusCodes.Status401Unauthorized,
+                Detail = "Invalid username/email or password."
+            });
         }
 
         Response.Cookies.Append(AuthCookieName, result.Token, new CookieOptions

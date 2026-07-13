@@ -4,7 +4,7 @@ using Domain.Entities.Orders;
 using Domain.Repositories;
 using MediatR;
 
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, CreateOrderResponse>
 {
     private readonly IOrderRepository _orders;
     private readonly IAuditService _audit;
@@ -17,7 +17,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         _audit = audit;
     }
 
-    public async Task<int> Handle(CreateOrderCommand dto, CancellationToken ct)
+    public async Task<CreateOrderResponse> Handle(CreateOrderCommand dto, CancellationToken ct)
     {
         var order = new Order
         {
@@ -81,6 +81,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
             $"Order created: {order.OrderNumber}.",
             ct);
 
-        return order.OrderId;
+        return new CreateOrderResponse
+        {
+            OrderId = order.OrderId
+        };
     }
 }

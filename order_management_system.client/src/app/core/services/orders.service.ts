@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreateOrder } from '../models/create-order.model';
+import { CreateOrderResponse } from '../models/create-order-response.model';
 import { Order } from '../models/order.model';
 import { AllowedStatus } from '../models/allowed-status.model';
 import { ChangeOrderStatusRequest } from '../models/change-order-status-request.model';
@@ -70,8 +71,8 @@ export class OrdersService {
     return this.http.get<PagedResult<Order>>(this.baseUrl, { params });
   }
 
-  createOrder(order: CreateOrder): Observable<number> {
-    return this.http.post<number>(this.baseUrl, order);
+  createOrder(order: CreateOrder): Observable<CreateOrderResponse> {
+    return this.http.post<CreateOrderResponse>(this.baseUrl, order);
   }
 
   updateOrder(orderId: number, order: CreateOrder): Observable<void> {

@@ -3,6 +3,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { OrderStatus } from '../../core/models/order-status.enum';
 import { ProcessingJob } from '../../core/models/processing-job.model';
 import { ProcessingJobsService } from '../../core/services/processing-jobs.service';
+import { getApiErrorMessage } from '../../core/utils/api-error-message';
 
 type ProcessingJobDisplay = Partial<ProcessingJob> & {
   jobType: string;
@@ -105,7 +106,7 @@ export class ProcessingJobsPanelComponent implements OnChanges {
       },
       error: (err) => {
         this.errorMessage =
-          err.error?.message || err.error || 'Failed to retry processing job.';
+          getApiErrorMessage(err, 'Failed to retry processing job.');
         this.isRetryingJobId = null;
         this.cdr.detectChanges();
       }

@@ -11,6 +11,7 @@ import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuditLogsService } from '../../../core/services/audit-logs.service';
 import { ProductsService } from '../../../core/services/products.service';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
   selector: 'app-product-form',
@@ -187,7 +188,7 @@ export class ProductFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to generate SDS', err);
-        this.errorMessage = err?.error?.message || err?.error?.error || 'Failed to generate SDS.';
+        this.errorMessage = getApiErrorMessage(err, 'Failed to generate SDS.');
         this.isGeneratingSds = false;
         this.cdr.detectChanges();
       }

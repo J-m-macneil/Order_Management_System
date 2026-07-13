@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text.Json;
 
@@ -30,12 +31,14 @@ public class ExceptionMiddleware
                 _logger.LogError(ex, "Unhandled exception");
             }
 
-            context.Response.ContentType = "application/json";
             context.Response.StatusCode = GetStatusCode(ex);
+            context.Response.ContentType = "application/problem+json";
 
-            var response = new
+            var response = new ProblemDetails
             {
-                message = GetMessage(ex)
+                Title = GetTitle(context.Response.StatusCode),
+                Status = context.Response.StatusCode,
+                Detail = GetMessage(ex)
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
@@ -65,6 +68,19 @@ public class ExceptionMiddleware
                 or NotFoundException
                 or UnauthorizedException => exception.Message,
             _ => "An unexpected error occurred."
+        };
+    }
+
+    private static string GetTitle(int statusCode)
+    {
+        return statusCode switch
+        {
+            StatusCodes.Status400BadRequest => "Bad Request",
+            StatusCodes.Status401Unauthorized => "Unauthorized",
+            StatusCodes.Status403Forbidden => "Forbidden",
+            StatusCodes.Status404NotFound => "Not Found",
+            StatusCodes.Status409Conflict => "Conflict",
+            _ => "Internal Server Error"
         };
     }
 }

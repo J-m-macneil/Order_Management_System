@@ -26,8 +26,8 @@ public class OrdersController : ControllerBase
     [Authorize(Policy = "SalesOrAdmin")]
     public async Task<IActionResult> Create(CreateOrderCommand command)
     {
-        var orderId = await _mediator.Send(command);
-        return Ok(orderId);
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 
     [HttpPut("{id}")]

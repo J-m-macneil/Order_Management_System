@@ -5,6 +5,7 @@ import { SystemSetting } from '../../core/models/system-setting.model';
 import { Department, Role, User, UserSaveRequest } from '../../core/models/user-management.model';
 import { SystemSettingsService } from '../../core/services/system-settings.service';
 import { UsersService } from '../../core/services/users.service';
+import { ApiErrorResponse, getApiErrorMessage } from '../../core/utils/api-error-message';
 
 @Component({
   selector: 'app-admin',
@@ -249,7 +250,7 @@ export class AdminComponent implements OnInit {
     if (this.selectedUser) {
       this.usersService.update(this.selectedUser.userId, request).subscribe({
         next: () => this.onSaveSuccess(),
-        error: (err: { error?: { message?: string } }) => this.onSaveError(err)
+        error: (err: ApiErrorResponse) => this.onSaveError(err)
       });
       return;
     }
@@ -258,7 +259,7 @@ export class AdminComponent implements OnInit {
       next: () => {
         this.onSaveSuccess();
       },
-      error: (err: { error?: { message?: string } }) => this.onSaveError(err)
+      error: (err: ApiErrorResponse) => this.onSaveError(err)
     });
   }
 
@@ -283,10 +284,10 @@ export class AdminComponent implements OnInit {
         this.settingsMessage = `${this.formatSettingName(setting.settingKey)} updated.`;
         this.loadSystemSettings();
       },
-      error: (err: { error?: { message?: string } }) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to update system setting', err);
         this.savingSettingIds.delete(setting.systemSettingId);
-        this.errorMessage = err?.error?.message ?? 'Failed to update system setting.';
+        this.errorMessage = getApiErrorMessage(err, 'Failed to update system setting.');
         this.cdr.detectChanges();
       }
     });
@@ -405,9 +406,9 @@ export class AdminComponent implements OnInit {
     this.loadUsers();
   }
 
-  private onSaveError(err: { error?: { message?: string } }): void {
+  private onSaveError(err: ApiErrorResponse): void {
     console.error('Failed to save user', err);
-    this.errorMessage = err?.error?.message ?? 'Failed to save user.';
+    this.errorMessage = getApiErrorMessage(err, 'Failed to save user.');
     this.isSaving = false;
     this.cdr.detectChanges();
   }

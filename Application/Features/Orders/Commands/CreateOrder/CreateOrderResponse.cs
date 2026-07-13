@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Application.Features.Orders.Commands.CreateOrder;
 
-namespace Application.Features.Orders.Commands.CreateOrder
+public class CreateOrderResponse
 {
-    internal class CreateOrderResponse
-    {
-    }
+    public int OrderId { get; set; }
 }
