@@ -28,19 +28,12 @@ public class SystemSettingsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateSystemSettingCommand command, CancellationToken ct)
     {
-        try
+        await _mediator.Send(new UpdateSystemSettingRequest
         {
-            await _mediator.Send(new UpdateSystemSettingRequest
-            {
-                SystemSettingId = id,
-                Data = command
-            }, ct);
+            SystemSettingId = id,
+            Data = command
+        }, ct);
 
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        return NoContent();
     }
 }

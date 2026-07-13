@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Interfaces;
 using Domain.Entities.Identity;
 using Domain.Repositories;
@@ -30,7 +31,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
 
         if (user is null)
         {
-            throw new InvalidOperationException("User not found.");
+            throw new NotFoundException("User", request.UserId);
         }
 
         var username = dto.Username.Trim();
@@ -38,12 +39,12 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
 
         if (await _repo.UsernameExistsAsync(username, user.UserId, ct))
         {
-            throw new InvalidOperationException("Username is already in use.");
+            throw new ConflictException("Username is already in use.");
         }
 
         if (await _repo.EmailExistsAsync(email, user.UserId, ct))
         {
-            throw new InvalidOperationException("Email is already in use.");
+            throw new ConflictException("Email is already in use.");
         }
 
         await ValidateReferences(dto.RoleId, dto.DepartmentId, ct);
@@ -85,12 +86,12 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
     {
         if (!await _repo.RoleExistsAsync(roleId, ct))
         {
-            throw new InvalidOperationException("Selected role does not exist.");
+            throw new BadRequestException("Selected role does not exist.");
         }
 
         if (!await _repo.DepartmentExistsAsync(departmentId, ct))
         {
-            throw new InvalidOperationException("Selected department does not exist.");
+            throw new BadRequestException("Selected department does not exist.");
         }
     }
 
@@ -101,7 +102,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
             string.IsNullOrWhiteSpace(request.Email) ||
             string.IsNullOrWhiteSpace(request.Username))
         {
-            throw new InvalidOperationException("First name, last name, email and username are required.");
+            throw new BadRequestException("First name, last name, email and username are required.");
         }
     }
 

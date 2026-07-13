@@ -53,33 +53,19 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateUserCommand command, CancellationToken ct)
     {
-        try
-        {
-            var result = await _mediator.Send(command, ct);
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _mediator.Send(command, ct);
+        return Ok(result);
     }
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateUserCommand command, CancellationToken ct)
     {
-        try
+        await _mediator.Send(new UpdateUserRequest
         {
-            await _mediator.Send(new UpdateUserRequest
-            {
-                UserId = id,
-                Data = command
-            }, ct);
+            UserId = id,
+            Data = command
+        }, ct);
 
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        return NoContent();
     }
 }

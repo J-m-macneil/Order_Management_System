@@ -187,7 +187,7 @@ export class ProductFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to generate SDS', err);
-        this.errorMessage = err?.error?.error || 'Failed to generate SDS.';
+        this.errorMessage = err?.error?.message || err?.error?.error || 'Failed to generate SDS.';
         this.isGeneratingSds = false;
         this.cdr.detectChanges();
       }

@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Interfaces;
 using Domain.Entities.SystemSettings;
 using Domain.Repositories;
@@ -24,7 +25,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
 
         if (setting is null)
         {
-            throw new InvalidOperationException("System setting not found.");
+            throw new NotFoundException("System setting", request.SystemSettingId);
         }
 
         var newValue = NormalizeAndValidate(request.Data.SettingValue, setting.DataType, setting.SettingKey);
@@ -53,7 +54,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new InvalidOperationException($"{settingKey} requires a value.");
+            throw new BadRequestException($"{settingKey} requires a value.");
         }
 
         var normalized = value.Trim();
@@ -63,7 +64,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
             case "boolean":
                 if (!bool.TryParse(normalized, out var boolValue))
                 {
-                    throw new InvalidOperationException($"{settingKey} must be true or false.");
+                    throw new BadRequestException($"{settingKey} must be true or false.");
                 }
 
                 return boolValue.ToString().ToLowerInvariant();
@@ -71,7 +72,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
             case "integer":
                 if (!int.TryParse(normalized, out var intValue))
                 {
-                    throw new InvalidOperationException($"{settingKey} must be a whole number.");
+                    throw new BadRequestException($"{settingKey} must be a whole number.");
                 }
 
                 return intValue.ToString();
@@ -79,7 +80,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
             case "decimal":
                 if (!decimal.TryParse(normalized, out var decimalValue))
                 {
-                    throw new InvalidOperationException($"{settingKey} must be a decimal number.");
+                    throw new BadRequestException($"{settingKey} must be a decimal number.");
                 }
 
                 return decimalValue.ToString("0.##");
@@ -88,7 +89,7 @@ public class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSet
                 return normalized;
 
             default:
-                throw new InvalidOperationException($"{settingKey} has an unsupported data type.");
+                throw new BadRequestException($"{settingKey} has an unsupported data type.");
         }
     }
 

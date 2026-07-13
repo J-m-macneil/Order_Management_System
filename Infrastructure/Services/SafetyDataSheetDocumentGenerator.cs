@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Features.Products.DTOs;
 using Application.Interfaces;
@@ -45,11 +46,11 @@ public class SafetyDataSheetDocumentGenerator : ISafetyDataSheetDocumentGenerato
             .Include(p => p.HazardClass)
             .Include(p => p.SafetyDataSheets)
             .FirstOrDefaultAsync(p => p.ProductId == productId && p.DeletedAt == null, cancellationToken)
-            ?? throw new InvalidOperationException("Product was not found.");
+            ?? throw new NotFoundException("Product", productId);
 
         if (!product.RequiresSds)
         {
-            throw new InvalidOperationException("This product does not require an SDS.");
+            throw new BadRequestException("This product does not require an SDS.");
         }
 
         foreach (var activeSds in product.SafetyDataSheets.Where(s => s.IsActive && s.DeletedAt == null))

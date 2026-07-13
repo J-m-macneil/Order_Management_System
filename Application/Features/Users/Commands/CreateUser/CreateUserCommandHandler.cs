@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Features.Users.DTOs;
 using Application.Interfaces;
 using Domain.Entities.Identity;
@@ -31,12 +32,12 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
 
         if (await _repo.UsernameExistsAsync(username, null, ct))
         {
-            throw new InvalidOperationException("Username is already in use.");
+            throw new ConflictException("Username is already in use.");
         }
 
         if (await _repo.EmailExistsAsync(email, null, ct))
         {
-            throw new InvalidOperationException("Email is already in use.");
+            throw new ConflictException("Email is already in use.");
         }
 
         await ValidateReferences(request.RoleId, request.DepartmentId, ct);
@@ -90,12 +91,12 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
     {
         if (!await _repo.RoleExistsAsync(roleId, ct))
         {
-            throw new InvalidOperationException("Selected role does not exist.");
+            throw new BadRequestException("Selected role does not exist.");
         }
 
         if (!await _repo.DepartmentExistsAsync(departmentId, ct))
         {
-            throw new InvalidOperationException("Selected department does not exist.");
+            throw new BadRequestException("Selected department does not exist.");
         }
     }
 
@@ -107,7 +108,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
             string.IsNullOrWhiteSpace(request.Username) ||
             string.IsNullOrWhiteSpace(request.Password))
         {
-            throw new InvalidOperationException("First name, last name, email, username and password are required.");
+            throw new BadRequestException("First name, last name, email, username and password are required.");
         }
     }
 

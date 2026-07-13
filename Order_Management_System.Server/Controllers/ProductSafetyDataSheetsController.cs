@@ -69,16 +69,9 @@ public class ProductSafetyDataSheetsController : ControllerBase
             return Unauthorized();
         }
 
-        try
-        {
-            var result = await _sdsDocumentGenerator.GenerateAsync(productId, userId, cancellationToken);
+        var result = await _sdsDocumentGenerator.GenerateAsync(productId, userId, cancellationToken);
 
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        return Ok(result);
     }
 
     [HttpGet("{sdsId}/view")]
