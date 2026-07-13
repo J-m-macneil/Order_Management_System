@@ -1,11 +1,10 @@
-using Application.Common.Interfaces;
 using Application.Features.Products.Commands.CreateSafetyDataSheet;
 using Application.Features.Products.Commands.DeleteSafetyDataSheet;
+using Application.Features.Products.Commands.GenerateSafetyDataSheet;
 using Application.Features.Products.Commands.UpdateSafetyDataSheet;
 using Application.Features.Products.DTOs;
+using Application.Features.Products.Queries.GetSafetyDataSheetFile;
 using Application.Features.Products.Queries.GetSafetyDataSheets;
-using Application.Interfaces;
-using Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,23 +17,10 @@ namespace Server.Controllers;
 public class ProductSafetyDataSheetsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly ISafetyDataSheetRepository _sdsRepository;
-    private readonly ISafetyDataSheetDocumentGenerator _sdsDocumentGenerator;
-    private readonly ICurrentUserService _currentUser;
-    private readonly IFileStorageService _fileStorage;
 
-    public ProductSafetyDataSheetsController(
-        IMediator mediator,
-        ISafetyDataSheetRepository sdsRepository,
-        ISafetyDataSheetDocumentGenerator sdsDocumentGenerator,
-        ICurrentUserService currentUser,
-        IFileStorageService fileStorage)
+    public ProductSafetyDataSheetsController(IMediator mediator)
     {
         _mediator = mediator;
-        _sdsRepository = sdsRepository;
-        _sdsDocumentGenerator = sdsDocumentGenerator;
-        _currentUser = currentUser;
-        _fileStorage = fileStorage;
     }
 
     [HttpGet]
@@ -64,12 +50,10 @@ public class ProductSafetyDataSheetsController : ControllerBase
     [Authorize(Policy = "OperationsOrAdmin")]
     public async Task<ActionResult<SafetyDataSheetDto>> Generate(int productId, CancellationToken cancellationToken)
     {
-        if (_currentUser.UserId is not int userId)
+        var result = await _mediator.Send(new GenerateSafetyDataSheetCommand
         {
-            return Unauthorized();
-        }
-
-        var result = await _sdsDocumentGenerator.GenerateAsync(productId, userId, cancellationToken);
+            ProductId = productId
+        }, cancellationToken);
 
         return Ok(result);
     }
@@ -77,23 +61,15 @@ public class ProductSafetyDataSheetsController : ControllerBase
     [HttpGet("{sdsId}/view")]
     public async Task<IActionResult> View(int productId, int sdsId, CancellationToken cancellationToken)
     {
-        var sds = await _sdsRepository.GetByIdAsync(productId, sdsId, cancellationToken);
-
-        if (sds == null)
+        var result = await _mediator.Send(new GetSafetyDataSheetFileQuery
         {
-            return NotFound();
-        }
+            ProductId = productId,
+            SafetyDataSheetId = sdsId
+        }, cancellationToken);
 
-        if (!_fileStorage.FileExists(sds.FilePath))
-        {
-            return NotFound("SDS file was not found on disk.");
-        }
+        Response.Headers.ContentDisposition = $"inline; filename=\"{result.FileName}\"";
 
-        var fileBytes = await _fileStorage.GetFileAsync(sds.FilePath, cancellationToken);
-
-        Response.Headers.ContentDisposition = $"inline; filename=\"{sds.FileName}\"";
-
-        return File(fileBytes, "application/pdf");
+        return File(result.Content, result.ContentType);
     }
 
     [HttpPut("{sdsId}")]
