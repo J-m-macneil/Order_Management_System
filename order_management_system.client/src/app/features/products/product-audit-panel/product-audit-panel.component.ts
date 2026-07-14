@@ -32,7 +32,6 @@ export class ProductAuditPanelComponent implements OnInit {
       this.auditLogs = [];
       this.auditUnavailable = true;
       this.isLoading = false;
-      this.cdr.detectChanges();
       return;
     }
 
@@ -58,14 +57,14 @@ export class ProductAuditPanelComponent implements OnInit {
           .slice(0, 10);
         this.auditUnavailable = false;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: error => {
         console.error('Failed to load product audit history', error);
         this.auditLogs = [];
         this.auditUnavailable = true;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

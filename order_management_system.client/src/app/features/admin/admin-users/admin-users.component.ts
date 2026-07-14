@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
@@ -14,35 +14,34 @@ import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-er
 export class AdminUsersComponent implements OnInit {
   @Output() formModeChange = new EventEmitter<boolean>();
 
-  users: User[] = [];
-  roles: Role[] = [];
-  departments: Department[] = [];
+  readonly users = signal<User[]>([]);
+  readonly roles = signal<Role[]>([]);
+  readonly departments = signal<Department[]>([]);
 
   userForm: FormGroup;
-  selectedUser: User | null = null;
-  showUserForm = false;
+  readonly selectedUser = signal<User | null>(null);
+  readonly showUserForm = signal(false);
 
-  pageNumber = 1;
-  pageSize = 25;
-  totalCount = 0;
-  totalPages = 0;
-  hasPreviousPage = false;
-  hasNextPage = false;
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(25);
+  readonly totalCount = signal(0);
+  readonly totalPages = signal(0);
+  readonly hasPreviousPage = signal(false);
+  readonly hasNextPage = signal(false);
 
   searchTerm = '';
   roleFilter: number | null = null;
   statusFilter = '';
   filtersVisible = false;
 
-  isLoading = false;
-  userLoadFailed = false;
-  isSaving = false;
-  errorMessage = '';
+  readonly isLoading = signal(false);
+  readonly userLoadFailed = signal(false);
+  readonly isSaving = signal(false);
+  readonly errorMessage = signal('');
 
   constructor(
     private usersService: UsersService,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private fb: FormBuilder
   ) {
     this.userForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.maxLength(80)]],
@@ -65,64 +64,58 @@ export class AdminUsersComponent implements OnInit {
   loadReferenceData(): void {
     this.usersService.getRoles().subscribe({
       next: roles => {
-        this.roles = roles;
-        this.cdr.detectChanges();
+        this.roles.set(roles);
       },
       error: err => {
         console.error('Failed to load roles', err);
-        this.errorMessage = 'Failed to load roles.';
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load roles.');
       }
     });
 
     this.usersService.getDepartments().subscribe({
       next: departments => {
-        this.departments = departments;
-        this.cdr.detectChanges();
+        this.departments.set(departments);
       },
       error: err => {
         console.error('Failed to load departments', err);
-        this.errorMessage = 'Failed to load departments.';
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load departments.');
       }
     });
   }
 
   loadUsers(): void {
-    this.isLoading = true;
-    this.userLoadFailed = false;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.userLoadFailed.set(false);
+    this.errorMessage.set('');
 
     this.usersService.getUsers({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
+      pageNumber: this.pageNumber(),
+      pageSize: this.pageSize(),
       searchTerm: this.searchTerm.trim() || undefined,
       roleId: this.roleFilter,
       isActive: this.getStatusFilterValue()
     }).subscribe({
       next: result => {
-        this.users = result.items;
-        this.pageNumber = result.pageNumber;
-        this.pageSize = result.pageSize;
-        this.totalCount = result.totalCount;
-        this.totalPages = result.totalPages;
-        this.hasPreviousPage = result.hasPreviousPage;
-        this.hasNextPage = result.hasNextPage;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.users.set(result.items);
+        this.pageNumber.set(result.pageNumber);
+        this.pageSize.set(result.pageSize);
+        this.totalCount.set(result.totalCount);
+        this.totalPages.set(result.totalPages);
+        this.hasPreviousPage.set(result.hasPreviousPage);
+        this.hasNextPage.set(result.hasNextPage);
+        this.isLoading.set(false);
       },
       error: err => {
         console.error('Failed to load users', err);
-        this.errorMessage = 'Failed to load users.';
-        this.userLoadFailed = true;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load users.');
+        this.userLoadFailed.set(true);
+        this.isLoading.set(false);
       }
     });
   }
 
   applyFilters(): void {
-    this.pageNumber = 1;
+    this.pageNumber.set(1);
     this.loadUsers();
   }
 
@@ -144,7 +137,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   openCreateForm(): void {
-    this.selectedUser = null;
+    this.selectedUser.set(null);
     this.userForm.reset({
       firstName: '',
       lastName: '',
@@ -158,13 +151,12 @@ export class AdminUsersComponent implements OnInit {
     });
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
     this.userForm.get('password')?.updateValueAndValidity();
-    this.showUserForm = true;
+    this.showUserForm.set(true);
     this.formModeChange.emit(true);
-    this.cdr.detectChanges();
   }
 
   openEditForm(user: User): void {
-    this.selectedUser = user;
+    this.selectedUser.set(user);
     this.userForm.reset({
       firstName: user.firstName,
       lastName: user.lastName,
@@ -178,17 +170,15 @@ export class AdminUsersComponent implements OnInit {
     });
     this.userForm.get('password')?.setValidators([Validators.minLength(8)]);
     this.userForm.get('password')?.updateValueAndValidity();
-    this.showUserForm = true;
+    this.showUserForm.set(true);
     this.formModeChange.emit(true);
-    this.cdr.detectChanges();
   }
 
   closeUserForm(): void {
-    this.showUserForm = false;
-    this.selectedUser = null;
-    this.isSaving = false;
+    this.showUserForm.set(false);
+    this.selectedUser.set(null);
+    this.isSaving.set(false);
     this.formModeChange.emit(false);
-    this.cdr.detectChanges();
   }
 
   saveUser(): void {
@@ -198,11 +188,12 @@ export class AdminUsersComponent implements OnInit {
     }
 
     const request = this.buildSaveRequest();
-    this.isSaving = true;
-    this.errorMessage = '';
+    this.isSaving.set(true);
+    this.errorMessage.set('');
 
-    const saveOperation: Observable<unknown> = this.selectedUser
-      ? this.usersService.update(this.selectedUser.userId, request)
+    const selectedUser = this.selectedUser();
+    const saveOperation: Observable<unknown> = selectedUser
+      ? this.usersService.update(selectedUser.userId, request)
       : this.usersService.create(request);
 
     saveOperation.subscribe({
@@ -212,13 +203,13 @@ export class AdminUsersComponent implements OnInit {
   }
 
   onPageChange(pageNumber: number): void {
-    this.pageNumber = pageNumber;
+    this.pageNumber.set(pageNumber);
     this.loadUsers();
   }
 
   onPageSizeChange(value: number): void {
-    this.pageSize = value;
-    this.pageNumber = 1;
+    this.pageSize.set(value);
+    this.pageNumber.set(1);
     this.loadUsers();
   }
 
@@ -257,9 +248,8 @@ export class AdminUsersComponent implements OnInit {
 
   private onSaveError(err: ApiErrorResponse): void {
     console.error('Failed to save user', err);
-    this.errorMessage = getApiErrorMessage(err, 'Failed to save user.');
-    this.isSaving = false;
-    this.cdr.detectChanges();
+    this.errorMessage.set(getApiErrorMessage(err, 'Failed to save user.'));
+    this.isSaving.set(false);
   }
 
   private getStatusFilterValue(): boolean | null {

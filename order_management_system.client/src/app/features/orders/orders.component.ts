@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { OrdersService } from '../../core/services/orders.service';
 import { Order } from '../../core/models/order.model';
 
@@ -8,17 +8,17 @@ import { Order } from '../../core/models/order.model';
   templateUrl: './orders.component.html',
 })
 export class OrdersComponent implements OnInit {
-  orders: Order[] = [];
+  readonly orders = signal<Order[]>([]);
 
-  pageNumber = 1;
-  pageSize = 25;
-  totalCount = 0;
-  totalPages = 0;
-  hasPreviousPage = false;
-  hasNextPage = false;
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(25);
+  readonly totalCount = signal(0);
+  readonly totalPages = signal(0);
+  readonly hasPreviousPage = signal(false);
+  readonly hasNextPage = signal(false);
 
-  isLoading = false;
-  errorMessage = '';
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
 
   searchTerm = '';
   priorityFilter = '';
@@ -51,23 +51,19 @@ export class OrdersComponent implements OnInit {
     this.orderStatuses.map(status => [status.id, status.badgeClass])
   );
 
-  constructor(
-    private ordersService: OrdersService,
-    // Required to update loading/table state after backend response in this view.
-    private cdr: ChangeDetectorRef
-  ) { }
+  constructor(private ordersService: OrdersService) { }
 
   ngOnInit(): void {
     this.loadOrders();
   }
 
   loadOrders(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     const request = {
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
+      pageNumber: this.pageNumber(),
+      pageSize: this.pageSize(),
       searchTerm: this.searchTerm.trim() || undefined,
       orderStatusId: this.statusFilter ? Number(this.statusFilter) : null,
       isPriorityOrder: this.getPriorityFilterValue(),
@@ -81,20 +77,18 @@ export class OrdersComponent implements OnInit {
     this.ordersService.getOrders(request)
       .subscribe({
         next: (data) => {
-          this.orders = data.items;
-          this.pageNumber = data.pageNumber;
-          this.pageSize = data.pageSize;
-          this.totalCount = data.totalCount;
-          this.totalPages = data.totalPages;
-          this.hasPreviousPage = data.hasPreviousPage;
-          this.hasNextPage = data.hasNextPage;
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.orders.set(data.items);
+          this.pageNumber.set(data.pageNumber);
+          this.pageSize.set(data.pageSize);
+          this.totalCount.set(data.totalCount);
+          this.totalPages.set(data.totalPages);
+          this.hasPreviousPage.set(data.hasPreviousPage);
+          this.hasNextPage.set(data.hasNextPage);
+          this.isLoading.set(false);
         },
         error: () => {
-          this.errorMessage = 'Failed to load orders.';
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.errorMessage.set('Failed to load orders.');
+          this.isLoading.set(false);
         }
       });
   }
@@ -104,7 +98,7 @@ export class OrdersComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.pageNumber = 1;
+    this.pageNumber.set(1);
     this.loadOrders();
   }
 
@@ -172,13 +166,13 @@ export class OrdersComponent implements OnInit {
   }
 
   onPageChange(pageNumber: number): void {
-    this.pageNumber = pageNumber;
+    this.pageNumber.set(pageNumber);
     this.loadOrders();
   }
 
   onPageSizeChange(value: number): void {
-    this.pageSize = value;
-    this.pageNumber = 1;
+    this.pageSize.set(value);
+    this.pageNumber.set(1);
     this.loadOrders();
   }
 }

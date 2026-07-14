@@ -1,4 +1,3 @@
-import { ChangeDetectorRef } from '@angular/core';
 import { of } from 'rxjs';
 
 import { PagedResult } from '../../core/models/paged-result.model';
@@ -32,8 +31,7 @@ describe('ProductsComponent', () => {
       delete: () => of(void 0)
     } as unknown as ProductsService;
 
-    const cdr = { detectChanges: () => undefined } as unknown as ChangeDetectorRef;
-    component = new ProductsComponent(service, cdr);
+    component = new ProductsComponent(service);
   });
 
   it('preserves false boolean filter values in the request', () => {
@@ -50,13 +48,13 @@ describe('ProductsComponent', () => {
 
   it('returns to the previous page after deleting its final product', () => {
     const product = { productId: 10 } as ProductList;
-    component.products = [product];
-    component.productPendingDelete = product;
-    component.pageNumber = 2;
+    component.products.set([product]);
+    component.productPendingDelete.set(product);
+    component.pageNumber.set(2);
 
     component.confirmDeleteProduct();
 
-    expect(component.pageNumber).toBe(1);
+    expect(component.pageNumber()).toBe(1);
     expect(requests[0]['pageNumber']).toBe(1);
   });
 });

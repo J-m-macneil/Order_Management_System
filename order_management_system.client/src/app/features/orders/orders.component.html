@@ -106,15 +106,15 @@
   </div>
 </div>
 
-<div *ngIf="isLoading" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state">
   <p>Loading orders...</p>
 </div>
 
-<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
-  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+<div *ngIf="errorMessage() && !isLoading()" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
 </div>
 
-<div *ngIf="!isLoading && !errorMessage" class="app-table-card">
+<div *ngIf="!isLoading() && !errorMessage()" class="app-table-card">
   <div class="app-table-scroll">
     <table class="app-data-table">
       <thead class="app-table-head">
@@ -143,7 +143,7 @@
         </tr>
       </thead>
       <tbody class="app-table-body">
-        <tr *ngFor="let order of orders">
+        <tr *ngFor="let order of orders()">
           <td class="px-6 py-4">
             <a [routerLink]="['/orders', order.orderId]"
                class="app-link-button">
@@ -184,16 +184,16 @@
     </table>
   </div>
 
-  <div *ngIf="orders.length === 0" class="app-empty-state">
+  <div *ngIf="orders().length === 0" class="app-empty-state">
     <p>No orders found.</p>
   </div>
 
-  <app-table-pagination [pageNumber]="pageNumber"
-                        [pageSize]="pageSize"
-                        [totalCount]="totalCount"
-                        [totalPages]="totalPages"
-                        [hasPreviousPage]="hasPreviousPage"
-                        [hasNextPage]="hasNextPage"
+  <app-table-pagination [pageNumber]="pageNumber()"
+                        [pageSize]="pageSize()"
+                        [totalCount]="totalCount()"
+                        [totalPages]="totalPages()"
+                        [hasPreviousPage]="hasPreviousPage()"
+                        [hasNextPage]="hasNextPage()"
                         itemLabel="orders"
                         (pageSizeChange)="onPageSizeChange($event)"
                         (pageChange)="onPageChange($event)">

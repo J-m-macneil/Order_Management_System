@@ -8,19 +8,19 @@
   </p>
 </div>
 
-<div *ngIf="isLoading" class="dashboard-message">
+<div *ngIf="isLoading()" class="dashboard-message">
   Loading dashboard metrics...
 </div>
 
-<div *ngIf="errorMessage && !isLoading"
+<div *ngIf="errorMessage() && !isLoading()"
      class="dashboard-error">
-  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
 </div>
 
-<div *ngIf="!isLoading && !errorMessage" class="dashboard-layout">
+<div *ngIf="!isLoading() && !errorMessage()" class="dashboard-layout">
   <!-- Metric Cards Grid -->
   <div class="app-stat-grid app-stat-grid--4 app-stat-grid--flush">
-    <div *ngFor="let metric of metrics" class="metric-card">
+    <div *ngFor="let metric of metrics()" class="metric-card">
       <p class="metric-card-label">{{ metric.label }}</p>
       <strong class="metric-card-value">
         {{ metric.type === 'totalValue' ? (metric.value | currency:'GBP':'symbol':'1.0-0':'en-GB') : (metric.value | number) }}
@@ -35,7 +35,7 @@
       <h2>Orders by Status</h2>
 
       <div class="status-list">
-        <div *ngFor="let status of ordersByStatus" class="status-row">
+        <div *ngFor="let status of ordersByStatus()" class="status-row">
           <div>
             <span [class]="'status-dot ' + status.color"></span>
             <span>
@@ -55,7 +55,7 @@
       <h2>Top Customers</h2>
 
       <div class="customer-list">
-        <div *ngFor="let customer of topCustomers" class="customer-row">
+        <div *ngFor="let customer of topCustomers()" class="customer-row">
           <div class="customer-summary">
             <div [class]="'customer-initials ' + customer.bgColor">
               {{ customer.initials }}
@@ -75,7 +75,7 @@
   </div>
 
   <!-- Recent Failures -->
-  <div class="dashboard-card alert-panel" *ngIf="recentFailures.length > 0">
+  <div class="dashboard-card alert-panel" *ngIf="recentFailures().length > 0">
     <h2>Recent Failures</h2>
 
     <div class="overflow-x-auto">
@@ -90,7 +90,7 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let failure of recentFailures">
+          <tr *ngFor="let failure of recentFailures()">
             <td data-label="Order #">
               <a [routerLink]="['/orders', failure.orderId]" class="app-link-button">
                 {{ failure.orderNumber }}
@@ -112,7 +112,7 @@
   </div>
 
   <!-- Priority Orders -->
-  <div class="dashboard-card alert-panel priority-panel" *ngIf="priorityOrders.length > 0">
+  <div class="dashboard-card alert-panel priority-panel" *ngIf="priorityOrders().length > 0">
     <h2>Priority Orders</h2>
 
     <div class="overflow-x-auto">
@@ -127,7 +127,7 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let order of priorityOrders">
+          <tr *ngFor="let order of priorityOrders()">
             <td data-label="Order #">
               <a [routerLink]="['/orders', order.orderId]" class="app-link-button">
                 {{ order.orderNumber }}

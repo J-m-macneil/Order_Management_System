@@ -34,13 +34,13 @@ export class OrderDocumentsPanelComponent implements OnChanges {
       next: (documents) => {
         this.documents = documents;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.documents = [];
         this.errorMessage = 'Failed to load documents.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -59,7 +59,7 @@ export class OrderDocumentsPanelComponent implements OnChanges {
       },
       error: () => {
         this.errorMessage = 'Failed to download document.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -72,7 +72,7 @@ export class OrderDocumentsPanelComponent implements OnChanges {
       },
       error: () => {
         this.errorMessage = 'Failed to open document.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

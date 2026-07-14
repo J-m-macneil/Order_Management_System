@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Customer } from '../../core/models/customer.model';
 import { CustomersService } from '../../core/services/customers.service';
 
@@ -8,17 +8,17 @@ import { CustomersService } from '../../core/services/customers.service';
   templateUrl: './customers.component.html'
 })
 export class CustomersComponent implements OnInit {
-  customers: Customer[] = [];
+  readonly customers = signal<Customer[]>([]);
 
-  isLoading = false;
-  errorMessage = '';
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
 
-  pageNumber = 1;
-  pageSize = 25;
-  totalCount = 0;
-  totalPages = 0;
-  hasPreviousPage = false;
-  hasNextPage = false;
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(25);
+  readonly totalCount = signal(0);
+  readonly totalPages = signal(0);
+  readonly hasPreviousPage = signal(false);
+  readonly hasNextPage = signal(false);
 
   searchTerm = '';
   industryFilter = '';
@@ -27,14 +27,11 @@ export class CustomersComponent implements OnInit {
 
   filtersVisible = false;
 
-  stats: { label: string; value: string | number }[] = [];
-  industries: string[] = [];
-  customerPendingDelete: Customer | null = null;
+  readonly stats = signal<{ label: string; value: string | number }[]>([]);
+  readonly industries = signal<string[]>([]);
+  readonly customerPendingDelete = signal<Customer | null>(null);
 
-  constructor(
-    private customersService: CustomersService,
-    private cdr: ChangeDetectorRef
-  ) { }
+  constructor(private customersService: CustomersService) { }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -45,7 +42,7 @@ export class CustomersComponent implements OnInit {
   loadSummary(): void {
     this.customersService.getSummary().subscribe({
       next: (summary) => {
-        this.stats = [
+        this.stats.set([
           {
             label: 'Total Customers',
             value: summary.totalCustomers
@@ -58,39 +55,36 @@ export class CustomersComponent implements OnInit {
             label: 'Inactive',
             value: summary.inactiveCustomers
           }
-        ];
-        this.cdr.detectChanges();
+        ]);
       }
     });
   }
 
   loadCustomers(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.customersService.getAll({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
+      pageNumber: this.pageNumber(),
+      pageSize: this.pageSize(),
       searchTerm: this.searchTerm.trim() || undefined,
       industryType: this.industryFilter || undefined,
       paymentTermsDays: this.paymentTermsFilter ? Number(this.paymentTermsFilter) : null,
       isActive: this.getActiveFilterValue()
     }).subscribe({
       next: (data) => {
-        this.customers = data.items;
-        this.pageNumber = data.pageNumber;
-        this.pageSize = data.pageSize;
-        this.totalCount = data.totalCount;
-        this.totalPages = data.totalPages;
-        this.hasPreviousPage = data.hasPreviousPage;
-        this.hasNextPage = data.hasNextPage;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.customers.set(data.items);
+        this.pageNumber.set(data.pageNumber);
+        this.pageSize.set(data.pageSize);
+        this.totalCount.set(data.totalCount);
+        this.totalPages.set(data.totalPages);
+        this.hasPreviousPage.set(data.hasPreviousPage);
+        this.hasNextPage.set(data.hasNextPage);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.errorMessage = 'Failed to load customers.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load customers.');
+        this.isLoading.set(false);
       }
     });
   }
@@ -100,7 +94,7 @@ export class CustomersComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.pageNumber = 1;
+    this.pageNumber.set(1);
     this.loadCustomers();
   }
 
@@ -114,12 +108,10 @@ export class CustomersComponent implements OnInit {
   loadIndustries(): void {
     this.customersService.getIndustryTypes().subscribe({
       next: (industries) => {
-        this.industries = industries;
-        this.cdr.detectChanges();
+        this.industries.set(industries);
       },
       error: () => {
-        this.industries = [];
-        this.cdr.detectChanges();
+        this.industries.set([]);
       }
     });
   }
@@ -137,35 +129,35 @@ export class CustomersComponent implements OnInit {
   }
 
   openDeleteCustomerModal(customer: Customer): void {
-    this.customerPendingDelete = customer;
+    this.customerPendingDelete.set(customer);
   }
 
   cancelDeleteCustomer(): void {
-    this.customerPendingDelete = null;
+    this.customerPendingDelete.set(null);
   }
 
   confirmDeleteCustomer(): void {
-    if (!this.customerPendingDelete) {
+    const customer = this.customerPendingDelete();
+    if (!customer) {
       return;
     }
 
-    const moveToPreviousPage = this.customers.length === 1 && this.pageNumber > 1;
+    const moveToPreviousPage = this.customers().length === 1 && this.pageNumber() > 1;
 
-    this.customersService.delete(this.customerPendingDelete.customerId).subscribe({
+    this.customersService.delete(customer.customerId).subscribe({
       next: () => {
-        this.customerPendingDelete = null;
+        this.customerPendingDelete.set(null);
 
         if (moveToPreviousPage) {
-          this.pageNumber--;
+          this.pageNumber.update(page => page - 1);
         }
 
         this.loadSummary();
         this.loadCustomers();
       },
       error: () => {
-        this.errorMessage = 'Failed to delete customer.';
-        this.customerPendingDelete = null;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to delete customer.');
+        this.customerPendingDelete.set(null);
       }
     });
   }
@@ -179,13 +171,13 @@ export class CustomersComponent implements OnInit {
   }
 
   onPageChange(pageNumber: number): void {
-    this.pageNumber = pageNumber;
+    this.pageNumber.set(pageNumber);
     this.loadCustomers();
   }
 
   onPageSizeChange(value: number): void {
-    this.pageSize = value;
-    this.pageNumber = 1;
+    this.pageSize.set(value);
+    this.pageNumber.set(1);
     this.loadCustomers();
   }
 }

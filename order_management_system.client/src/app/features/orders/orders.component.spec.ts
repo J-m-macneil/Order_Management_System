@@ -1,4 +1,3 @@
-import { ChangeDetectorRef } from '@angular/core';
 import { of } from 'rxjs';
 
 import { PagedResult } from '../../core/models/paged-result.model';
@@ -30,17 +29,16 @@ describe('OrdersComponent', () => {
       }
     } as unknown as OrdersService;
 
-    const cdr = { detectChanges: () => undefined } as unknown as ChangeDetectorRef;
-    component = new OrdersComponent(service, cdr);
+    component = new OrdersComponent(service);
   });
 
   it('resets pagination and trims search when filters are applied', () => {
-    component.pageNumber = 3;
+    component.pageNumber.set(3);
     component.searchTerm = '  ORD-1001  ';
 
     component.applyFilters();
 
-    expect(component.pageNumber).toBe(1);
+    expect(component.pageNumber()).toBe(1);
     expect(requests[0]['searchTerm']).toBe('ORD-1001');
   });
 

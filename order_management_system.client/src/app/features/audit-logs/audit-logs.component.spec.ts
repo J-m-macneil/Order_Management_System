@@ -1,4 +1,3 @@
-import { ChangeDetectorRef } from '@angular/core';
 import { of } from 'rxjs';
 
 import { AuditLog } from '../../core/models/audit-log.model';
@@ -24,16 +23,15 @@ describe('AuditLogsComponent', () => {
         return of(result);
       }
     } as unknown as AuditLogsService;
-    const cdr = { detectChanges: () => undefined } as unknown as ChangeDetectorRef;
-    const component = new AuditLogsComponent(service, cdr);
+    const component = new AuditLogsComponent(service);
 
     component.searchTerm = 'Order approved';
     component.entityType = 'Order';
     component.action = 'Updated';
     component.entityId = 12;
     component.performedByUserId = 4;
-    component.pageNumber = 3;
-    component.selectedLog = { auditLogId: 1 } as AuditLog;
+    component.pageNumber.set(3);
+    component.selectedLog.set({ auditLogId: 1 } as AuditLog);
 
     component.clearFilters();
 
@@ -42,7 +40,7 @@ describe('AuditLogsComponent', () => {
     expect(component.action).toBe('');
     expect(component.entityId).toBeNull();
     expect(component.performedByUserId).toBeNull();
-    expect(component.selectedLog).toBeNull();
+    expect(component.selectedLog()).toBeNull();
     expect(requests[0]['pageNumber']).toBe(1);
   });
 });

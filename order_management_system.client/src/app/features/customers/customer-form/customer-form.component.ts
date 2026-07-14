@@ -129,13 +129,13 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerAddresses(id, customer);
         this.getCustomerContacts(id);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load customer', err);
         this.errorMessage = 'Failed to load customer.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -152,7 +152,7 @@ export class CustomerFormComponent implements OnInit {
           });
         }
 
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load pricing tiers', err);
@@ -302,13 +302,13 @@ export class CustomerFormComponent implements OnInit {
       next: () => {
         this.successMessage = 'Customer details saved.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to update customer', err);
         this.errorMessage = 'Failed to update customer.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -334,13 +334,13 @@ export class CustomerFormComponent implements OnInit {
       next: () => {
         this.addressPendingDelete = null;
         this.getCustomerAddresses(this.customerId!);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to delete address', err);
         this.errorMessage = 'Failed to delete address.';
         this.addressPendingDelete = null;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -354,12 +354,12 @@ export class CustomerFormComponent implements OnInit {
           this.populateAddressForms(customer, data);
         }
 
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load addresses', err);
         this.errorMessage = 'Failed to load addresses.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -368,12 +368,12 @@ export class CustomerFormComponent implements OnInit {
     this.customersService.getContacts(id).subscribe({
       next: (data) => {
         this.contacts = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load contacts', err);
         this.errorMessage = 'Failed to load contacts.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -399,12 +399,12 @@ export class CustomerFormComponent implements OnInit {
       next: () => {
         this.resetContactForm();
         this.getCustomerContacts(this.customerId!);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to create contact', err);
         this.errorMessage = 'Failed to create contact.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -470,13 +470,13 @@ export class CustomerFormComponent implements OnInit {
         });
         this.successMessage = successMessage;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to update customer address references', err);
         this.errorMessage = 'Failed to update customer address selection.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -511,12 +511,12 @@ export class CustomerFormComponent implements OnInit {
       next: () => {
         this.resetContactForm();
         this.getCustomerContacts(this.customerId!);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to set primary contact', err);
         this.errorMessage = 'Failed to set primary contact.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -534,12 +534,12 @@ export class CustomerFormComponent implements OnInit {
       next: () => {
         this.resetContactForm();
         this.getCustomerContacts(this.customerId!);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to update contact', err);
         this.errorMessage = 'Failed to update contact.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -581,13 +581,13 @@ export class CustomerFormComponent implements OnInit {
       next: () => {
         this.contactPendingDelete = null;
         this.getCustomerContacts(this.customerId!);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to delete contact', err);
         this.errorMessage = 'Failed to delete contact.';
         this.contactPendingDelete = null;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -674,12 +674,12 @@ export class CustomerFormComponent implements OnInit {
         this.successMessage = this.editingAddressId ? 'Address updated.' : 'Address added.';
         this.cancelAddressEdit();
         this.getCustomerAddresses(this.customerId!);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to save address', err);
         this.errorMessage = 'Failed to save address.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -713,7 +713,7 @@ export class CustomerFormComponent implements OnInit {
         }
 
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
         return;
       }
 
@@ -769,7 +769,7 @@ export class CustomerFormComponent implements OnInit {
           console.error('Failed to create customer', err);
           this.errorMessage = 'Failed to create customer.';
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
     }

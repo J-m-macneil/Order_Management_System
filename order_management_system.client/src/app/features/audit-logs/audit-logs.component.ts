@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { AuditLog } from '../../core/models/audit-log.model';
 import { AuditLogsService } from '../../core/services/audit-logs.service';
 
@@ -9,15 +9,15 @@ import { AuditLogsService } from '../../core/services/audit-logs.service';
   styleUrls: ['./audit-logs.component.css']
 })
 export class AuditLogsComponent implements OnInit {
-  logs: AuditLog[] = [];
-  selectedLog: AuditLog | null = null;
+  readonly logs = signal<AuditLog[]>([]);
+  readonly selectedLog = signal<AuditLog | null>(null);
 
-  pageNumber = 1;
-  pageSize = 25;
-  totalCount = 0;
-  totalPages = 0;
-  hasPreviousPage = false;
-  hasNextPage = false;
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(25);
+  readonly totalCount = signal(0);
+  readonly totalPages = signal(0);
+  readonly hasPreviousPage = signal(false);
+  readonly hasNextPage = signal(false);
 
   entityTypes = ['Order', 'Customer', 'Product', 'ProcessingJob', 'Document', 'Notification'];
   actionTypes = [
@@ -40,26 +40,23 @@ export class AuditLogsComponent implements OnInit {
   from = '';
   to = '';
 
-  isLoading = false;
-  errorMessage = '';
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
   filtersVisible = false;
 
-  constructor(
-    private auditLogsService: AuditLogsService,
-    private cdr: ChangeDetectorRef
-  ) { }
+  constructor(private auditLogsService: AuditLogsService) { }
 
   ngOnInit(): void {
     this.loadAuditLogs();
   }
 
   loadAuditLogs(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.auditLogsService.getAuditLogs({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
+      pageNumber: this.pageNumber(),
+      pageSize: this.pageSize(),
       searchTerm: this.searchTerm.trim() || undefined,
       entityType: this.entityType || undefined,
       action: this.action.trim() || undefined,
@@ -69,28 +66,26 @@ export class AuditLogsComponent implements OnInit {
       to: this.to || undefined
     }).subscribe({
       next: (result) => {
-        this.logs = result.items;
-        this.pageNumber = result.pageNumber;
-        this.pageSize = result.pageSize;
-        this.totalCount = result.totalCount;
-        this.totalPages = result.totalPages;
-        this.hasPreviousPage = result.hasPreviousPage;
-        this.hasNextPage = result.hasNextPage;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.logs.set(result.items);
+        this.pageNumber.set(result.pageNumber);
+        this.pageSize.set(result.pageSize);
+        this.totalCount.set(result.totalCount);
+        this.totalPages.set(result.totalPages);
+        this.hasPreviousPage.set(result.hasPreviousPage);
+        this.hasNextPage.set(result.hasNextPage);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.logs = [];
-        this.errorMessage = 'Failed to load audit logs.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.logs.set([]);
+        this.errorMessage.set('Failed to load audit logs.');
+        this.isLoading.set(false);
       }
     });
   }
 
   applyFilters(): void {
-    this.pageNumber = 1;
-    this.selectedLog = null;
+    this.pageNumber.set(1);
+    this.selectedLog.set(null);
     this.loadAuditLogs();
   }
 
@@ -109,21 +104,21 @@ export class AuditLogsComponent implements OnInit {
   }
 
   selectLog(log: AuditLog): void {
-    this.selectedLog = this.selectedLog?.auditLogId === log.auditLogId
+    this.selectedLog.set(this.selectedLog()?.auditLogId === log.auditLogId
       ? null
-      : log;
+      : log);
   }
 
   onPageChange(pageNumber: number): void {
-    this.pageNumber = pageNumber;
-    this.selectedLog = null;
+    this.pageNumber.set(pageNumber);
+    this.selectedLog.set(null);
     this.loadAuditLogs();
   }
 
   onPageSizeChange(value: number): void {
-    this.pageSize = value;
-    this.pageNumber = 1;
-    this.selectedLog = null;
+    this.pageSize.set(value);
+    this.pageNumber.set(1);
+    this.selectedLog.set(null);
     this.loadAuditLogs();
   }
 

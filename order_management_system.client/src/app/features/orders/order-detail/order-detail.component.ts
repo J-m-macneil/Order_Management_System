@@ -48,7 +48,6 @@ export class OrderDetailComponent implements OnInit {
 
     if (!this.orderId) {
       this.errorMessage = 'Invalid order id.';
-      this.cdr.detectChanges();
       return;
     }
 
@@ -69,12 +68,12 @@ export class OrderDetailComponent implements OnInit {
       next: (data) => {
         this.order = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Failed to load order details.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -83,11 +82,11 @@ export class OrderDetailComponent implements OnInit {
     this.ordersService.getAllowedStatuses(this.orderId).subscribe({
       next: (statuses) => {
         this.allowedStatuses = statuses;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.allowedStatuses = [];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -96,11 +95,11 @@ export class OrderDetailComponent implements OnInit {
     this.ordersService.getOrderHistory(this.orderId).subscribe({
       next: (data) => {
         this.history = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.history = [];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -133,7 +132,6 @@ export class OrderDetailComponent implements OnInit {
 
   onConfirmationCancel(): void {
     this.closeConfirmationModal();
-    this.cdr.detectChanges();
   }
 
   private executeStatusChange(status: OrderStatus, reason?: string): void {
@@ -153,7 +151,7 @@ export class OrderDetailComponent implements OnInit {
         this.errorMessage =
           getApiErrorMessage(err, 'Failed to change order status.');
         this.isChangingStatus = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -190,7 +188,7 @@ export class OrderDetailComponent implements OnInit {
       error: (err) => {
         this.errorMessage = getApiErrorMessage(err, 'Failed to discard draft order.');
         this.isDiscardingDraft = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -229,7 +227,6 @@ export class OrderDetailComponent implements OnInit {
       requireReason: true,
       reasonPlaceholder: this.getReasonModalPlaceholder(status)
     };
-    this.cdr.detectChanges();
   }
 
   private openDiscardDraftModal(): void {

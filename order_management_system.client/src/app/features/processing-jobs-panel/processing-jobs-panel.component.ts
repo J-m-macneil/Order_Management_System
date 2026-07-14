@@ -60,14 +60,14 @@ export class ProcessingJobsPanelComponent implements OnChanges {
         this.processingJobs = jobs;
         this.displayJobs = this.buildDisplayJobs(this.processingJobs);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.processingJobs = [];
         this.displayJobs = [];
         this.errorMessage = 'Failed to load processing jobs.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -108,7 +108,7 @@ export class ProcessingJobsPanelComponent implements OnChanges {
         this.errorMessage =
           getApiErrorMessage(err, 'Failed to retry processing job.');
         this.isRetryingJobId = null;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

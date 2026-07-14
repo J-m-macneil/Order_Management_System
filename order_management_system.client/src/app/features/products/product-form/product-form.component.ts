@@ -71,33 +71,30 @@ export class ProductFormComponent implements OnInit {
     this.productsService.getProductCategories().subscribe({
       next: (data) => {
         this.productCategories = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load categories', err);
-        this.cdr.detectChanges();
       }
     });
 
     this.productsService.getUnitsOfMeasure().subscribe({
       next: (data) => {
         this.unitsOfMeasure = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load units', err);
-        this.cdr.detectChanges();
       }
     });
 
     this.productsService.getHazardClasses().subscribe({
       next: (data) => {
         this.hazardClasses = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load hazard classes', err);
-        this.cdr.detectChanges();
       }
     });
   }
@@ -127,13 +124,13 @@ export class ProductFormComponent implements OnInit {
 
         this.savedRequiresSds = product.requiresSds;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load product', err);
         this.errorMessage = 'Failed to load product.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -147,7 +144,6 @@ export class ProductFormComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
-    this.cdr.detectChanges();
 
     const formValue = this.form.value;
 
@@ -158,13 +154,13 @@ export class ProductFormComponent implements OnInit {
           this.savedRequiresSds = Boolean(this.form.get('requiresSds')?.value);
           this.isLoading = false;
           this.auditPanel?.reload();
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Failed to update product', err);
           this.errorMessage = 'Failed to update product.';
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
     } else {
@@ -174,7 +170,7 @@ export class ProductFormComponent implements OnInit {
           console.error('Failed to create product', err);
           this.errorMessage = 'Failed to create product.';
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
     }

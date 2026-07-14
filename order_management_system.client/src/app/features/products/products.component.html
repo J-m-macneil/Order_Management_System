@@ -10,7 +10,7 @@
 </div>
 
 <div class="app-stat-grid app-stat-grid--4">
-  <div *ngFor="let stat of stats" class="metric-card">
+  <div *ngFor="let stat of stats()" class="metric-card">
     <p class="metric-card-label">
       {{ stat.label }}
     </p>
@@ -71,7 +71,7 @@
               (change)="applyFilters()"
               class="form-input">
         <option [ngValue]="null">All categories</option>
-        <option *ngFor="let category of categories" [ngValue]="category.productCategoryId">
+        <option *ngFor="let category of categories()" [ngValue]="category.productCategoryId">
           {{ category.name }}
         </option>
       </select>
@@ -83,7 +83,7 @@
               (change)="applyFilters()"
               class="form-input">
         <option [ngValue]="null">All hazard classes</option>
-        <option *ngFor="let hazardClass of hazardClasses" [ngValue]="hazardClass.hazardClassId">
+        <option *ngFor="let hazardClass of hazardClasses()" [ngValue]="hazardClass.hazardClassId">
           {{ hazardClass.name }}
         </option>
       </select>
@@ -111,15 +111,15 @@
   </div>
 </div>
 
-<div *ngIf="isLoading" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state">
   <p>Loading products...</p>
 </div>
 
-<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
-  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+<div *ngIf="errorMessage() && !isLoading()" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
 </div>
 
-<div *ngIf="!isLoading && !errorMessage" class="app-table-card">
+<div *ngIf="!isLoading() && !errorMessage()" class="app-table-card">
   <div class="app-table-scroll">
     <table class="app-data-table">
       <thead class="app-table-head">
@@ -148,7 +148,7 @@
         </tr>
       </thead>
       <tbody class="app-table-body">
-        <tr *ngFor="let product of products">
+        <tr *ngFor="let product of products()">
           <td class="px-6 py-4">
             <a [routerLink]="['/products/edit', product.productId]"
                class="app-link-button">
@@ -210,25 +210,25 @@
     </table>
   </div>
 
-  <div *ngIf="products.length === 0" class="app-empty-state">
+  <div *ngIf="products().length === 0" class="app-empty-state">
     <p>No products found.</p>
   </div>
 
-  <app-table-pagination [pageNumber]="pageNumber"
-                        [pageSize]="pageSize"
-                        [totalCount]="totalCount"
-                        [totalPages]="totalPages"
-                        [hasPreviousPage]="hasPreviousPage"
-                        [hasNextPage]="hasNextPage"
+  <app-table-pagination [pageNumber]="pageNumber()"
+                        [pageSize]="pageSize()"
+                        [totalCount]="totalCount()"
+                        [totalPages]="totalPages()"
+                        [hasPreviousPage]="hasPreviousPage()"
+                        [hasNextPage]="hasNextPage()"
                         itemLabel="products"
                         (pageSizeChange)="onPageSizeChange($event)"
                         (pageChange)="onPageChange($event)">
   </app-table-pagination>
 </div>
 
-<app-confirmation-modal *ngIf="productPendingDelete"
+<app-confirmation-modal *ngIf="productPendingDelete() as product"
                         title="Delete Product"
-                        [message]="'Delete product ' + productPendingDelete.productName + '? This action cannot be undone.'"
+                        [message]="'Delete product ' + product.productName + '? This action cannot be undone.'"
                         confirmText="Delete Product"
                         variant="danger"
                         (confirm)="confirmDeleteProduct()"

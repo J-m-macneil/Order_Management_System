@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { MetricCard, OrderByStatus, RecentFailure, PriorityOrder, TopCustomer } from '../../core/models/dashboard.models';
 
@@ -9,75 +9,69 @@ import { MetricCard, OrderByStatus, RecentFailure, PriorityOrder, TopCustomer } 
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  metrics: MetricCard[] = [];
-  ordersByStatus: OrderByStatus[] = [];
-  topCustomers: TopCustomer[] = [];
-  recentFailures: RecentFailure[] = [];
-  priorityOrders: PriorityOrder[] = [];
+  readonly metrics = signal<MetricCard[]>([]);
+  readonly ordersByStatus = signal<OrderByStatus[]>([]);
+  readonly topCustomers = signal<TopCustomer[]>([]);
+  readonly recentFailures = signal<RecentFailure[]>([]);
+  readonly priorityOrders = signal<PriorityOrder[]>([]);
 
-  isLoading = false;
-  errorMessage = '';
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
 
-  constructor(
-    private dashboardService: DashboardService,
-    private cdr: ChangeDetectorRef
-  ) { }
+  constructor(private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
     this.loadDashboard();
   }
 
   loadDashboard(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.cdr.detectChanges();
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.dashboardService.getMetrics().subscribe({
       next: (data) => {
-        this.metrics = [
+        this.metrics.set([
           { label: 'Total Orders', value: data.metrics.totalOrders, type: 'orders', color: 'text-blue-600' },
           { label: 'Active Orders', value: data.metrics.activeOrders, type: 'activeOrders', color: 'text-emerald-500' },
           { label: 'Failed Orders', value: data.metrics.failedOrders, type: 'failedOrders', color: 'text-red-500' },
           { label: 'Total Value', value: data.metrics.totalValue, type: 'totalValue', color: 'text-purple-500' }
-        ];
+        ]);
 
-        this.ordersByStatus = data.ordersByStatus.map(x => ({
+        this.ordersByStatus.set(data.ordersByStatus.map(x => ({
           status: x.status,
           count: x.count,
           color: this.getStatusColor(x.status)
-        }));
+        })));
 
-        this.topCustomers = data.topCustomers.map((x, index) => ({
+        this.topCustomers.set(data.topCustomers.map((x, index) => ({
           name: x.name,
           initials: this.getInitials(x.name),
           orders: x.orders,
           bgColor: this.getCustomerColor(index)
-        }));
+        })));
 
-        this.recentFailures = data.recentFailures.map(x => ({
+        this.recentFailures.set(data.recentFailures.map(x => ({
           orderId: x.orderId,
           orderNumber: x.orderNumber,
           customer: x.customer,
           reason: x.reason,
           date: x.date
-        }));
+        })));
 
-        this.priorityOrders = data.priorityOrders.map(x => ({
+        this.priorityOrders.set(data.priorityOrders.map(x => ({
           orderId: x.orderId,
           orderNumber: x.orderNumber,
           customer: x.customer,
           priority: x.priority,
           dueDate: x.dueDate
-        }));
+        })));
 
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Dashboard metrics error:', err);
-        this.errorMessage = 'Failed to load dashboard metrics.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load dashboard metrics.');
+        this.isLoading.set(false);
       }
     });
   }

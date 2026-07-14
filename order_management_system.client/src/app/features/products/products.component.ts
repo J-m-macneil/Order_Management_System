@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ProductList } from '../../core/models/product-list.model';
 import { ProductsService } from '../../core/services/products.service';
 import { ProductCategory } from '../../core/models/product-category.model';
@@ -10,17 +10,17 @@ import { HazardClass } from '../../core/models/hazard-class.model';
   templateUrl: './products.component.html'
 })
 export class ProductsComponent implements OnInit {
-  products: ProductList[] = [];
+  readonly products = signal<ProductList[]>([]);
 
-  pageNumber = 1;
-  pageSize = 25;
-  totalCount = 0;
-  totalPages = 0;
-  hasPreviousPage = false;
-  hasNextPage = false;
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(25);
+  readonly totalCount = signal(0);
+  readonly totalPages = signal(0);
+  readonly hasPreviousPage = signal(false);
+  readonly hasNextPage = signal(false);
 
-  isLoading = false;
-  errorMessage = '';
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
 
   searchTerm = '';
   activeFilter = '';
@@ -31,15 +31,12 @@ export class ProductsComponent implements OnInit {
 
   filtersVisible = false;
 
-  stats: { label: string; value: string | number }[] = [];
-  categories: ProductCategory[] = [];
-  hazardClasses: HazardClass[] = [];
-  productPendingDelete: ProductList | null = null;
+  readonly stats = signal<{ label: string; value: string | number }[]>([]);
+  readonly categories = signal<ProductCategory[]>([]);
+  readonly hazardClasses = signal<HazardClass[]>([]);
+  readonly productPendingDelete = signal<ProductList | null>(null);
 
-  constructor(
-    private productsService: ProductsService,
-    private cdr: ChangeDetectorRef
-  ) { }
+  constructor(private productsService: ProductsService) { }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -50,15 +47,13 @@ export class ProductsComponent implements OnInit {
   loadFilterOptions(): void {
     this.productsService.getProductCategories().subscribe({
       next: (categories) => {
-        this.categories = categories;
-        this.cdr.detectChanges();
+        this.categories.set(categories);
       }
     });
 
     this.productsService.getHazardClasses().subscribe({
       next: (hazardClasses) => {
-        this.hazardClasses = hazardClasses;
-        this.cdr.detectChanges();
+        this.hazardClasses.set(hazardClasses);
       }
     });
   }
@@ -66,7 +61,7 @@ export class ProductsComponent implements OnInit {
   loadSummary(): void {
     this.productsService.getSummary().subscribe({
       next: (summary) => {
-        this.stats = [
+        this.stats.set([
           {
             label: 'Total Products',
             value: summary.totalProducts
@@ -83,19 +78,18 @@ export class ProductsComponent implements OnInit {
             label: 'Hazardous',
             value: summary.hazardousProducts
           }
-        ];
-        this.cdr.detectChanges();
+        ]);
       }
     });
   }
 
   loadProducts(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.productsService.getAll({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
+      pageNumber: this.pageNumber(),
+      pageSize: this.pageSize(),
       searchTerm: this.searchTerm.trim() || undefined,
       isActive: this.getActiveFilterValue(),
       isRestricted: this.getRestrictedFilterValue(),
@@ -105,21 +99,19 @@ export class ProductsComponent implements OnInit {
     })
     .subscribe({
       next: (data) => {
-        this.products = data.items;
-        this.pageNumber = data.pageNumber;
-        this.pageSize = data.pageSize;
-        this.totalCount = data.totalCount;
-        this.totalPages = data.totalPages;
-        this.hasPreviousPage = data.hasPreviousPage;
-        this.hasNextPage = data.hasNextPage;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.products.set(data.items);
+        this.pageNumber.set(data.pageNumber);
+        this.pageSize.set(data.pageSize);
+        this.totalCount.set(data.totalCount);
+        this.totalPages.set(data.totalPages);
+        this.hasPreviousPage.set(data.hasPreviousPage);
+        this.hasNextPage.set(data.hasNextPage);
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to load products', err);
-        this.errorMessage = 'Failed to load products.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load products.');
+        this.isLoading.set(false);
       }
     });
   }
@@ -129,7 +121,7 @@ export class ProductsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.pageNumber = 1;
+    this.pageNumber.set(1);
     this.loadProducts();
   }
 
@@ -143,26 +135,27 @@ export class ProductsComponent implements OnInit {
   }
 
   openDeleteProductModal(product: ProductList): void {
-    this.productPendingDelete = product;
+    this.productPendingDelete.set(product);
   }
 
   cancelDeleteProduct(): void {
-    this.productPendingDelete = null;
+    this.productPendingDelete.set(null);
   }
 
   confirmDeleteProduct(): void {
-    if (!this.productPendingDelete) {
+    const product = this.productPendingDelete();
+    if (!product) {
       return;
     }
 
-    const moveToPreviousPage = this.products.length === 1 && this.pageNumber > 1;
+    const moveToPreviousPage = this.products().length === 1 && this.pageNumber() > 1;
 
-    this.productsService.delete(this.productPendingDelete.productId).subscribe({
+    this.productsService.delete(product.productId).subscribe({
       next: () => {
-        this.productPendingDelete = null;
+        this.productPendingDelete.set(null);
 
         if (moveToPreviousPage) {
-          this.pageNumber--;
+          this.pageNumber.update(page => page - 1);
         }
 
         this.loadSummary();
@@ -170,21 +163,20 @@ export class ProductsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to delete product', err);
-        this.errorMessage = 'Failed to delete product.';
-        this.productPendingDelete = null;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to delete product.');
+        this.productPendingDelete.set(null);
       }
     });
   }
 
   onPageChange(pageNumber: number): void {
-    this.pageNumber = pageNumber;
+    this.pageNumber.set(pageNumber);
     this.loadProducts();
   }
 
   onPageSizeChange(value: number): void {
-    this.pageSize = value;
-    this.pageNumber = 1;
+    this.pageSize.set(value);
+    this.pageNumber.set(1);
     this.loadProducts();
   }
 

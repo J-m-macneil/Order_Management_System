@@ -88,8 +88,6 @@ export class OrderCreateComponent implements OnInit {
     if (this.isEditMode && this.orderId) {
       this.loadOrderForEdit(this.orderId);
     }
-
-    this.cdr.detectChanges();
   }
 
   get items(): FormArray {
@@ -113,11 +111,10 @@ export class OrderCreateComponent implements OnInit {
     }).subscribe({
       next: (data) => {
         this.customers = data.items;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load customers', err);
-        this.cdr.detectChanges();
       }
     });
   }
@@ -129,11 +126,10 @@ export class OrderCreateComponent implements OnInit {
     }).subscribe({
       next: (data) => {
         this.products = data.items;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load products', err);
-        this.cdr.detectChanges();
       }
     });
   }
@@ -142,11 +138,10 @@ export class OrderCreateComponent implements OnInit {
     this.warehousesService.getAll().subscribe({
       next: (data) => {
         this.warehouses = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load warehouses', err);
-        this.cdr.detectChanges();
       }
     });
   }
@@ -155,11 +150,10 @@ export class OrderCreateComponent implements OnInit {
     this.carriersService.getAll().subscribe({
       next: (data) => {
         this.carriers = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load carriers', err);
-        this.cdr.detectChanges();
       }
     });
   }
@@ -168,31 +162,28 @@ export class OrderCreateComponent implements OnInit {
     this.projectsService.getAll().subscribe({
       next: (data) => {
         this.projects = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load projects', err);
-        this.cdr.detectChanges();
       }
     });
   }
 
   addItem(): void {
     this.items.push(this.createItemFormGroup());
-    this.cdr.detectChanges();
   }
 
   removeItem(index: number): void {
     if (this.items.length > 1) {
       this.items.removeAt(index);
-      this.cdr.detectChanges();
     }
   }
 
   private onCustomerChange(customerId: number | null): void {
     if (!customerId) {
       this.clearCustomerAddresses();
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       return;
     }
 
@@ -208,12 +199,12 @@ export class OrderCreateComponent implements OnInit {
           deliveryAddressId: defaultDelivery?.addressId ?? null
         });
 
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load customer addresses', err);
         this.clearCustomerAddresses();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -228,19 +219,19 @@ export class OrderCreateComponent implements OnInit {
           this.errorMessage = 'Only draft orders can be edited. Return this order to Draft before making changes.';
           this.isLoadingOrder = false;
           this.orderForm.disable();
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
           return;
         }
 
         this.orderNumber = order.orderNumber;
         this.patchFormForEdit(order);
         this.isLoadingOrder = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Failed to load order for editing.';
         this.isLoadingOrder = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -269,11 +260,11 @@ export class OrderCreateComponent implements OnInit {
           deliveryAddressId: order.deliveryAddressId
         }, { emitEvent: false });
 
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.clearCustomerAddresses();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
 
@@ -306,8 +297,6 @@ export class OrderCreateComponent implements OnInit {
       unitPrice: selectedProduct?.basePrice ?? 0,
       discountPercent: 0
     });
-
-    this.cdr.detectChanges();
   }
 
   submit(): void {
@@ -317,7 +306,6 @@ export class OrderCreateComponent implements OnInit {
 
     if (this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
-      this.cdr.detectChanges();
       return;
     }
 
@@ -365,7 +353,7 @@ export class OrderCreateComponent implements OnInit {
   private onSaveError(error: ApiErrorResponse, fallbackMessage: string): void {
     this.errorMessage = getApiErrorMessage(error, fallbackMessage);
     this.isSaving = false;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   private toDateInputValue(value: string): string {

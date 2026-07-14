@@ -9,7 +9,7 @@
 </div>
 
 <div class="app-stat-grid app-stat-grid--3">
-  <div *ngFor="let stat of stats" class="metric-card">
+  <div *ngFor="let stat of stats()" class="metric-card">
     <p class="metric-card-label">
       {{ stat.label }}
     </p>
@@ -58,7 +58,7 @@
               (change)="applyFilters()"
               class="form-input">
         <option value="">All industries</option>
-        <option *ngFor="let industry of industries" [value]="industry">
+        <option *ngFor="let industry of industries()" [value]="industry">
           {{ industry }}
         </option>
       </select>
@@ -87,15 +87,15 @@
   </div>
 </div>
 
-<div *ngIf="isLoading" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state">
   <p>Loading customers...</p>
 </div>
 
-<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
-  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+<div *ngIf="errorMessage() && !isLoading()" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
 </div>
 
-<div *ngIf="!isLoading && !errorMessage" class="app-table-card">
+<div *ngIf="!isLoading() && !errorMessage()" class="app-table-card">
   <div class="app-table-scroll">
     <table class="app-data-table">
       <thead class="app-table-head">
@@ -112,7 +112,7 @@
       </thead>
 
       <tbody class="app-table-body">
-        <tr *ngFor="let customer of customers">
+        <tr *ngFor="let customer of customers()">
           <td class="px-6 py-4 app-strong-text">
             {{ customer.accountNumber }}
           </td>
@@ -152,25 +152,25 @@
     </table>
   </div>
 
-  <div *ngIf="customers.length === 0" class="app-empty-state">
+  <div *ngIf="customers().length === 0" class="app-empty-state">
     <p>No customers found.</p>
   </div>
 
-  <app-table-pagination [pageNumber]="pageNumber"
-                        [pageSize]="pageSize"
-                        [totalCount]="totalCount"
-                        [totalPages]="totalPages"
-                        [hasPreviousPage]="hasPreviousPage"
-                        [hasNextPage]="hasNextPage"
+  <app-table-pagination [pageNumber]="pageNumber()"
+                        [pageSize]="pageSize()"
+                        [totalCount]="totalCount()"
+                        [totalPages]="totalPages()"
+                        [hasPreviousPage]="hasPreviousPage()"
+                        [hasNextPage]="hasNextPage()"
                         itemLabel="customers"
                         (pageSizeChange)="onPageSizeChange($event)"
                         (pageChange)="onPageChange($event)">
   </app-table-pagination>
 </div>
 
-<app-confirmation-modal *ngIf="customerPendingDelete"
+<app-confirmation-modal *ngIf="customerPendingDelete() as customer"
                         title="Delete Customer"
-                        [message]="'Delete customer ' + customerPendingDelete.companyName + '? This action cannot be undone.'"
+                        [message]="'Delete customer ' + customer.companyName + '? This action cannot be undone.'"
                         confirmText="Delete Customer"
                         variant="danger"
                         (confirm)="confirmDeleteCustomer()"

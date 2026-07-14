@@ -1,4 +1,3 @@
-import { ChangeDetectorRef } from '@angular/core';
 import { of } from 'rxjs';
 
 import { Customer } from '../../core/models/customer.model';
@@ -32,12 +31,11 @@ describe('CustomersComponent', () => {
       delete: () => of(void 0)
     } as unknown as CustomersService;
 
-    const cdr = { detectChanges: () => undefined } as unknown as ChangeDetectorRef;
-    component = new CustomersComponent(service, cdr);
+    component = new CustomersComponent(service);
   });
 
   it('clears advanced filters without clearing search', () => {
-    component.pageNumber = 3;
+    component.pageNumber.set(3);
     component.searchTerm = 'Acme';
     component.industryFilter = 'Manufacturing';
     component.paymentTermsFilter = '30';
@@ -54,13 +52,13 @@ describe('CustomersComponent', () => {
 
   it('returns to the previous page after deleting its final customer', () => {
     const customer = { customerId: 10 } as Customer;
-    component.customers = [customer];
-    component.customerPendingDelete = customer;
-    component.pageNumber = 2;
+    component.customers.set([customer]);
+    component.customerPendingDelete.set(customer);
+    component.pageNumber.set(2);
 
     component.confirmDeleteCustomer();
 
-    expect(component.pageNumber).toBe(1);
+    expect(component.pageNumber()).toBe(1);
     expect(requests[0]['pageNumber']).toBe(1);
   });
 });

@@ -57,7 +57,7 @@ export class ProductSdsPanelComponent implements OnInit {
         console.error('Failed to generate SDS', error);
         this.errorMessage = getApiErrorMessage(error, 'Failed to generate SDS.');
         this.isGenerating = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -96,7 +96,7 @@ export class ProductSdsPanelComponent implements OnInit {
         console.error('Failed to delete SDS', error);
         this.errorMessage = getApiErrorMessage(error, 'Failed to delete SDS.');
         this.sdsPendingDelete = null;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -109,13 +109,13 @@ export class ProductSdsPanelComponent implements OnInit {
         this.safetyDataSheets = data;
         this.errorMessage = '';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: error => {
         console.error('Failed to load SDS records', error);
         this.errorMessage = 'Failed to load SDS records.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

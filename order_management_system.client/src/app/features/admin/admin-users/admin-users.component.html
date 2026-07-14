@@ -1,6 +1,6 @@
-<ng-container *ngIf="!showUserForm">
-  <div *ngIf="errorMessage && !isLoading" class="mb-4 p-4 app-alert app-alert--danger">
-    <p class="app-alert-text--danger">{{ errorMessage }}</p>
+<ng-container *ngIf="!showUserForm()">
+  <div *ngIf="errorMessage() && !isLoading()" class="mb-4 p-4 app-alert app-alert--danger">
+    <p class="app-alert-text--danger">{{ errorMessage() }}</p>
   </div>
 
   <div class="app-filter-section">
@@ -31,7 +31,7 @@
                 (change)="applyFilters()"
                 class="form-input">
           <option [ngValue]="null">All roles</option>
-          <option *ngFor="let role of roles" [ngValue]="role.roleId">{{ role.name }}</option>
+          <option *ngFor="let role of roles()" [ngValue]="role.roleId">{{ role.name }}</option>
         </select>
       </div>
 
@@ -56,11 +56,11 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="app-empty-state">
+  <div *ngIf="isLoading()" class="app-empty-state">
     <p>Loading users...</p>
   </div>
 
-  <div *ngIf="!isLoading && !userLoadFailed" class="app-table-card">
+  <div *ngIf="!isLoading() && !userLoadFailed()" class="app-table-card">
     <div class="app-table-scroll">
       <table class="app-data-table">
         <thead class="app-table-head">
@@ -74,7 +74,7 @@
           </tr>
         </thead>
         <tbody class="app-table-body">
-          <tr *ngFor="let user of users">
+          <tr *ngFor="let user of users()">
             <td class="px-6 py-4">
               <div class="flex items-center gap-2">
                 <div>
@@ -112,16 +112,16 @@
       </table>
     </div>
 
-    <div *ngIf="users.length === 0" class="app-empty-state">
+    <div *ngIf="users().length === 0" class="app-empty-state">
       <p>No users found.</p>
     </div>
 
-    <app-table-pagination [pageNumber]="pageNumber"
-                          [pageSize]="pageSize"
-                          [totalCount]="totalCount"
-                          [totalPages]="totalPages"
-                          [hasPreviousPage]="hasPreviousPage"
-                          [hasNextPage]="hasNextPage"
+    <app-table-pagination [pageNumber]="pageNumber()"
+                          [pageSize]="pageSize()"
+                          [totalCount]="totalCount()"
+                          [totalPages]="totalPages()"
+                          [hasPreviousPage]="hasPreviousPage()"
+                          [hasNextPage]="hasNextPage()"
                           itemLabel="users"
                           (pageSizeChange)="onPageSizeChange($event)"
                           (pageChange)="onPageChange($event)">
@@ -129,14 +129,14 @@
   </div>
 </ng-container>
 
-<ng-container *ngIf="showUserForm">
+<ng-container *ngIf="showUserForm()">
   <div class="app-page-header">
     <div>
       <h1 class="brand-page-title">
-        {{ selectedUser ? 'Edit User' : 'Create User' }}<span class="brand-page-dot" aria-hidden="true">.</span>
+        {{ selectedUser() ? 'Edit User' : 'Create User' }}<span class="brand-page-dot" aria-hidden="true">.</span>
       </h1>
       <p class="app-muted-text mt-2">
-        {{ selectedUser ? 'Update access, role and account status' : 'Create a new user and assign their role' }}
+        {{ selectedUser() ? 'Update access, role and account status' : 'Create a new user and assign their role' }}
       </p>
     </div>
     <button type="button"
@@ -146,8 +146,8 @@
     </button>
   </div>
 
-  <div *ngIf="errorMessage" class="mb-4 p-4 app-alert app-alert--danger">
-    <p class="app-alert-text--danger">{{ errorMessage }}</p>
+  <div *ngIf="errorMessage()" class="mb-4 p-4 app-alert app-alert--danger">
+    <p class="app-alert-text--danger">{{ errorMessage() }}</p>
   </div>
 
   <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -178,10 +178,10 @@
 
           <label class="block">
             <span class="form-label">
-              {{ selectedUser ? 'New password' : 'Password' }}
+              {{ selectedUser() ? 'New password' : 'Password' }}
             </span>
             <input type="password" formControlName="password" autocomplete="new-password" class="form-input" />
-            <span *ngIf="selectedUser" class="block mt-1 text-xs app-muted-text">Leave blank to keep the current password.</span>
+            <span *ngIf="selectedUser()" class="block mt-1 text-xs app-muted-text">Leave blank to keep the current password.</span>
           </label>
 
           <label class="block">
@@ -199,7 +199,7 @@
             <span class="form-label">Role</span>
             <select formControlName="roleId" class="form-input">
               <option [ngValue]="null">Select role</option>
-              <option *ngFor="let role of roles" [ngValue]="role.roleId">{{ role.name }}</option>
+              <option *ngFor="let role of roles()" [ngValue]="role.roleId">{{ role.name }}</option>
             </select>
           </label>
 
@@ -207,7 +207,7 @@
             <span class="form-label">Department</span>
             <select formControlName="departmentId" class="form-input">
               <option [ngValue]="null">Select department</option>
-              <option *ngFor="let department of departments" [ngValue]="department.departmentId">{{ department.name }}</option>
+              <option *ngFor="let department of departments()" [ngValue]="department.departmentId">{{ department.name }}</option>
             </select>
           </label>
         </div>
@@ -239,8 +239,8 @@
         <div class="space-y-3">
           <button type="submit"
                   class="app-primary-button w-full px-4 py-3"
-                  [disabled]="isSaving">
-            {{ isSaving ? 'Saving...' : 'Save User' }}
+                  [disabled]="isSaving()">
+            {{ isSaving() ? 'Saving...' : 'Save User' }}
           </button>
 
           <button type="button"

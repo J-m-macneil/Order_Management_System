@@ -44,13 +44,13 @@ export class SystemSettingsComponent implements OnInit {
         }, {});
         this.settingsMessage = successMessage;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: err => {
         console.error('Failed to load system settings', err);
         this.errorMessage = 'Failed to load system settings.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -62,7 +62,6 @@ export class SystemSettingsComponent implements OnInit {
     if (validationError) {
       this.errorMessage = validationError;
       this.settingsMessage = '';
-      this.cdr.detectChanges();
       return;
     }
 
@@ -79,7 +78,7 @@ export class SystemSettingsComponent implements OnInit {
         console.error('Failed to update system setting', err);
         this.savingSettingIds.delete(setting.systemSettingId);
         this.errorMessage = getApiErrorMessage(err, 'Failed to update system setting.');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
