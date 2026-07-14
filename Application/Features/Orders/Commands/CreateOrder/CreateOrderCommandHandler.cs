@@ -1,3 +1,5 @@
+using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Features.Orders.Commands.CreateOrder;
 using Application.Interfaces;
 using Domain.Entities.Orders;
@@ -8,17 +10,23 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Cre
 {
     private readonly IOrderRepository _orders;
     private readonly IAuditService _audit;
+    private readonly ICurrentUserService _currentUser;
 
     public CreateOrderCommandHandler(
         IOrderRepository orders,
-        IAuditService audit)
+        IAuditService audit,
+        ICurrentUserService currentUser)
     {
         _orders = orders;
         _audit = audit;
+        _currentUser = currentUser;
     }
 
     public async Task<CreateOrderResponse> Handle(CreateOrderCommand dto, CancellationToken ct)
     {
+        var userId = _currentUser.UserId
+            ?? throw new UnauthorizedException("User is not authenticated.");
+
         var order = new Order
         {
             OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}",
@@ -28,7 +36,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Cre
             WarehouseId = dto.WarehouseId,
             CarrierId = dto.CarrierId,
             ProjectId = dto.ProjectId,
-            CreatedByUserId = dto.CreatedByUserId,
+            CreatedByUserId = userId,
             RequestedDeliveryDate = dto.RequestedDeliveryDate,
             PurchaseOrderReference = dto.PurchaseOrderReference,
             SpecialInstructions = dto.SpecialInstructions,

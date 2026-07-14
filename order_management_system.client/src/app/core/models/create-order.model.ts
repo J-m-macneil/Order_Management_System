@@ -9,7 +9,6 @@ export interface CreateOrder {
   carrierId?: number | null;
   projectId?: number | null;
 
-  createdByUserId: number;
   requestedDeliveryDate: string;
 
   purchaseOrderReference?: string | null;

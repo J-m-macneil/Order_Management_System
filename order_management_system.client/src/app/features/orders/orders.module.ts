@@ -9,6 +9,7 @@ import { OrderCreateComponent } from './order-create/order-create.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
 import { OrderDocumentsPanelComponent } from './order-documents-panel/order-documents-panel.component';
 import { OrderInformationCardComponent } from './order-information-card/order-information-card.component';
+import { OrderItemsEditorComponent } from './order-items-editor/order-items-editor.component';
 import { OrderItemsTableComponent } from './order-items-table/order-items-table.component';
 import { OrderLogisticsCardComponent } from './order-logistics-card/order-logistics-card.component';
 import { OrderNotesCardComponent } from './order-notes-card/order-notes-card.component';
@@ -26,6 +27,7 @@ import { OrdersComponent } from './orders.component';
     OrderCreateComponent,
     OrderDetailComponent,
     OrderInformationCardComponent,
+    OrderItemsEditorComponent,
     OrderItemsTableComponent,
     OrderLogisticsCardComponent,
     OrderNotesCardComponent,

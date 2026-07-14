@@ -15,13 +15,13 @@ import { OrderStatus } from '../../../core/models/order-status.enum';
 import { Warehouse } from '../../../core/models/warehouse-model';
 import { Carrier } from '../../../core/models/carrier.model';
 import { Project } from '../../../core/models/project.model';
-import { getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { CreateOrder } from '../../../core/models/create-order.model';
+import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
   selector: 'app-order-create',
   standalone: false,
-  templateUrl: './order-create.component.html',
-  styleUrls: ['./order-create.component.css']
+  templateUrl: './order-create.component.html'
 })
 export class OrderCreateComponent implements OnInit {
   orderForm!: FormGroup;
@@ -31,6 +31,7 @@ export class OrderCreateComponent implements OnInit {
 
   isEditMode = false;
   isLoadingOrder = false;
+  isSaving = false;
   errorMessage = '';
   orderNumber = '';
   customers: Customer[] = [];
@@ -66,7 +67,6 @@ export class OrderCreateComponent implements OnInit {
       warehouseId: [null, Validators.required],
       carrierId: [null],
       projectId: [null],
-      createdByUserId: [1, Validators.required],
       requestedDeliveryDate: [null, Validators.required],
       purchaseOrderReference: ['', [Validators.maxLength(40)]],
       specialInstructions: ['', [Validators.maxLength(255)]],
@@ -96,26 +96,17 @@ export class OrderCreateComponent implements OnInit {
     return this.orderForm.get('items') as FormArray;
   }
 
-  createItemFormGroup(): FormGroup {
-    const group = this.fb.group({
+  private createItemFormGroup(): FormGroup {
+    return this.fb.group({
       productId: [null, Validators.required],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitPrice: [0, [Validators.required, Validators.min(0)]],
-      discountPercent: [0, [Validators.required, Validators.min(0)]],
+      discountPercent: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       notes: ['', [Validators.maxLength(255)]]
     });
-
-    group.get('productId')?.valueChanges.subscribe(() => {
-      const index = this.items.controls.indexOf(group);
-      if (index !== -1) {
-        this.onProductChange(index);
-      }
-    });
-
-    return group;
   }
 
-  loadCustomers(): void {
+  private loadCustomers(): void {
     this.customersService.getAll({
       pageNumber: 1,
       pageSize: this.customerLookupPageSize
@@ -131,7 +122,7 @@ export class OrderCreateComponent implements OnInit {
     });
   }
 
-  loadProducts(): void {
+  private loadProducts(): void {
     this.productsService.getAll({
       pageNumber: 1,
       pageSize: this.productLookupPageSize
@@ -147,7 +138,7 @@ export class OrderCreateComponent implements OnInit {
     });
   }
 
-  loadWarehouses(): void {
+  private loadWarehouses(): void {
     this.warehousesService.getAll().subscribe({
       next: (data) => {
         this.warehouses = data;
@@ -160,7 +151,7 @@ export class OrderCreateComponent implements OnInit {
     });
   }
 
-  loadCarriers(): void {
+  private loadCarriers(): void {
     this.carriersService.getAll().subscribe({
       next: (data) => {
         this.carriers = data;
@@ -173,7 +164,7 @@ export class OrderCreateComponent implements OnInit {
     });
   }
 
-  loadProjects(): void {
+  private loadProjects(): void {
     this.projectsService.getAll().subscribe({
       next: (data) => {
         this.projects = data;
@@ -198,27 +189,16 @@ export class OrderCreateComponent implements OnInit {
     }
   }
 
-  onCustomerChange(customerId: number | null): void {
+  private onCustomerChange(customerId: number | null): void {
     if (!customerId) {
-      this.billingAddresses = [];
-      this.deliveryAddresses = [];
-      this.orderForm.patchValue({
-        billingAddressId: null,
-        deliveryAddressId: null
-      });
+      this.clearCustomerAddresses();
       this.cdr.detectChanges();
       return;
     }
 
     this.customersService.getAddresses(customerId).subscribe({
       next: (customerAddresses) => {
-        this.billingAddresses = customerAddresses.filter(
-          x => x.addressType === 'Billing'
-        );
-
-        this.deliveryAddresses = customerAddresses.filter(
-          x => x.addressType === 'DeliverySite'
-        );
+        this.setCustomerAddresses(customerAddresses);
 
         const defaultBilling = this.billingAddresses.find(x => x.isPrimary);
         const defaultDelivery = this.deliveryAddresses.find(x => x.isPrimary);
@@ -232,18 +212,13 @@ export class OrderCreateComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load customer addresses', err);
-        this.billingAddresses = [];
-        this.deliveryAddresses = [];
-        this.orderForm.patchValue({
-          billingAddressId: null,
-          deliveryAddressId: null
-        });
+        this.clearCustomerAddresses();
         this.cdr.detectChanges();
       }
     });
   }
 
-  loadOrderForEdit(orderId: number): void {
+  private loadOrderForEdit(orderId: number): void {
     this.isLoadingOrder = true;
     this.errorMessage = '';
 
@@ -270,7 +245,7 @@ export class OrderCreateComponent implements OnInit {
     });
   }
 
-  patchFormForEdit(order: Order): void {
+  private patchFormForEdit(order: Order): void {
     this.orderForm.patchValue({
       customerId: order.customerId,
       billingAddressId: order.billingAddressId,
@@ -278,7 +253,6 @@ export class OrderCreateComponent implements OnInit {
       warehouseId: order.warehouseId,
       carrierId: order.carrierId ?? null,
       projectId: order.projectId ?? null,
-      createdByUserId: order.createdByUserId,
       requestedDeliveryDate: this.toDateInputValue(order.requestedDeliveryDate),
       purchaseOrderReference: order.purchaseOrderReference ?? '',
       specialInstructions: order.specialInstructions ?? '',
@@ -288,8 +262,7 @@ export class OrderCreateComponent implements OnInit {
 
     this.customersService.getAddresses(order.customerId).subscribe({
       next: (customerAddresses) => {
-        this.billingAddresses = customerAddresses.filter(x => x.addressType === 'Billing');
-        this.deliveryAddresses = customerAddresses.filter(x => x.addressType === 'DeliverySite');
+        this.setCustomerAddresses(customerAddresses);
 
         this.orderForm.patchValue({
           billingAddressId: order.billingAddressId,
@@ -299,8 +272,7 @@ export class OrderCreateComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.billingAddresses = [];
-        this.deliveryAddresses = [];
+        this.clearCustomerAddresses();
         this.cdr.detectChanges();
       }
     });
@@ -328,29 +300,10 @@ export class OrderCreateComponent implements OnInit {
   onProductChange(index: number): void {
     const itemGroup = this.items.at(index) as FormGroup;
     const productId = itemGroup.get('productId')?.value;
-
-    if (!productId) {
-      itemGroup.patchValue({
-        unitPrice: 0,
-        discountPercent: 0
-      });
-      this.cdr.detectChanges();
-      return;
-    }
-
     const selectedProduct = this.products.find(x => x.productId === productId);
 
-    if (!selectedProduct) {
-      itemGroup.patchValue({
-        unitPrice: 0,
-        discountPercent: 0
-      });
-      this.cdr.detectChanges();
-      return;
-    }
-
     itemGroup.patchValue({
-      unitPrice: selectedProduct.basePrice,
+      unitPrice: selectedProduct?.basePrice ?? 0,
       discountPercent: 0
     });
 
@@ -358,13 +311,19 @@ export class OrderCreateComponent implements OnInit {
   }
 
   submit(): void {
+    if (this.isSaving || this.orderForm.disabled) {
+      return;
+    }
+
     if (this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
       this.cdr.detectChanges();
       return;
     }
 
-    const dto = this.orderForm.value;
+    const dto = this.orderForm.getRawValue() as CreateOrder;
+    this.isSaving = true;
+    this.errorMessage = '';
 
     if (this.isEditMode && this.orderId) {
       this.ordersService.updateOrder(this.orderId, dto).subscribe({
@@ -372,8 +331,7 @@ export class OrderCreateComponent implements OnInit {
           this.router.navigate(['/orders', this.orderId]);
         },
         error: (err) => {
-          this.errorMessage = getApiErrorMessage(err, 'Failed to update order.');
-          this.cdr.detectChanges();
+          this.onSaveError(err, 'Failed to update order.');
         }
       });
 
@@ -385,10 +343,29 @@ export class OrderCreateComponent implements OnInit {
         this.router.navigate(['/orders', result.orderId]);
       },
       error: (err) => {
-        this.errorMessage = getApiErrorMessage(err, 'Failed to create order.');
-        this.cdr.detectChanges();
+        this.onSaveError(err, 'Failed to create order.');
       }
     });
+  }
+
+  private setCustomerAddresses(addresses: Address[]): void {
+    this.billingAddresses = addresses.filter(address => address.addressType === 'Billing');
+    this.deliveryAddresses = addresses.filter(address => address.addressType === 'DeliverySite');
+  }
+
+  private clearCustomerAddresses(): void {
+    this.billingAddresses = [];
+    this.deliveryAddresses = [];
+    this.orderForm.patchValue({
+      billingAddressId: null,
+      deliveryAddressId: null
+    });
+  }
+
+  private onSaveError(error: ApiErrorResponse, fallbackMessage: string): void {
+    this.errorMessage = getApiErrorMessage(error, fallbackMessage);
+    this.isSaving = false;
+    this.cdr.detectChanges();
   }
 
   private toDateInputValue(value: string): string {

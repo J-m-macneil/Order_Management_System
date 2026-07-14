@@ -10,7 +10,6 @@ public class CreateOrderCommand : IRequest<CreateOrderResponse>
     public int WarehouseId { get; set; }
     public int? CarrierId { get; set; }
     public int? ProjectId { get; set; }
-    public int CreatedByUserId { get; set; }
     public DateTime RequestedDeliveryDate { get; set; }
     public string? PurchaseOrderReference { get; set; }
     public string? SpecialInstructions { get; set; }
