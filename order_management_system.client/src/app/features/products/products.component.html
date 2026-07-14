@@ -1,4 +1,3 @@
-<!-- Page Header -->
 <div class="app-page-header">
   <div>
     <h1 class="brand-page-title">Products<span class="brand-page-dot" aria-hidden="true">.</span></h1>
@@ -10,7 +9,6 @@
   </a>
 </div>
 
-<!-- Stats Cards -->
 <div class="app-stat-grid app-stat-grid--4">
   <div *ngFor="let stat of stats" class="metric-card">
     <p class="metric-card-label">
@@ -22,7 +20,6 @@
   </div>
 </div>
 
-<!-- Search and Filters -->
 <div class="app-filter-section">
   <div class="app-responsive-action-row">
     <a routerLink="/products/create"
@@ -33,23 +30,19 @@
 
   <div class="app-search-row">
 
-    <!-- Search -->
     <app-search-input [(value)]="searchTerm"
                       placeholder="Search by SKU, product name, pack size, category, unit, or hazard class..."
                       (search)="applyFilters()">
     </app-search-input>
 
-    <!-- Filter Button -->
     <app-filter-button [activeFilterCount]="activeFilterCount"
                        (toggle)="toggleFilters()">
     </app-filter-button>
   </div>
 
-  <!-- Filter Panel -->
-  <div *ngIf="showFilters()"
+  <div *ngIf="filtersVisible"
        class="app-filter-panel app-filter-panel--3">
 
-    <!-- Status -->
     <div>
       <label class="form-label">Status</label>
       <select [(ngModel)]="activeFilter"
@@ -61,7 +54,6 @@
       </select>
     </div>
 
-    <!-- Restricted -->
     <div>
       <label class="form-label">Restricted</label>
       <select [(ngModel)]="restrictedFilter"
@@ -73,7 +65,6 @@
       </select>
     </div>
 
-    <!-- Category -->
     <div>
       <label class="form-label">Category</label>
       <select [(ngModel)]="categoryFilter"
@@ -86,7 +77,6 @@
       </select>
     </div>
 
-    <!-- Hazard Class -->
     <div>
       <label class="form-label">Hazard Class</label>
       <select [(ngModel)]="hazardClassFilter"
@@ -99,7 +89,6 @@
       </select>
     </div>
 
-    <!-- Hazardous -->
     <div>
       <label class="form-label">Hazardous</label>
       <select [(ngModel)]="hazardousFilter"
@@ -111,7 +100,6 @@
       </select>
     </div>
 
-    <!-- Clear Filters -->
     <div class="app-filter-actions app-filter-actions--full">
       <button type="button"
               (click)="clearFilters()"
@@ -123,17 +111,14 @@
   </div>
 </div>
 
-<!-- Loading State -->
 <div *ngIf="isLoading" class="app-empty-state">
   <p>Loading products...</p>
 </div>
 
-<!-- Error State -->
 <div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
   <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
-<!-- Products Table -->
 <div *ngIf="!isLoading && !errorMessage" class="app-table-card">
   <div class="app-table-scroll">
     <table class="app-data-table">
@@ -225,7 +210,6 @@
     </table>
   </div>
 
-  <!-- Empty State -->
   <div *ngIf="products.length === 0" class="app-empty-state">
     <p>No products found.</p>
   </div>
@@ -236,11 +220,9 @@
                         [totalPages]="totalPages"
                         [hasPreviousPage]="hasPreviousPage"
                         [hasNextPage]="hasNextPage"
-                        [pageSizeOptions]="pageSizeOptions"
                         itemLabel="products"
                         (pageSizeChange)="onPageSizeChange($event)"
-                        (previousPage)="goToPreviousPage()"
-                        (nextPage)="goToNextPage()">
+                        (pageChange)="onPageChange($event)">
   </app-table-pagination>
 </div>
 

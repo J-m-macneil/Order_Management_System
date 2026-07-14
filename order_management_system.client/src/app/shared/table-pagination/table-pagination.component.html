@@ -18,7 +18,7 @@
     </label>
 
     <button type="button"
-            (click)="previousPage.emit()"
+            (click)="pageChange.emit(pageNumber - 1)"
             [disabled]="!hasPreviousPage"
             class="app-pagination-button"
             aria-label="Previous page">
@@ -29,7 +29,7 @@
     </button>
 
     <button type="button"
-            (click)="nextPage.emit()"
+            (click)="pageChange.emit(pageNumber + 1)"
             [disabled]="!hasNextPage"
             class="app-pagination-button"
             aria-label="Next page">

@@ -5,8 +5,7 @@ import { CustomersService } from '../../core/services/customers.service';
 @Component({
   selector: 'app-customers',
   standalone: false,
-  templateUrl: './customers.component.html',
-  styleUrls: ['./customers.component.css']
+  templateUrl: './customers.component.html'
 })
 export class CustomersComponent implements OnInit {
   customers: Customer[] = [];
@@ -20,14 +19,13 @@ export class CustomersComponent implements OnInit {
   totalPages = 0;
   hasPreviousPage = false;
   hasNextPage = false;
-  pageSizeOptions = [25, 50, 100];
 
   searchTerm = '';
   industryFilter = '';
   paymentTermsFilter = '';
   activeFilter = '';
 
-  private filtersVisible = false;
+  filtersVisible = false;
 
   stats: { label: string; value: string | number }[] = [];
   industries: string[] = [];
@@ -97,10 +95,6 @@ export class CustomersComponent implements OnInit {
     });
   }
 
-  showFilters(): boolean {
-    return this.filtersVisible;
-  }
-
   toggleFilters(): void {
     this.filtersVisible = !this.filtersVisible;
   }
@@ -155,9 +149,16 @@ export class CustomersComponent implements OnInit {
       return;
     }
 
+    const moveToPreviousPage = this.customers.length === 1 && this.pageNumber > 1;
+
     this.customersService.delete(this.customerPendingDelete.customerId).subscribe({
       next: () => {
         this.customerPendingDelete = null;
+
+        if (moveToPreviousPage) {
+          this.pageNumber--;
+        }
+
         this.loadSummary();
         this.loadCustomers();
       },
@@ -177,29 +178,12 @@ export class CustomersComponent implements OnInit {
     ].filter(Boolean).length;
   }
 
-  goToPreviousPage(): void {
-    if (!this.hasPreviousPage) {
-      return;
-    }
-
-    this.pageNumber--;
-    this.loadCustomers();
-  }
-
-  goToNextPage(): void {
-    if (!this.hasNextPage) {
-      return;
-    }
-
-    this.pageNumber++;
+  onPageChange(pageNumber: number): void {
+    this.pageNumber = pageNumber;
     this.loadCustomers();
   }
 
   onPageSizeChange(value: number): void {
-    if (!this.pageSizeOptions.includes(value)) {
-      return;
-    }
-
     this.pageSize = value;
     this.pageNumber = 1;
     this.loadCustomers();

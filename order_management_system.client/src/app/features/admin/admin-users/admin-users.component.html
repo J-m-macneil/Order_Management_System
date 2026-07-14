@@ -1,5 +1,5 @@
 <ng-container *ngIf="!showUserForm">
-  <div *ngIf="errorMessage" class="mb-4 p-4 app-alert app-alert--danger">
+  <div *ngIf="errorMessage && !isLoading" class="mb-4 p-4 app-alert app-alert--danger">
     <p class="app-alert-text--danger">{{ errorMessage }}</p>
   </div>
 
@@ -56,7 +56,11 @@
     </div>
   </div>
 
-  <div class="app-table-card">
+  <div *ngIf="isLoading" class="app-empty-state">
+    <p>Loading users...</p>
+  </div>
+
+  <div *ngIf="!isLoading && !userLoadFailed" class="app-table-card">
     <div class="app-table-scroll">
       <table class="app-data-table">
         <thead class="app-table-head">
@@ -108,11 +112,7 @@
       </table>
     </div>
 
-    <div *ngIf="isLoading" class="app-empty-state">
-      <p>Loading users...</p>
-    </div>
-
-    <div *ngIf="!isLoading && users.length === 0" class="app-empty-state">
+    <div *ngIf="users.length === 0" class="app-empty-state">
       <p>No users found.</p>
     </div>
 
@@ -122,11 +122,9 @@
                           [totalPages]="totalPages"
                           [hasPreviousPage]="hasPreviousPage"
                           [hasNextPage]="hasNextPage"
-                          [pageSizeOptions]="pageSizeOptions"
                           itemLabel="users"
                           (pageSizeChange)="onPageSizeChange($event)"
-                          (previousPage)="goToPreviousPage()"
-                          (nextPage)="goToNextPage()">
+                          (pageChange)="onPageChange($event)">
     </app-table-pagination>
   </div>
 </ng-container>

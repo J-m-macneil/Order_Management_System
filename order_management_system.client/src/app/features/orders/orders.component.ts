@@ -16,7 +16,6 @@ export class OrdersComponent implements OnInit {
   totalPages = 0;
   hasPreviousPage = false;
   hasNextPage = false;
-  readonly pageSizeOptions = [25, 50, 100];
 
   isLoading = false;
   errorMessage = '';
@@ -30,7 +29,7 @@ export class OrdersComponent implements OnInit {
   createdFrom = '';
   createdTo = '';
 
-  private filtersVisible = false;
+  filtersVisible = false;
 
   readonly orderStatuses = [
     { id: 1, name: 'Draft', badgeClass: 'app-badge app-badge--neutral' },
@@ -98,10 +97,6 @@ export class OrdersComponent implements OnInit {
           this.cdr.detectChanges();
         }
       });
-  }
-
-  showFilters(): boolean {
-    return this.filtersVisible;
   }
 
   toggleFilters(): void {
@@ -176,29 +171,12 @@ export class OrdersComponent implements OnInit {
     ].filter(Boolean).length;
   }
 
-  goToPreviousPage(): void {
-    if (!this.hasPreviousPage) {
-      return;
-    }
-
-    this.pageNumber--;
-    this.loadOrders();
-  }
-
-  goToNextPage(): void {
-    if (!this.hasNextPage) {
-      return;
-    }
-
-    this.pageNumber++;
+  onPageChange(pageNumber: number): void {
+    this.pageNumber = pageNumber;
     this.loadOrders();
   }
 
   onPageSizeChange(value: number): void {
-    if (!this.pageSizeOptions.includes(value)) {
-      return;
-    }
-
     this.pageSize = value;
     this.pageNumber = 1;
     this.loadOrders();

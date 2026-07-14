@@ -3,8 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 @Component({
   selector: 'app-table-pagination',
   standalone: false,
-  templateUrl: './table-pagination.component.html',
-  styleUrl: './table-pagination.component.css'
+  templateUrl: './table-pagination.component.html'
 })
 export class TablePaginationComponent {
   @Input() pageNumber = 1;
@@ -13,10 +12,10 @@ export class TablePaginationComponent {
   @Input() totalPages = 0;
   @Input() hasPreviousPage = false;
   @Input() hasNextPage = false;
-  @Input() pageSizeOptions: number[] = [25, 50, 100];
   @Input() itemLabel = 'items';
 
+  readonly pageSizeOptions = [25, 50, 100];
+
   @Output() pageSizeChange = new EventEmitter<number>();
-  @Output() previousPage = new EventEmitter<void>();
-  @Output() nextPage = new EventEmitter<void>();
+  @Output() pageChange = new EventEmitter<number>();
 }

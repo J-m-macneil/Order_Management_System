@@ -7,8 +7,7 @@ import { HazardClass } from '../../core/models/hazard-class.model';
 @Component({
   selector: 'app-products',
   standalone: false,
-  templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css'],
+  templateUrl: './products.component.html'
 })
 export class ProductsComponent implements OnInit {
   products: ProductList[] = [];
@@ -19,7 +18,6 @@ export class ProductsComponent implements OnInit {
   totalPages = 0;
   hasPreviousPage = false;
   hasNextPage = false;
-  pageSizeOptions = [25, 50, 100];
 
   isLoading = false;
   errorMessage = '';
@@ -31,7 +29,7 @@ export class ProductsComponent implements OnInit {
   categoryFilter: number | null = null;
   hazardClassFilter: number | null = null;
 
-  private filtersVisible = false;
+  filtersVisible = false;
 
   stats: { label: string; value: string | number }[] = [];
   categories: ProductCategory[] = [];
@@ -126,10 +124,6 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  showFilters(): boolean {
-    return this.filtersVisible;
-  }
-
   toggleFilters(): void {
     this.filtersVisible = !this.filtersVisible;
   }
@@ -161,9 +155,16 @@ export class ProductsComponent implements OnInit {
       return;
     }
 
+    const moveToPreviousPage = this.products.length === 1 && this.pageNumber > 1;
+
     this.productsService.delete(this.productPendingDelete.productId).subscribe({
       next: () => {
         this.productPendingDelete = null;
+
+        if (moveToPreviousPage) {
+          this.pageNumber--;
+        }
+
         this.loadSummary();
         this.loadProducts();
       },
@@ -176,29 +177,12 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  goToPreviousPage(): void {
-    if (!this.hasPreviousPage) {
-      return;
-    }
-
-    this.pageNumber--;
-    this.loadProducts();
-  }
-
-  goToNextPage(): void {
-    if (!this.hasNextPage) {
-      return;
-    }
-
-    this.pageNumber++;
+  onPageChange(pageNumber: number): void {
+    this.pageNumber = pageNumber;
     this.loadProducts();
   }
 
   onPageSizeChange(value: number): void {
-    if (!this.pageSizeOptions.includes(value)) {
-      return;
-    }
-
     this.pageSize = value;
     this.pageNumber = 1;
     this.loadProducts();

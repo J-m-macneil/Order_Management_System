@@ -18,7 +18,6 @@ export class AuditLogsComponent implements OnInit {
   totalPages = 0;
   hasPreviousPage = false;
   hasNextPage = false;
-  pageSizeOptions = [25, 50, 100];
 
   entityTypes = ['Order', 'Customer', 'Product', 'ProcessingJob', 'Document', 'Notification'];
   actionTypes = [
@@ -96,7 +95,6 @@ export class AuditLogsComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchTerm = '';
     this.entityType = '';
     this.action = '';
     this.entityId = null;
@@ -116,31 +114,16 @@ export class AuditLogsComponent implements OnInit {
       : log;
   }
 
-  goToPreviousPage(): void {
-    if (!this.hasPreviousPage) {
-      return;
-    }
-
-    this.pageNumber--;
-    this.loadAuditLogs();
-  }
-
-  goToNextPage(): void {
-    if (!this.hasNextPage) {
-      return;
-    }
-
-    this.pageNumber++;
+  onPageChange(pageNumber: number): void {
+    this.pageNumber = pageNumber;
+    this.selectedLog = null;
     this.loadAuditLogs();
   }
 
   onPageSizeChange(value: number): void {
-    if (!this.pageSizeOptions.includes(value)) {
-      return;
-    }
-
     this.pageSize = value;
     this.pageNumber = 1;
+    this.selectedLog = null;
     this.loadAuditLogs();
   }
 

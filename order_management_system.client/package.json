@@ -21,7 +21,6 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "jest-editor-support": "*",
     "run-script-os": "*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
@@ -30,7 +29,6 @@
     "@angular/build": "^21.2.7",
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.0",
-    "@types/jasmine": "^6.0.0",
     "autoprefixer": "^10.5.0",
     "eslint": "^10.2.0",
     "jsdom": "^28.0.0",

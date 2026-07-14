@@ -28,7 +28,6 @@ export class AdminUsersComponent implements OnInit {
   totalPages = 0;
   hasPreviousPage = false;
   hasNextPage = false;
-  readonly pageSizeOptions = [25, 50, 100];
 
   searchTerm = '';
   roleFilter: number | null = null;
@@ -36,6 +35,7 @@ export class AdminUsersComponent implements OnInit {
   filtersVisible = false;
 
   isLoading = false;
+  userLoadFailed = false;
   isSaving = false;
   errorMessage = '';
 
@@ -90,6 +90,7 @@ export class AdminUsersComponent implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
+    this.userLoadFailed = false;
     this.errorMessage = '';
 
     this.usersService.getUsers({
@@ -113,6 +114,7 @@ export class AdminUsersComponent implements OnInit {
       error: err => {
         console.error('Failed to load users', err);
         this.errorMessage = 'Failed to load users.';
+        this.userLoadFailed = true;
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -129,7 +131,6 @@ export class AdminUsersComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchTerm = '';
     this.roleFilter = null;
     this.statusFilter = '';
     this.applyFilters();
@@ -210,29 +211,12 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  goToPreviousPage(): void {
-    if (!this.hasPreviousPage) {
-      return;
-    }
-
-    this.pageNumber--;
-    this.loadUsers();
-  }
-
-  goToNextPage(): void {
-    if (!this.hasNextPage) {
-      return;
-    }
-
-    this.pageNumber++;
+  onPageChange(pageNumber: number): void {
+    this.pageNumber = pageNumber;
     this.loadUsers();
   }
 
   onPageSizeChange(value: number): void {
-    if (!this.pageSizeOptions.includes(value)) {
-      return;
-    }
-
     this.pageSize = value;
     this.pageNumber = 1;
     this.loadUsers();

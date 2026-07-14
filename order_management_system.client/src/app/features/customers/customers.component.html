@@ -1,4 +1,3 @@
-<!-- Page Header -->
 <div class="app-page-header">
   <div>
     <h1 class="brand-page-title">Customers<span class="brand-page-dot" aria-hidden="true">.</span></h1>
@@ -9,7 +8,6 @@
   </a>
 </div>
 
-<!-- Stats Cards -->
 <div class="app-stat-grid app-stat-grid--3">
   <div *ngFor="let stat of stats" class="metric-card">
     <p class="metric-card-label">
@@ -21,7 +19,6 @@
   </div>
 </div>
 
-<!-- Search and Filters -->
 <div class="app-filter-section">
   <div class="app-responsive-action-row">
     <a routerLink="/customers/new" class="app-primary-button px-4 py-3">
@@ -31,23 +28,19 @@
 
   <div class="app-search-row">
 
-    <!-- Search -->
     <app-search-input [(value)]="searchTerm"
                       placeholder="Search by account number, company, contact, or email..."
                       (search)="applyFilters()">
     </app-search-input>
 
-    <!-- Filter Button -->
     <app-filter-button [activeFilterCount]="activeFilterCount"
                        (toggle)="toggleFilters()">
     </app-filter-button>
   </div>
 
-  <!-- Filter Panel -->
-  <div *ngIf="showFilters()"
+  <div *ngIf="filtersVisible"
        class="app-filter-panel app-filter-panel--3">
 
-    <!-- Status -->
     <div>
       <label class="form-label">Status</label>
       <select [(ngModel)]="activeFilter"
@@ -59,7 +52,6 @@
       </select>
     </div>
 
-    <!-- Industry -->
     <div>
       <label class="form-label">Industry</label>
       <select [(ngModel)]="industryFilter"
@@ -72,7 +64,6 @@
       </select>
     </div>
 
-    <!-- Payment Terms -->
     <div>
       <label class="form-label">Payment Terms</label>
       <select [(ngModel)]="paymentTermsFilter"
@@ -85,7 +76,6 @@
       </select>
     </div>
 
-    <!-- Clear Filters -->
     <div class="app-filter-actions">
       <button type="button"
               (click)="clearFilters()"
@@ -97,17 +87,14 @@
   </div>
 </div>
 
-<!-- Loading State -->
 <div *ngIf="isLoading" class="app-empty-state">
   <p>Loading customers...</p>
 </div>
 
-<!-- Error State -->
 <div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
   <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
-<!-- Customers Table -->
 <div *ngIf="!isLoading && !errorMessage" class="app-table-card">
   <div class="app-table-scroll">
     <table class="app-data-table">
@@ -165,7 +152,6 @@
     </table>
   </div>
 
-  <!-- Empty State -->
   <div *ngIf="customers.length === 0" class="app-empty-state">
     <p>No customers found.</p>
   </div>
@@ -176,11 +162,9 @@
                         [totalPages]="totalPages"
                         [hasPreviousPage]="hasPreviousPage"
                         [hasNextPage]="hasNextPage"
-                        [pageSizeOptions]="pageSizeOptions"
                         itemLabel="customers"
                         (pageSizeChange)="onPageSizeChange($event)"
-                        (previousPage)="goToPreviousPage()"
-                        (nextPage)="goToNextPage()">
+                        (pageChange)="onPageChange($event)">
   </app-table-pagination>
 </div>
 

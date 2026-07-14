@@ -1,4 +1,3 @@
-<!-- Page Header -->
 <div class="app-page-header">
   <div>
     <h1 class="brand-page-title">Orders<span class="brand-page-dot" aria-hidden="true">.</span></h1>
@@ -10,7 +9,6 @@
   </a>
 </div>
 
-<!-- Search and Filters -->
 <div class="app-filter-section">
   <div class="app-responsive-action-row">
     <a routerLink="/orders/create"
@@ -30,7 +28,7 @@
     </app-filter-button>
   </div>
 
-  <div *ngIf="showFilters()"
+  <div *ngIf="filtersVisible"
        class="app-filter-panel app-filter-panel--3">
     <div>
       <label class="form-label">Status</label>
@@ -44,7 +42,6 @@
       </select>
     </div>
 
-    <!-- Priority Filter -->
     <div>
       <label class="form-label">Priority</label>
       <select [(ngModel)]="priorityFilter"
@@ -99,7 +96,6 @@
              class="form-input" />
     </div>
 
-    <!-- Clear Filters -->
     <div class="app-filter-actions app-filter-actions--full">
       <button type="button"
               (click)="clearFilters()"
@@ -110,17 +106,14 @@
   </div>
 </div>
 
-<!-- Loading State -->
 <div *ngIf="isLoading" class="app-empty-state">
   <p>Loading orders...</p>
 </div>
 
-<!-- Error State -->
 <div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
   <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
-<!-- Orders Table -->
 <div *ngIf="!isLoading && !errorMessage" class="app-table-card">
   <div class="app-table-scroll">
     <table class="app-data-table">
@@ -191,7 +184,6 @@
     </table>
   </div>
 
-  <!-- Empty State -->
   <div *ngIf="orders.length === 0" class="app-empty-state">
     <p>No orders found.</p>
   </div>
@@ -202,11 +194,9 @@
                         [totalPages]="totalPages"
                         [hasPreviousPage]="hasPreviousPage"
                         [hasNextPage]="hasNextPage"
-                        [pageSizeOptions]="pageSizeOptions"
                         itemLabel="orders"
                         (pageSizeChange)="onPageSizeChange($event)"
-                        (previousPage)="goToPreviousPage()"
-                        (nextPage)="goToNextPage()">
+                        (pageChange)="onPageChange($event)">
   </app-table-pagination>
 
 </div>
