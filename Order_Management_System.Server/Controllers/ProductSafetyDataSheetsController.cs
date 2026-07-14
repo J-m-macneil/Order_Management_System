@@ -87,6 +87,7 @@ public class ProductSafetyDataSheetsController : ControllerBase
     }
 
     [HttpDelete("{sdsId}")]
+    [Authorize(Policy = "OperationsOrAdmin")]
     public async Task<IActionResult> Delete(int productId, int sdsId)
     {
         await _mediator.Send(new DeleteSafetyDataSheetCommand

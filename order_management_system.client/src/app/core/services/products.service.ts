@@ -10,7 +10,7 @@ import { UpdateProductRequest } from "../models/update-product.model";
 import { UnitOfMeasure } from "../models/unit-of-measure.model";
 import { HazardClass } from "../models/hazard-class.model";
 import { ProductList } from "../models/product-list.model";
-import { SafetyDataSheet, CreateSafetyDataSheetRequest, UpdateSafetyDataSheetRequest } from "../models/safety-data-sheet-model";
+import { SafetyDataSheet } from "../models/safety-data-sheet-model";
 import { PaginationQuery } from "../models/pagination-query.model";
 import { PagedResult } from "../models/paged-result.model";
 import { ProductSummary } from "../models/product-summary.model";
@@ -98,20 +98,12 @@ export class ProductsService {
     return this.http.get<SafetyDataSheet[]>(`${this.baseUrl}/${productId}/sds`);
   }
 
-  createSafetyDataSheet(productId: number, request: CreateSafetyDataSheetRequest): Observable<SafetyDataSheet> {
-    return this.http.post<SafetyDataSheet>(`${this.baseUrl}/${productId}/sds`, request);
-  }
-
   generateSafetyDataSheet(productId: number): Observable<SafetyDataSheet> {
     return this.http.post<SafetyDataSheet>(`${this.baseUrl}/${productId}/sds/generate`, {});
   }
 
   getSafetyDataSheetViewUrl(productId: number, sdsId: number): string {
     return `${this.baseUrl}/${productId}/sds/${sdsId}/view`;
-  }
-
-  updateSafetyDataSheet(productId: number, sdsId: number, request: UpdateSafetyDataSheetRequest): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${productId}/sds/${sdsId}`, request);
   }
 
   deleteSafetyDataSheet(productId: number, sdsId: number): Observable<void> {

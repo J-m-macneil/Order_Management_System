@@ -1,25 +1,21 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { HazardClass } from '../../../core/models/hazard-class.model';
 import { ProductCategory } from '../../../core/models/product-category.model';
 import { Product } from '../../../core/models/product.model';
-import { AuditLog } from '../../../core/models/audit-log.model';
-import { SafetyDataSheet } from '../../../core/models/safety-data-sheet-model';
 import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
-import { AuthService } from '../../../core/auth/auth.service';
-import { AuditLogsService } from '../../../core/services/audit-logs.service';
 import { ProductsService } from '../../../core/services/products.service';
-import { getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { ProductAuditPanelComponent } from '../product-audit-panel/product-audit-panel.component';
 
 @Component({
   selector: 'app-product-form',
   templateUrl: './product-form.component.html',
-  styleUrls: ['./product-form.component.css'],
   standalone: false
 })
 export class ProductFormComponent implements OnInit {
+  @ViewChild(ProductAuditPanelComponent) private auditPanel?: ProductAuditPanelComponent;
+
   form!: FormGroup;
 
   isEditMode = false;
@@ -27,22 +23,15 @@ export class ProductFormComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
+  savedRequiresSds = false;
 
   productCategories: ProductCategory[] = [];
   unitsOfMeasure: UnitOfMeasure[] = [];
   hazardClasses: HazardClass[] = [];
 
-  safetyDataSheets: SafetyDataSheet[] = [];
-  isGeneratingSds = false;
-  sdsPendingDelete: SafetyDataSheet | null = null;
-  auditLogs: AuditLog[] = [];
-  auditUnavailable = false;
-
   constructor(
     private fb: FormBuilder,
     private productsService: ProductsService,
-    private authService: AuthService,
-    private auditLogsService: AuditLogsService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -75,16 +64,10 @@ export class ProductFormComponent implements OnInit {
       this.isEditMode = true;
       this.productId = id;
       this.loadProduct(id);
-      this.loadSafetyDataSheets(id);
-      this.loadProductAuditHistory(id);
     }
   }
 
-  get canGenerateSds(): boolean {
-    return this.authService.hasRole('Operations', 'Admin');
-  }
-
-  loadLookups(): void {
+  private loadLookups(): void {
     this.productsService.getProductCategories().subscribe({
       next: (data) => {
         this.productCategories = data;
@@ -119,7 +102,7 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  loadProduct(id: number): void {
+  private loadProduct(id: number): void {
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -142,6 +125,7 @@ export class ProductFormComponent implements OnInit {
           isActive: product.isActive
         });
 
+        this.savedRequiresSds = product.requiresSds;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -149,132 +133,6 @@ export class ProductFormComponent implements OnInit {
         console.error('Failed to load product', err);
         this.errorMessage = 'Failed to load product.';
         this.isLoading = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  loadSafetyDataSheets(productId: number): void {
-    this.productsService.getSafetyDataSheets(productId).subscribe({
-      next: (data) => {
-        this.safetyDataSheets = data;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to load SDS records', err);
-        this.errorMessage = 'Failed to load SDS records.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  generateSafetyDataSheet(): void {
-    if (!this.productId || !this.form.get('requiresSds')?.value) {
-      return;
-    }
-
-    this.isGeneratingSds = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-    this.cdr.detectChanges();
-
-    this.productsService.generateSafetyDataSheet(this.productId).subscribe({
-      next: () => {
-        this.successMessage = 'SDS generated.';
-        this.isGeneratingSds = false;
-        this.loadSafetyDataSheets(this.productId!);
-        this.loadProductAuditHistory(this.productId!);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to generate SDS', err);
-        this.errorMessage = getApiErrorMessage(err, 'Failed to generate SDS.');
-        this.isGeneratingSds = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  getSafetyDataSheetViewUrl(sds: SafetyDataSheet): string {
-    return this.productsService.getSafetyDataSheetViewUrl(sds.productId, sds.safetyDataSheetId);
-  }
-
-  loadProductAuditHistory(productId: number): void {
-    forkJoin([
-      this.auditLogsService.getAuditLogs({
-        pageNumber: 1,
-        pageSize: 10,
-        entityType: 'Product',
-        entityId: productId
-      }),
-      this.auditLogsService.getAuditLogs({
-        pageNumber: 1,
-        pageSize: 10,
-        searchTerm: `product #${productId}`,
-        entityType: 'SafetyDataSheet'
-      })
-    ]).subscribe({
-      next: ([productResult, sdsResult]) => {
-        this.auditLogs = [...productResult.items, ...sdsResult.items]
-          .sort((a, b) => new Date(b.performedAt).getTime() - new Date(a.performedAt).getTime())
-          .slice(0, 10);
-        this.auditUnavailable = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to load product audit history', err);
-        this.auditLogs = [];
-        this.auditUnavailable = true;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  getAuditEventLabel(log: AuditLog): string {
-    if (log.changeSummary) {
-      return log.entityType === 'SafetyDataSheet'
-        ? 'SDS changed'
-        : 'Product changed';
-    }
-
-    if (log.entityType === 'SafetyDataSheet') {
-      return `SDS ${log.action.toLowerCase()}`;
-    }
-
-    return `Product ${log.action.toLowerCase()}`;
-  }
-
-  getAuditDescription(log: AuditLog): string {
-    return log.changeSummary || log.notes || 'No audit note recorded';
-  }
-
-  openDeleteSdsModal(sds: SafetyDataSheet): void {
-    this.sdsPendingDelete = sds;
-  }
-
-  cancelDeleteSds(): void {
-    this.sdsPendingDelete = null;
-  }
-
-  confirmDeleteSds(): void {
-    if (!this.productId) {
-      return;
-    }
-
-    if (!this.sdsPendingDelete) {
-      return;
-    }
-
-    this.productsService.deleteSafetyDataSheet(this.productId, this.sdsPendingDelete.safetyDataSheetId).subscribe({
-      next: () => {
-        this.sdsPendingDelete = null;
-        this.loadSafetyDataSheets(this.productId!);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to delete SDS', err);
-        this.errorMessage = 'Failed to delete SDS.';
-        this.sdsPendingDelete = null;
         this.cdr.detectChanges();
       }
     });
@@ -297,8 +155,9 @@ export class ProductFormComponent implements OnInit {
       this.productsService.update(this.productId, formValue).subscribe({
         next: () => {
           this.successMessage = 'Product saved.';
+          this.savedRequiresSds = Boolean(this.form.get('requiresSds')?.value);
           this.isLoading = false;
-          this.loadProductAuditHistory(this.productId!);
+          this.auditPanel?.reload();
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -319,5 +178,9 @@ export class ProductFormComponent implements OnInit {
         }
       });
     }
+  }
+
+  onSdsChanged(): void {
+    this.auditPanel?.reload();
   }
 }

@@ -122,150 +122,17 @@
       </div>
     </div>
 
-    <div *ngIf="isEditMode && form.get('requiresSds')?.value && safetyDataSheets.length > 0" class="form-card">
-      <div class="flex items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 class="app-section-title">Safety Data Sheets</h2>
-          <p class="text-xs app-muted-text mt-1">{{ safetyDataSheets.length }} total</p>
-        </div>
+    <ng-container *ngIf="productId !== null">
+      <app-product-sds-panel class="block"
+                             [productId]="productId!"
+                             [requiresSds]="savedRequiresSds"
+                             (sdsChanged)="onSdsChanged()">
+      </app-product-sds-panel>
 
-        <div class="flex flex-wrap items-center gap-3">
-          <button *ngIf="canGenerateSds"
-                  type="button"
-                  (click)="generateSafetyDataSheet()"
-                  [disabled]="isGeneratingSds"
-                  class="app-primary-button px-4 py-2">
-            {{ isGeneratingSds ? 'Generating...' : 'Generate SDS' }}
-          </button>
-        </div>
-      </div>
-
-      <div class="mb-6">
-        <div class="app-table-scroll">
-          <table *ngIf="safetyDataSheets.length > 0" class="app-data-table">
-            <thead class="app-table-head">
-              <tr>
-                <th class="app-table-heading">File Name</th>
-                <th class="app-table-heading">Version</th>
-                <th class="app-table-heading">Effective Date</th>
-                <th class="app-table-heading">Uploaded At</th>
-                <th class="app-table-heading">Uploaded By</th>
-                <th class="app-table-heading app-table-heading--center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="app-table-body">
-              <tr *ngFor="let sds of safetyDataSheets">
-                <td class="px-6 py-4 app-strong-text">{{ sds.fileName }}</td>
-                <td class="px-6 py-4 app-body-text">{{ sds.version }}</td>
-                <td class="px-6 py-4 app-body-text">{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
-                <td class="px-6 py-4 app-body-text">{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="px-6 py-4 app-body-text">
-                  {{ sds.uploadedByUserName || ('User #' + sds.uploadedByUserId) }}
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <a [href]="getSafetyDataSheetViewUrl(sds)"
-                     target="_blank"
-                     rel="noopener"
-                     class="app-link-button text-xs mr-3">
-                    View
-                  </a>
-
-                  <button type="button"
-                          (click)="openDeleteSdsModal(sds)"
-                          class="app-danger-link text-xs">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div *ngIf="safetyDataSheets.length === 0" class="text-center py-8 app-muted-text">
-          No SDS records found for this product.
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="isEditMode && form.get('requiresSds')?.value && safetyDataSheets.length === 0" class="form-card">
-      <div class="flex items-center justify-between gap-4">
-        <div>
-          <h2 class="app-section-title">Safety Data Sheets</h2>
-          <p class="app-muted-text mt-1">Required, but no SDS records have been added yet.</p>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <span class="app-badge app-badge--warning">
-            Required
-          </span>
-
-          <button *ngIf="canGenerateSds"
-                  type="button"
-                  (click)="generateSafetyDataSheet()"
-                  [disabled]="isGeneratingSds"
-                  class="app-primary-button px-4 py-2">
-            {{ isGeneratingSds ? 'Generating...' : 'Generate SDS' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="isEditMode && !form.get('requiresSds')?.value" class="form-card">
-      <div class="flex items-center justify-between gap-4">
-        <div>
-          <h2 class="app-section-title">Safety Data Sheets</h2>
-          <p class="app-muted-text mt-1">Not required for this product.</p>
-        </div>
-
-        <span class="app-badge app-badge--neutral">
-          Not Required
-        </span>
-      </div>
-    </div>
-
-    <div *ngIf="isEditMode" class="form-card">
-      <h2 class="app-section-title mb-6">Audit History</h2>
-
-      <div *ngIf="auditUnavailable" class="flex items-center justify-between gap-4">
-        <div>
-          <p class="app-muted-text">Audit history is unavailable for this user.</p>
-        </div>
-
-        <span class="app-badge app-badge--neutral">
-          Unavailable
-        </span>
-      </div>
-
-      <div *ngIf="!auditUnavailable && auditLogs.length === 0" class="flex items-center justify-between gap-4">
-        <div>
-          <p class="app-muted-text">No product audit history found.</p>
-        </div>
-
-        <span class="app-badge app-badge--neutral">
-          No History
-        </span>
-      </div>
-
-      <p *ngIf="!auditUnavailable && auditLogs.length > 3" class="text-xs app-muted-text mb-3">
-        Showing latest 3. Scroll to view more.
-      </p>
-
-      <div *ngIf="!auditUnavailable && auditLogs.length > 0" class="space-y-3 max-h-[21rem] overflow-y-auto pr-2">
-        <div *ngFor="let log of auditLogs"
-             class="app-sub-card">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm app-strong-text">{{ getAuditEventLabel(log) }}</p>
-              <p class="text-xs app-muted-text mt-1">{{ getAuditDescription(log) }}</p>
-            </div>
-            <p class="text-xs app-muted-text shrink-0">{{ log.performedAt | date:'dd/MM/yyyy HH:mm' }}</p>
-          </div>
-          <p class="text-xs app-muted-text mt-3">
-            {{ log.performedByUserName || 'System' }}
-          </p>
-        </div>
-      </div>
-    </div>
+      <app-product-audit-panel class="block"
+                               [productId]="productId!">
+      </app-product-audit-panel>
+    </ng-container>
 
   </div>
 
@@ -324,12 +191,3 @@
     </div>
   </div>
 </form>
-
-<app-confirmation-modal *ngIf="sdsPendingDelete"
-                        title="Delete SDS"
-                        [message]="'Delete SDS record ' + sdsPendingDelete.fileName + '? This action cannot be undone.'"
-                        confirmText="Delete SDS"
-                        variant="danger"
-                        (confirm)="confirmDeleteSds()"
-                        (cancel)="cancelDeleteSds()">
-</app-confirmation-modal>

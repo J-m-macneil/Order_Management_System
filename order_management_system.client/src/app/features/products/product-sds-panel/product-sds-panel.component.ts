@@ -1,0 +1,122 @@
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+
+import { AuthService } from '../../../core/auth/auth.service';
+import { SafetyDataSheet } from '../../../core/models/safety-data-sheet-model';
+import { ProductsService } from '../../../core/services/products.service';
+import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
+
+@Component({
+  selector: 'app-product-sds-panel',
+  standalone: false,
+  templateUrl: './product-sds-panel.component.html'
+})
+export class ProductSdsPanelComponent implements OnInit {
+  @Input({ required: true }) productId!: number;
+  @Input() requiresSds = false;
+
+  @Output() sdsChanged = new EventEmitter<void>();
+
+  safetyDataSheets: SafetyDataSheet[] = [];
+  sdsPendingDelete: SafetyDataSheet | null = null;
+  isLoading = false;
+  isGenerating = false;
+  errorMessage = '';
+  successMessage = '';
+
+  constructor(
+    private productsService: ProductsService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) { }
+
+  ngOnInit(): void {
+    this.loadSafetyDataSheets();
+  }
+
+  get canManageSds(): boolean {
+    return this.authService.hasRole('Operations', 'Admin');
+  }
+
+  generateSafetyDataSheet(): void {
+    if (!this.requiresSds || !this.canManageSds || this.isGenerating) {
+      return;
+    }
+
+    this.isGenerating = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.productsService.generateSafetyDataSheet(this.productId).subscribe({
+      next: () => {
+        this.isGenerating = false;
+        this.successMessage = 'SDS generated.';
+        this.loadSafetyDataSheets();
+        this.sdsChanged.emit();
+      },
+      error: (error: ApiErrorResponse) => {
+        console.error('Failed to generate SDS', error);
+        this.errorMessage = getApiErrorMessage(error, 'Failed to generate SDS.');
+        this.isGenerating = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getViewUrl(sds: SafetyDataSheet): string {
+    return this.productsService.getSafetyDataSheetViewUrl(sds.productId, sds.safetyDataSheetId);
+  }
+
+  openDeleteModal(sds: SafetyDataSheet): void {
+    if (this.canManageSds) {
+      this.sdsPendingDelete = sds;
+    }
+  }
+
+  cancelDelete(): void {
+    this.sdsPendingDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.sdsPendingDelete || !this.canManageSds) {
+      return;
+    }
+
+    const sdsId = this.sdsPendingDelete.safetyDataSheetId;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.productsService.deleteSafetyDataSheet(this.productId, sdsId).subscribe({
+      next: () => {
+        this.sdsPendingDelete = null;
+        this.successMessage = 'SDS deleted.';
+        this.loadSafetyDataSheets();
+        this.sdsChanged.emit();
+      },
+      error: (error: ApiErrorResponse) => {
+        console.error('Failed to delete SDS', error);
+        this.errorMessage = getApiErrorMessage(error, 'Failed to delete SDS.');
+        this.sdsPendingDelete = null;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadSafetyDataSheets(): void {
+    this.isLoading = true;
+
+    this.productsService.getSafetyDataSheets(this.productId).subscribe({
+      next: data => {
+        this.safetyDataSheets = data;
+        this.errorMessage = '';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to load SDS records', error);
+        this.errorMessage = 'Failed to load SDS records.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+}
