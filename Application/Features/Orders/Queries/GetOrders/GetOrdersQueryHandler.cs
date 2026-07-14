@@ -94,6 +94,7 @@ public class GetOrdersQueryHandler
 
                 IsPriorityOrder = o.IsPriorityOrder,
                 HasRestrictedItems = reviewReasons.Count > 0,
+                RequiresSdsBundle = o.GetProductsRequiringSafetyDataSheets().Count > 0,
                 ReviewReasons = reviewReasons.ToList(),
                 FailedProcessingJobCount = effectiveStatus.FailedProcessingJobCount
             };

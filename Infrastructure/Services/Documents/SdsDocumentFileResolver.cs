@@ -18,9 +18,8 @@ internal class SdsDocumentFileResolver
         var fileKeys = new List<string>();
         var missingFiles = new List<string>();
 
-        foreach (var item in GetSdsOrderItems(order))
+        foreach (var product in order.GetProductsRequiringSafetyDataSheets())
         {
-            var product = item.Product;
             var activeSds = product.SafetyDataSheets
                 .Where(s => s.IsActive && s.DeletedAt == null)
                 .OrderByDescending(s => s.EffectiveDate)
@@ -50,15 +49,6 @@ internal class SdsDocumentFileResolver
 
         return fileKeys
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-    }
-
-    private static List<OrderItem> GetSdsOrderItems(Order order)
-    {
-        return order.OrderItems
-            .Where(i => i.DeletedAt == null && i.Product.RequiresSds)
-            .GroupBy(i => i.ProductId)
-            .Select(g => g.First())
             .ToList();
     }
 }

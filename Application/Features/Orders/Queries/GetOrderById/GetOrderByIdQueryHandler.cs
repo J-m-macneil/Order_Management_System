@@ -80,6 +80,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
 
             IsPriorityOrder = order.IsPriorityOrder,
             HasRestrictedItems = reviewReasons.Count > 0,
+            RequiresSdsBundle = order.GetProductsRequiringSafetyDataSheets().Count > 0,
             ReviewReasons = reviewReasons.ToList(),
             FailedProcessingJobCount = effectiveStatus.FailedProcessingJobCount,
 

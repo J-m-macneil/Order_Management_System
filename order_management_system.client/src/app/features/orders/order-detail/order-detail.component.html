@@ -94,7 +94,7 @@
         <app-processing-jobs-panel
           [orderId]="currentOrder.orderId"
           [orderStatusId]="currentOrder.orderStatusId"
-          [requiresSdsBundle]="requiresSdsBundle"
+          [requiresSdsBundle]="currentOrder.requiresSdsBundle"
           (jobsChanged)="refresh()">
         </app-processing-jobs-panel>
       </div>

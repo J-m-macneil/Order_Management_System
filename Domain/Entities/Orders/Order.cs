@@ -65,6 +65,15 @@ public class Order
     public ICollection<OrderStatusHistory> OrderStatusHistory { get; set; } = new List<OrderStatusHistory>();
     public ICollection<ProcessingJob> ProcessingJobs { get; set; } = new List<ProcessingJob>();
 
+    public IReadOnlyCollection<Product> GetProductsRequiringSafetyDataSheets()
+    {
+        return OrderItems
+            .Where(item => item.DeletedAt == null && item.Product.RequiresSds)
+            .Select(item => item.Product)
+            .DistinctBy(product => product.ProductId)
+            .ToList();
+    }
+
     public void DiscardDraft()
     {
         if (DeletedAt != null)

@@ -48,6 +48,7 @@ export interface Order {
 
   isPriorityOrder: boolean;
   hasRestrictedItems: boolean;
+  requiresSdsBundle: boolean;
   reviewReasons: string[];
   failedProcessingJobCount: number;
 

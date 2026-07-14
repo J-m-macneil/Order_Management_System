@@ -124,7 +124,7 @@ internal class OrderDocumentPdfBuilder
     {
         AddSectionTitle(column, "Safety Data Sheet Bundle");
 
-        var sdsItems = GetSdsOrderItems(order);
+        var sdsProducts = order.GetProductsRequiringSafetyDataSheets();
 
         column.Item()
             .Border(1)
@@ -154,10 +154,8 @@ internal class OrderDocumentPdfBuilder
                 AddHeaderCell(header.Cell(), "SDS");
             });
 
-            foreach (var item in sdsItems)
+            foreach (var product in sdsProducts)
             {
-                var product = item.Product;
-
                 var activeSds = product.SafetyDataSheets
                     .Where(s => s.IsActive && s.DeletedAt == null)
                     .OrderByDescending(s => s.EffectiveDate)
@@ -272,15 +270,6 @@ internal class OrderDocumentPdfBuilder
     {
         table.Cell().PaddingVertical(4).Text(label).SemiBold().FontColor(Muted);
         table.Cell().PaddingVertical(4).Text(value).FontColor(Ink);
-    }
-
-    private static List<OrderItem> GetSdsOrderItems(Order order)
-    {
-        return order.OrderItems
-            .Where(i => i.DeletedAt == null && i.Product.RequiresSds)
-            .GroupBy(i => i.ProductId)
-            .Select(g => g.First())
-            .ToList();
     }
 
     private static string FormatDocumentTitle(string documentType)

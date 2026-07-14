@@ -51,6 +51,7 @@ public class OrderDto
 
     public bool IsPriorityOrder { get; set; }
     public bool HasRestrictedItems { get; set; }
+    public bool RequiresSdsBundle { get; set; }
     public List<string> ReviewReasons { get; set; } = new();
     public int FailedProcessingJobCount { get; set; }
 
