@@ -26,9 +26,9 @@ public class CarriersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int carrierId)
+    public async Task<IActionResult> GetById(int id)
     {
-        var result = await _mediator.Send(new GetCarrierByIdQuery { CarrierId = carrierId });
+        var result = await _mediator.Send(new GetCarrierByIdQuery { CarrierId = id });
 
         if (result == null)
             return NotFound();
