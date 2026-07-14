@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Features.Products.Commands.DeleteSafetyDataSheet;
 using Application.Interfaces;
 using Domain.Entities;
@@ -78,8 +79,8 @@ public class DeleteSafetyDataSheetCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<Exception>()
-            .WithMessage("Safety data sheet not found");
+            .ThrowAsync<NotFoundException>()
+            .WithMessage("Safety data sheet was not found.");
 
         await repo.Received(1)
             .GetByIdAsync(command.ProductId, command.SafetyDataSheetId, Arg.Any<CancellationToken>());

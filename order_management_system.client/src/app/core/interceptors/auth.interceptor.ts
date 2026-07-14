@@ -38,12 +38,16 @@ export class AuthInterceptor implements HttpInterceptor {
         }
 
         return this.refreshSession().pipe(
-          switchMap(() => next.handle(request)),
           catchError(refreshError => {
             this.authService.clearSession();
-            void this.router.navigate(['/login']);
+
+            if (!request.url.endsWith('/auth/me')) {
+              void this.router.navigate(['/login']);
+            }
+
             return throwError(() => refreshError);
-          })
+          }),
+          switchMap(() => next.handle(request))
         );
       })
     );

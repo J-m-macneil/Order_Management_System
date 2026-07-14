@@ -1,4 +1,4 @@
-using Application.Common.Services;
+using Application.Common.Exceptions;
 using Application.Features.Products.Commands.UpdateSafetyDataSheet;
 using Application.Interfaces;
 using Domain.Entities;
@@ -18,7 +18,7 @@ public class UpdateSafetyDataSheetCommandHandlerTests
         var repo = Substitute.For<ISafetyDataSheetRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateSafetyDataSheetCommandHandler(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateSafetyDataSheetCommandHandler(repo, audit);
         var existingSafetyDataSheet = CreateExistingSafetyDataSheet();
         var command = CreateValidCommand();
 
@@ -62,7 +62,7 @@ public class UpdateSafetyDataSheetCommandHandlerTests
         var repo = Substitute.For<ISafetyDataSheetRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateSafetyDataSheetCommandHandler(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateSafetyDataSheetCommandHandler(repo, audit);
         var command = CreateValidCommand();
 
         repo.GetByIdAsync(command.ProductId, command.SafetyDataSheetId, Arg.Any<CancellationToken>())
@@ -73,8 +73,8 @@ public class UpdateSafetyDataSheetCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<Exception>()
-            .WithMessage("Safety data sheet not found");
+            .ThrowAsync<NotFoundException>()
+            .WithMessage("Safety data sheet was not found.");
 
         await repo.Received(1)
             .GetByIdAsync(command.ProductId, command.SafetyDataSheetId, Arg.Any<CancellationToken>());

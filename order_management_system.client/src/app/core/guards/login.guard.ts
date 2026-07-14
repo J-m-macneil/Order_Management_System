@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
@@ -12,16 +12,11 @@ export class LoginGuard implements CanActivate {
     private router: Router
   ) { }
 
-  canActivate(): Observable<boolean> {
+  canActivate(): Observable<boolean | UrlTree> {
     return this.authService.ensureAuthenticated().pipe(
-      map(isAuthenticated => {
-        if (isAuthenticated) {
-          this.router.navigate(['/dashboard']);
-          return false;
-        }
-
-        return true;
-      })
+      map(isAuthenticated => isAuthenticated
+        ? this.router.createUrlTree(['/dashboard'])
+        : true)
     );
   }
 }

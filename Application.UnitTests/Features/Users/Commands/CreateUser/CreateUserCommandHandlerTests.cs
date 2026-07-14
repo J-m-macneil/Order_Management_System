@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Features.Users.Commands.CreateUser;
 using Application.Interfaces;
 using Domain.Entities.Identity;
@@ -87,7 +88,7 @@ public class CreateUserCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<InvalidOperationException>()
+            .ThrowAsync<ConflictException>()
             .WithMessage("Username is already in use.");
 
         await repo.DidNotReceive().AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());

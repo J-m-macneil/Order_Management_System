@@ -1,5 +1,6 @@
 using Application.Features.Products.Queries.GetSafetyDataSheets;
 using Domain.Entities;
+using Domain.Entities.Identity;
 using Domain.Repositories;
 using FluentAssertions;
 using NSubstitute;
@@ -38,6 +39,7 @@ public class GetSafetyDataSheetsQueryHandlerTests
         item.EffectiveDate.Should().Be(items[0].EffectiveDate);
         item.UploadedAt.Should().Be(items[0].UploadedAt);
         item.UploadedByUserId.Should().Be(items[0].UploadedByUserId);
+        item.UploadedByUserName.Should().Be(items[0].UploadedByUser.FullName);
 
         await repo.Received(1)
             .GetByProductIdAsync(query.ProductId, Arg.Any<CancellationToken>());
@@ -55,6 +57,11 @@ public class GetSafetyDataSheetsQueryHandlerTests
             EffectiveDate = new DateTime(2026, 1, 1),
             UploadedAt = new DateTime(2026, 1, 2),
             UploadedByUserId = 4,
+            UploadedByUser = new User
+            {
+                UserId = 4,
+                FullName = "Daniel Foster"
+            },
             IsActive = true
         };
     }

@@ -1,4 +1,4 @@
-using Application.Common.Services;
+using Application.Common.Exceptions;
 using Application.Features.SystemSettings.Commands.UpdateSystemSetting;
 using Application.Interfaces;
 using Domain.Entities.SystemSettings;
@@ -17,7 +17,7 @@ public class UpdateSystemSettingCommandHandlerTests
         // Arrange
         var repo = Substitute.For<ISystemSettingRepository>();
         var audit = Substitute.For<IAuditService>();
-        var handler = new UpdateSystemSettingCommandHandler(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateSystemSettingCommandHandler(repo, audit);
         var setting = new SystemSetting
         {
             SystemSettingId = 1,
@@ -62,7 +62,7 @@ public class UpdateSystemSettingCommandHandlerTests
         // Arrange
         var repo = Substitute.For<ISystemSettingRepository>();
         var audit = Substitute.For<IAuditService>();
-        var handler = new UpdateSystemSettingCommandHandler(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateSystemSettingCommandHandler(repo, audit);
         var setting = new SystemSetting
         {
             SystemSettingId = 2,
@@ -86,7 +86,7 @@ public class UpdateSystemSettingCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<InvalidOperationException>()
+            .ThrowAsync<BadRequestException>()
             .WithMessage("EnablePriorityOrders must be true or false.");
 
         setting.SettingValue.Should().Be("true");

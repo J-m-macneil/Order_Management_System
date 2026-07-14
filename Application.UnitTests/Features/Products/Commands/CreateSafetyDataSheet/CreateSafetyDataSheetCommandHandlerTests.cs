@@ -59,7 +59,7 @@ public class CreateSafetyDataSheetCommandHandlerTests
         await audit.Received(1).LogAsync(
             Arg.Is<string>(value => value == "SafetyDataSheet"),
             Arg.Is<int>(value => value == savedSafetyDataSheet.SafetyDataSheetId),
-            Arg.Is<string>(value => value == "Added"),
+            Arg.Is<string>(value => value == "Created"),
             Arg.Is<object?>(value => value == null),
             Arg.Any<object>(),
             Arg.Is<string>(message => message.Contains(command.FileName)),

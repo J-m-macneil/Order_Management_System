@@ -1,4 +1,3 @@
-using Application.Common.Services;
 using Application.Features.Products.Commands.UpdateProduct;
 using Application.Interfaces;
 using Domain.Entities;
@@ -18,7 +17,7 @@ public class UpdateProductCommandHandlerTests
         var repo = Substitute.For<IProductRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateProductCommandHandler(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateProductCommandHandler(repo, audit);
         var existingProduct = CreateExistingProduct();
         var request = CreateValidRequest();
 
@@ -70,7 +69,7 @@ public class UpdateProductCommandHandlerTests
         var repo = Substitute.For<IProductRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateProductCommandHandler(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateProductCommandHandler(repo, audit);
         var request = CreateValidRequest();
 
         repo.GetByIdAsync(request.ProductId, Arg.Any<CancellationToken>())

@@ -1,5 +1,4 @@
 using Application.Features.Customers.Commands.UpdateCustomerContact;
-using Application.Common.Services;
 using Application.Interfaces;
 using Domain.Entities.Customers;
 using Domain.Repositories;
@@ -19,7 +18,7 @@ public class UpdateCustomerContactCommandHandlerTests
         var customers = Substitute.For<ICustomerRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit, new AuditChangeFormatter());
+        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit);
         var contact = CreateExistingContact();
         var customer = CreateExistingCustomer();
         var command = CreateValidCommand();
@@ -88,7 +87,7 @@ public class UpdateCustomerContactCommandHandlerTests
         var customers = Substitute.For<ICustomerRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit, new AuditChangeFormatter());
+        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit);
         var contact = CreateExistingContact();
         contact.IsPrimary = true;
 
@@ -152,7 +151,7 @@ public class UpdateCustomerContactCommandHandlerTests
         var customers = Substitute.For<ICustomerRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit, new AuditChangeFormatter());
+        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit);
         var contact = CreateExistingContact();
         var command = CreateValidCommand();
         command.IsPrimary = false;
@@ -209,7 +208,7 @@ public class UpdateCustomerContactCommandHandlerTests
         var customers = Substitute.For<ICustomerRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit, new AuditChangeFormatter());
+        var handler = new UpdateCustomerContactCommandHandler(repo, customers, audit);
         var command = CreateValidCommand();
 
         repo.GetByIdAsync(

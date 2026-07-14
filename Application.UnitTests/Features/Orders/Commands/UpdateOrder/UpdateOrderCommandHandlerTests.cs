@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Features.Orders.Commands.UpdateOrder;
 using Application.Interfaces;
@@ -70,7 +71,7 @@ public class UpdateOrderCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<InvalidOperationException>()
+            .ThrowAsync<ConflictException>()
             .WithMessage("Only draft orders can be edited.");
 
         await repo.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -103,7 +104,7 @@ public class UpdateOrderCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<InvalidOperationException>()
+            .ThrowAsync<ForbiddenException>()
             .WithMessage("Only Sales or Admin users can edit draft orders.");
 
         await repo.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());

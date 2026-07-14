@@ -1,5 +1,4 @@
 using Application.Features.Addresses.Commands.UpdateAddress;
-using Application.Common.Services;
 using Application.Interfaces;
 using Domain.Entities.Customers;
 using Domain.Repositories;
@@ -18,7 +17,7 @@ public class UpdateAddressCommandHandlerTests
         var repo = Substitute.For<IAddressRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateAddressCommandHanlder(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateAddressCommandHanlder(repo, audit);
         var address = CreateExistingAddress();
         var command = CreateValidCommand();
 
@@ -71,7 +70,7 @@ public class UpdateAddressCommandHandlerTests
         var repo = Substitute.For<IAddressRepository>();
         var audit = Substitute.For<IAuditService>();
 
-        var handler = new UpdateAddressCommandHanlder(repo, audit, new AuditChangeFormatter());
+        var handler = new UpdateAddressCommandHanlder(repo, audit);
         var command = CreateValidCommand();
 
         repo.GetByIdAsync(command.CustomerId, command.AddressId, Arg.Any<CancellationToken>())

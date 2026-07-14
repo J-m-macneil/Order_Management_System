@@ -20,6 +20,7 @@ interface LoginResponse {
 })
 export class AuthService {
   private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
+  private sessionChecked = false;
 
   currentUser$ = this.currentUserSubject.asObservable();
 
@@ -47,20 +48,18 @@ export class AuthService {
   }
 
   ensureAuthenticated(): Observable<boolean> {
-    if (this.currentUserSubject.value) {
-      return of(true);
+    if (this.sessionChecked) {
+      return of(this.isLoggedIn());
     }
 
     return this.loadCurrentUser().pipe(
-      map(user => !!user),
-      catchError(() => of(false))
+      map(user => user !== null)
     );
   }
 
   loadCurrentUser(): Observable<AuthUser | null> {
     return this.http.get<AuthUser>(`${apiBaseUrl}/auth/me`).pipe(
       tap(user => this.setCurrentUser(user)),
-      map(user => user),
       catchError(() => {
         this.setCurrentUser(null);
         return of(null);
@@ -97,5 +96,6 @@ export class AuthService {
 
   private setCurrentUser(user: AuthUser | null): void {
     this.currentUserSubject.next(user);
+    this.sessionChecked = true;
   }
 }

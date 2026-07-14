@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
@@ -12,15 +12,16 @@ export class AdminGuard implements CanActivate {
     private router: Router
   ) { }
 
-  canActivate(): Observable<boolean> {
+  canActivate(): Observable<boolean | UrlTree> {
     return this.authService.ensureAuthenticated().pipe(
       map(isAuthenticated => {
-        if (isAuthenticated && this.authService.hasRole('Admin')) {
-          return true;
+        if (!isAuthenticated) {
+          return this.router.createUrlTree(['/login']);
         }
 
-        this.router.navigate(['/dashboard']);
-        return false;
+        return this.authService.hasRole('Admin')
+          ? true
+          : this.router.createUrlTree(['/dashboard']);
       })
     );
   }

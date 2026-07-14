@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Features.Orders.Commands.ChangeOrderStatus;
 using Application.Interfaces;
@@ -84,7 +85,7 @@ public class ChangeOrderStatusCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<InvalidOperationException>()
+            .ThrowAsync<BadRequestException>()
             .WithMessage("A reason is required to move an order from Submitted to Draft.");
 
         await repo.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -164,7 +165,7 @@ public class ChangeOrderStatusCommandHandlerTests
 
         // Assert
         await act.Should()
-            .ThrowAsync<InvalidOperationException>()
+            .ThrowAsync<ConflictException>()
             .WithMessage("Invalid transition from PendingReview to Failed");
 
         await repo.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
