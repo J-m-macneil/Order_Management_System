@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<PricingTier> PricingTiers => Set<PricingTier>();
@@ -38,7 +39,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
       => base.SaveChangesAsync(cancellationToken);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -135,6 +136,34 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithMany(x => x.Users)
                 .HasForeignKey(x => x.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("RefreshTokens");
+
+            entity.HasKey(x => x.RefreshTokenId);
+
+            entity.Property(x => x.TokenHash)
+                .IsRequired()
+                .HasMaxLength(64);
+
+            entity.HasIndex(x => x.TokenHash)
+                .IsUnique();
+
+            entity.Property(x => x.CreatedAtUtc)
+                .HasColumnType("datetime2");
+
+            entity.Property(x => x.ExpiresAtUtc)
+                .HasColumnType("datetime2");
+
+            entity.Property(x => x.RevokedAtUtc)
+                .HasColumnType("datetime2");
+
+            entity.HasOne(x => x.User)
+                .WithMany(x => x.RefreshTokens)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<User>().HasData(

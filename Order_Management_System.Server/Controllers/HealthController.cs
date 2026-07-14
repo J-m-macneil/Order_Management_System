@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.DTOs;
 
@@ -16,6 +17,7 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Get()
     {
         return Ok(new HealthCheckDto

@@ -6,12 +6,12 @@ using Application.Interfaces;
 using Domain.Repositories;
 using Infrastructure.BackgroundServices;
 using Infrastructure.DependencyInjection;
-using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.ProcessingJobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Server.Services;
@@ -71,10 +71,6 @@ public static class Program
         builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
         builder.Services.AddHttpContextAccessor();
 
-        builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-        builder.Services.AddScoped<IPasswordService, PasswordService>();
-
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IPricingService, PricingService>();
         builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
@@ -94,20 +90,6 @@ public static class Program
 
         // Background jobs
         builder.Services.AddHostedService<JobProcessingService>();
-
-        // CORS
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("Frontend", policy =>
-            {
-                policy.WithOrigins(
-                        "https://localhost:53923",
-                        "http://localhost:4200")
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials();
-            });
-        });
 
         // JWT Auth
         var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -171,13 +153,22 @@ public static class Program
                         var dbContext = context.HttpContext.RequestServices
                             .GetRequiredService<Infrastructure.Persistence.Context.AppDbContext>();
 
-                        var isActive = await dbContext.Users
+                        var currentUser = await dbContext.Users
                             .AsNoTracking()
-                            .AnyAsync(x => x.UserId == userId && x.IsActive);
+                            .Where(x => x.UserId == userId && x.IsActive)
+                            .Select(x => new { RoleName = x.Role!.Name })
+                            .SingleOrDefaultAsync();
 
-                        if (!isActive)
+                        if (currentUser is null)
                         {
                             context.Fail("User account is inactive.");
+                            return;
+                        }
+
+                        var tokenRole = context.Principal?.FindFirstValue(ClaimTypes.Role);
+                        if (!string.Equals(tokenRole, currentUser.RoleName, StringComparison.Ordinal))
+                        {
+                            context.Fail("User role has changed.");
                         }
                     }
                 };
@@ -186,6 +177,10 @@ public static class Program
         // Authorization Policies
         builder.Services.AddAuthorization(options =>
         {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+
             options.AddPolicy("AdminOnly", policy =>
                 policy.RequireRole("Admin"));
 
@@ -208,7 +203,6 @@ public static class Program
         }
 
         app.UseHttpsRedirection();
-        app.UseCors("Frontend");
 
         app.UseAuthentication();
         app.UseAuthorization();

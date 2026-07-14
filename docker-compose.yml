@@ -5,8 +5,6 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}"
-    ports:
-      - "127.0.0.1:14333:1433"
     volumes:
       - back-db-data:/var/opt/mssql
     healthcheck:
@@ -30,6 +28,7 @@ services:
       Jwt__Issuer: "${JWT_ISSUER:-Back}"
       Jwt__Audience: "${JWT_AUDIENCE:-Back.Client}"
       Jwt__SecretKey: "${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}"
+      AllowedHosts: "${APP_DOMAIN:-localhost}"
       ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True"
     expose:
       - "8080"

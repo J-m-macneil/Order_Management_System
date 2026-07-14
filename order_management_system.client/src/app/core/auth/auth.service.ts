@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, map, of, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, finalize, map, of, tap } from 'rxjs';
 import { apiBaseUrl } from '../config/api-url';
 
 export interface AuthUser {
@@ -33,9 +33,16 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    this.setCurrentUser(null);
     return this.http.post<void>(`${apiBaseUrl}/auth/logout`, {}).pipe(
-      catchError(() => of(void 0))
+      catchError(() => of(void 0)),
+      finalize(() => this.clearSession())
+    );
+  }
+
+  refresh(): Observable<void> {
+    return this.http.post<LoginResponse>(`${apiBaseUrl}/auth/refresh`, {}).pipe(
+      tap(response => this.setCurrentUser(response.user)),
+      map(() => void 0)
     );
   }
 
@@ -82,6 +89,10 @@ export class AuthService {
     return !!userRole && roles.some(role =>
       role.toLowerCase() === userRole.toLowerCase()
     );
+  }
+
+  clearSession(): void {
+    this.setCurrentUser(null);
   }
 
   private setCurrentUser(user: AuthUser | null): void {

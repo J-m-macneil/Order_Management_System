@@ -28,4 +28,5 @@ public class User
     public ICollection<SafetyDataSheet> UploadedSafetyDataSheets { get; set; } = new List<SafetyDataSheet>();
     public ICollection<Order> CreatedOrders { get; set; } = new List<Order>();
     public ICollection<Order> AssignedOrders { get; set; } = new List<Order>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

@@ -13,6 +13,7 @@ namespace Server.Controllers;
 public class AuthController : ControllerBase
 {
     private const string AuthCookieName = "__Host-back_auth";
+    private const string RefreshCookieName = "__Host-back_refresh";
 
     private readonly IAuthService _authService;
 
@@ -22,9 +23,12 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginCommand request)
+    [AllowAnonymous]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginCommand request,
+        CancellationToken cancellationToken)
     {
-        var result = await _authService.LoginAsync(request);
+        var result = await _authService.LoginAsync(request, cancellationToken);
 
         if (result is null)
         {
@@ -36,15 +40,29 @@ public class AuthController : ControllerBase
             });
         }
 
-        Response.Cookies.Append(AuthCookieName, result.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = result.ExpiresAtUtc,
-            Path = "/"
-        });
+        AppendSessionCookies(result);
 
+        return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+    {
+        if (!Request.Cookies.TryGetValue(RefreshCookieName, out var refreshToken))
+        {
+            return UnauthorizedProblem();
+        }
+
+        var result = await _authService.RefreshAsync(refreshToken, cancellationToken);
+
+        if (result is null)
+        {
+            DeleteSessionCookies();
+            return UnauthorizedProblem();
+        }
+
+        AppendSessionCookies(result);
         return Ok(result);
     }
 
@@ -72,15 +90,54 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("logout")]
-    public IActionResult Logout()
+    [AllowAnonymous]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        Response.Cookies.Delete(AuthCookieName, new CookieOptions
+        DeleteSessionCookies();
+
+        if (Request.Cookies.TryGetValue(RefreshCookieName, out var refreshToken))
         {
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Path = "/"
-        });
+            await _authService.RevokeRefreshTokenAsync(refreshToken, cancellationToken);
+        }
 
         return NoContent();
+    }
+
+    private void AppendSessionCookies(LoginResponseDto session)
+    {
+        Response.Cookies.Append(AuthCookieName, session.Token, CreateCookieOptions(session.ExpiresAtUtc));
+        Response.Cookies.Append(
+            RefreshCookieName,
+            session.RefreshToken,
+            CreateCookieOptions(session.RefreshTokenExpiresAtUtc));
+    }
+
+    private void DeleteSessionCookies()
+    {
+        var options = CreateCookieOptions(null);
+        Response.Cookies.Delete(AuthCookieName, options);
+        Response.Cookies.Delete(RefreshCookieName, options);
+    }
+
+    private static CookieOptions CreateCookieOptions(DateTime? expiresAtUtc)
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = expiresAtUtc,
+            Path = "/"
+        };
+    }
+
+    private UnauthorizedObjectResult UnauthorizedProblem()
+    {
+        return Unauthorized(new ProblemDetails
+        {
+            Title = "Unauthorized",
+            Status = StatusCodes.Status401Unauthorized,
+            Detail = "Your session is invalid or has expired."
+        });
     }
 }

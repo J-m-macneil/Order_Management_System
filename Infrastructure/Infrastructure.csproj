@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Identity\CurrentUserService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
@@ -21,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Identity\CurrentUserService.cs" />
     <None Include="Persistence\Repositories\CarrierRepository.cs" />
   </ItemGroup>
 
