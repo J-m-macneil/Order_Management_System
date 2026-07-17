@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { PagedResult } from '../../../core/models/paged-result.model';
 import { User } from '../../../core/models/user-management.model';
 import { UsersService } from '../../../core/services/users.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { AdminUsersComponent } from './admin-users.component';
 
 describe('AdminUsersComponent', () => {
@@ -24,7 +25,8 @@ describe('AdminUsersComponent', () => {
         return of(result);
       }
     } as unknown as UsersService;
-    const component = new AdminUsersComponent(service, new FormBuilder());
+    const toastService = { success: () => undefined } as unknown as ToastService;
+    const component = new AdminUsersComponent(service, new FormBuilder(), toastService);
 
     component.searchTerm = 'alex';
     component.roleFilter = 2;

@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 import { SystemSetting } from '../../../core/models/system-setting.model';
 import { SystemSettingsService } from '../../../core/services/system-settings.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
@@ -17,10 +18,10 @@ export class SystemSettingsComponent implements OnInit {
 
   isLoading = false;
   errorMessage = '';
-  settingsMessage = '';
 
   constructor(
     private systemSettingsService: SystemSettingsService,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -28,9 +29,8 @@ export class SystemSettingsComponent implements OnInit {
     this.loadSystemSettings();
   }
 
-  loadSystemSettings(successMessage = ''): void {
+  loadSystemSettings(): void {
     this.isLoading = true;
-    this.settingsMessage = '';
 
     this.systemSettingsService.getSettings().subscribe({
       next: settings => {
@@ -42,7 +42,6 @@ export class SystemSettingsComponent implements OnInit {
           values[setting.systemSettingId] = setting.settingValue;
           return values;
         }, {});
-        this.settingsMessage = successMessage;
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -61,18 +60,20 @@ export class SystemSettingsComponent implements OnInit {
 
     if (validationError) {
       this.errorMessage = validationError;
-      this.settingsMessage = '';
       return;
     }
 
     this.errorMessage = '';
-    this.settingsMessage = '';
     this.savingSettingIds.add(setting.systemSettingId);
 
     this.systemSettingsService.update(setting.systemSettingId, { settingValue: value.trim() }).subscribe({
       next: () => {
         this.savingSettingIds.delete(setting.systemSettingId);
-        this.loadSystemSettings(`${this.formatSettingName(setting.settingKey)} updated.`);
+        this.toastService.success(
+          'Setting updated',
+          `${this.formatSettingName(setting.settingKey)} was saved.`
+        );
+        this.loadSystemSettings();
       },
       error: (err: ApiErrorResponse) => {
         console.error('Failed to update system setting', err);

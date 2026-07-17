@@ -2,10 +2,6 @@
   <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
-<div *ngIf="settingsMessage" class="mb-4 p-4 app-alert app-alert--success">
-  <p class="app-alert-text--success">{{ settingsMessage }}</p>
-</div>
-
 <div class="space-y-6">
   <div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
     <p>Loading system settings...</p>

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { Department, Role, User, UserSaveRequest } from '../../../core/models/user-management.model';
 import { UsersService } from '../../../core/services/users.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
@@ -41,7 +42,8 @@ export class AdminUsersComponent implements OnInit {
 
   constructor(
     private usersService: UsersService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private toastService: ToastService
   ) {
     this.userForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.maxLength(80)]],
@@ -197,7 +199,7 @@ export class AdminUsersComponent implements OnInit {
       : this.usersService.create(request);
 
     saveOperation.subscribe({
-      next: () => this.onSaveSuccess(),
+      next: () => this.onSaveSuccess(Boolean(selectedUser)),
       error: (err: ApiErrorResponse) => this.onSaveError(err)
     });
   }
@@ -241,7 +243,11 @@ export class AdminUsersComponent implements OnInit {
     };
   }
 
-  private onSaveSuccess(): void {
+  private onSaveSuccess(wasEditing: boolean): void {
+    this.toastService.success(
+      wasEditing ? 'User updated' : 'User created',
+      wasEditing ? 'The user account was saved.' : 'The user account was created.'
+    );
     this.closeUserForm();
     this.loadUsers();
   }

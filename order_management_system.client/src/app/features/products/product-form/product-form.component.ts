@@ -6,6 +6,7 @@ import { ProductCategory } from '../../../core/models/product-category.model';
 import { Product } from '../../../core/models/product.model';
 import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
 import { ProductsService } from '../../../core/services/products.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ProductAuditPanelComponent } from '../product-audit-panel/product-audit-panel.component';
 
 @Component({
@@ -22,7 +23,6 @@ export class ProductFormComponent implements OnInit {
   productId: number | null = null;
   isLoading = false;
   errorMessage = '';
-  successMessage = '';
   savedRequiresSds = false;
 
   productCategories: ProductCategory[] = [];
@@ -32,6 +32,7 @@ export class ProductFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private productsService: ProductsService,
+    private toastService: ToastService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -143,14 +144,13 @@ export class ProductFormComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     const formValue = this.form.value;
 
     if (this.isEditMode && this.productId !== null) {
       this.productsService.update(this.productId, formValue).subscribe({
         next: () => {
-          this.successMessage = 'Product saved.';
+          this.toastService.success('Product updated', 'The product details were saved.');
           this.savedRequiresSds = Boolean(this.form.get('requiresSds')?.value);
           this.isLoading = false;
           this.auditPanel?.reload();
@@ -165,7 +165,10 @@ export class ProductFormComponent implements OnInit {
       });
     } else {
       this.productsService.create(formValue).subscribe({
-        next: () => this.router.navigate(['/products']),
+        next: () => {
+          this.toastService.success('Product created', 'The product was added successfully.');
+          this.router.navigate(['/products']);
+        },
         error: (err) => {
           console.error('Failed to create product', err);
           this.errorMessage = 'Failed to create product.';

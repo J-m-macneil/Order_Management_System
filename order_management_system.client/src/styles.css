@@ -75,14 +75,14 @@
 
   /* Order statuses */
   --app-status-draft: var(--app-muted-text);
-  --app-status-submitted: var(--app-badge-info-text);
-  --app-status-pending-review: var(--app-badge-warning-text);
-  --app-status-approved: var(--app-badge-success-text);
-  --app-status-processing: var(--app-badge-warning-text);
-  --app-status-awaiting-dispatch: var(--app-badge-warning-text);
-  --app-status-completed: var(--app-badge-success-text);
-  --app-status-failed: var(--app-badge-danger-text);
-  --app-status-cancelled: var(--app-muted-text);
+  --app-status-submitted: #1d4ed8;
+  --app-status-pending-review: #b45309;
+  --app-status-approved: #0f766e;
+  --app-status-processing: #7c3aed;
+  --app-status-awaiting-dispatch: #0e7490;
+  --app-status-completed: #15803d;
+  --app-status-failed: #b91c1c;
+  --app-status-cancelled: #475569;
 
   /* Tables */
   --app-table-chrome: #dbeafe;
@@ -269,6 +269,17 @@ html.dark {
   --app-badge-danger-text: #f87171;
   --app-badge-info-bg: rgba(28, 168, 254, 0.12);
   --app-badge-info-text: #7dd3fc;
+
+  /* Order statuses */
+  --app-status-draft: var(--app-muted-text);
+  --app-status-submitted: var(--app-badge-info-text);
+  --app-status-pending-review: var(--app-badge-warning-text);
+  --app-status-approved: var(--app-badge-success-text);
+  --app-status-processing: #a78bfa;
+  --app-status-awaiting-dispatch: #67e8f9;
+  --app-status-completed: var(--app-badge-success-text);
+  --app-status-failed: var(--app-badge-danger-text);
+  --app-status-cancelled: var(--app-muted-text);
 
   /* Alerts */
   --app-alert-danger-bg: rgba(239, 68, 68, 0.12);

@@ -22,8 +22,8 @@
   </p>
 
   <div *ngIf="!isLoading && !auditUnavailable && auditLogs.length > 0"
-       class="space-y-3 max-h-[21rem] overflow-y-auto pr-2">
-    <div *ngFor="let log of auditLogs" class="app-sub-card">
+       class="divide-y app-divider max-h-[21rem] overflow-y-auto pr-4">
+    <div *ngFor="let log of auditLogs" class="py-4 first:pt-0 last:pb-0">
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="text-sm app-strong-text">{{ getEventLabel(log) }}</p>

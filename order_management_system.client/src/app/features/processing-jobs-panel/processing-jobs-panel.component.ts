@@ -3,6 +3,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { OrderStatus } from '../../core/models/order-status.enum';
 import { ProcessingJob } from '../../core/models/processing-job.model';
 import { ProcessingJobsService } from '../../core/services/processing-jobs.service';
+import { ToastService } from '../../core/services/toast.service';
 import { getApiErrorMessage } from '../../core/utils/api-error-message';
 
 type ProcessingJobDisplay = Partial<ProcessingJob> & {
@@ -41,7 +42,8 @@ export class ProcessingJobsPanelComponent implements OnChanges {
   constructor(
     private processingJobsService: ProcessingJobsService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toastService: ToastService
   ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,6 +102,7 @@ export class ProcessingJobsPanelComponent implements OnChanges {
     this.processingJobsService.retryJob(job.processingJobId).subscribe({
       next: () => {
         this.isRetryingJobId = null;
+        this.toastService.success('Retry queued', 'The processing job will be attempted again.');
         this.jobsChanged.emit();
         this.loadProcessingJobs();
       },

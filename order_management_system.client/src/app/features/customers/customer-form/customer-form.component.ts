@@ -9,6 +9,7 @@ import { UpdateCustomerRequest } from '../../../core/models/update-customer.mode
 import { CustomersService } from '../../../core/services/customers.service';
 import { PricingTier } from '../../../core/models/pricing-tier.model';
 import { PricingService } from '../../../core/services/pricing.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { forkJoin, map, switchMap } from 'rxjs';
 
 @Component({
@@ -26,7 +27,6 @@ export class CustomerFormComponent implements OnInit {
   customerId: number | null = null;
   isLoading = false;
   errorMessage = '';
-  successMessage = '';
   addresses: Address[] = [];
 
   contactForm!: FormGroup;
@@ -45,7 +45,8 @@ export class CustomerFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private pricingService: PricingService
+    private pricingService: PricingService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -296,11 +297,10 @@ export class CustomerFormComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.customersService.update(this.customerId, this.buildCurrentCustomerUpdateRequest()).subscribe({
       next: () => {
-        this.successMessage = 'Customer details saved.';
+        this.toastService.success('Customer updated', 'The customer details were saved.');
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -333,6 +333,7 @@ export class CustomerFormComponent implements OnInit {
     this.customersService.deleteAddress(this.customerId, this.addressPendingDelete.addressId).subscribe({
       next: () => {
         this.addressPendingDelete = null;
+        this.toastService.success('Address deleted', 'The address was removed from the customer.');
         this.getCustomerAddresses(this.customerId!);
         this.cdr.markForCheck();
       },
@@ -398,6 +399,7 @@ export class CustomerFormComponent implements OnInit {
     this.customersService.createContact(this.customerId, request).subscribe({
       next: () => {
         this.resetContactForm();
+        this.toastService.success('Contact added', 'The contact was added to the customer.');
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
@@ -453,7 +455,6 @@ export class CustomerFormComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     const updateRequest = this.buildCustomerRequest(
       this.form.value,
@@ -468,7 +469,7 @@ export class CustomerFormComponent implements OnInit {
           defaultDeliveryAddressId,
           deliverySameAsBilling: !!billingAddressId && billingAddressId === defaultDeliveryAddressId
         });
-        this.successMessage = successMessage;
+        this.toastService.success('Address preference updated', successMessage);
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -510,6 +511,7 @@ export class CustomerFormComponent implements OnInit {
     this.customersService.updateContact(this.customerId, contact.customerContactId, request).subscribe({
       next: () => {
         this.resetContactForm();
+        this.toastService.success('Primary contact updated', `${contact.name} is now the primary contact.`);
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
@@ -533,6 +535,7 @@ export class CustomerFormComponent implements OnInit {
     this.customersService.updateContact(this.customerId, this.editingContactId, request).subscribe({
       next: () => {
         this.resetContactForm();
+        this.toastService.success('Contact updated', 'The contact details were saved.');
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
@@ -580,6 +583,7 @@ export class CustomerFormComponent implements OnInit {
     this.customersService.deleteContact(this.customerId, this.contactPendingDelete.customerContactId).subscribe({
       next: () => {
         this.contactPendingDelete = null;
+        this.toastService.success('Contact deleted', 'The contact was removed from the customer.');
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
@@ -671,7 +675,11 @@ export class CustomerFormComponent implements OnInit {
 
     save$.subscribe({
       next: () => {
-        this.successMessage = this.editingAddressId ? 'Address updated.' : 'Address added.';
+        const wasEditing = this.editingAddressId !== null;
+        this.toastService.success(
+          wasEditing ? 'Address updated' : 'Address added',
+          wasEditing ? 'The address details were saved.' : 'The address was added to the customer.'
+        );
         this.cancelAddressEdit();
         this.getCustomerAddresses(this.customerId!);
         this.cdr.markForCheck();
@@ -764,7 +772,10 @@ export class CustomerFormComponent implements OnInit {
           );
         })
       ).subscribe({
-        next: () => this.router.navigate(['/customers']),
+        next: () => {
+          this.toastService.success('Customer created', 'The customer account was created successfully.');
+          this.router.navigate(['/customers']);
+        },
         error: (err) => {
           console.error('Failed to create customer', err);
           this.errorMessage = 'Failed to create customer.';

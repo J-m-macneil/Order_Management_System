@@ -63,8 +63,9 @@
             {{ reason }}
           </div>
 
-          <div *ngFor="let item of restrictedItems"
-               class="app-sub-card">
+          <div class="divide-y app-divider">
+            <div *ngFor="let item of restrictedItems"
+                 class="py-3 first:pt-0 last:pb-0">
             <div class="app-strong-text">
               {{ item.productName || 'Product #' + item.productId }}
             </div>
@@ -72,6 +73,7 @@
               <span *ngIf="item.productSku" class="font-mono">{{ item.productSku }}</span>
               <span *ngIf="item.unNumber">{{ item.unNumber }}</span>
               <span class="app-badge app-badge--danger">Restricted</span>
+            </div>
             </div>
           </div>
         </div>

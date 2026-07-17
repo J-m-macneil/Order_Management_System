@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 import { PagedResult } from '../../core/models/paged-result.model';
 import { ProductList } from '../../core/models/product-list.model';
 import { ProductsService } from '../../core/services/products.service';
+import { ToastService } from '../../core/services/toast.service';
 import { ProductsComponent } from './products.component';
 
 describe('ProductsComponent', () => {
@@ -31,7 +32,8 @@ describe('ProductsComponent', () => {
       delete: () => of(void 0)
     } as unknown as ProductsService;
 
-    component = new ProductsComponent(service);
+    const toastService = { success: () => undefined } as unknown as ToastService;
+    component = new ProductsComponent(service, toastService);
   });
 
   it('preserves false boolean filter values in the request', () => {

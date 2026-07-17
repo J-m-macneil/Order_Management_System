@@ -6,6 +6,7 @@ import { AllowedStatus } from '../../../core/models/allowed-status.model';
 import { OrderStatus } from '../../../core/models/order-status.enum';
 import { OrderStatusHistory } from '../../../core/models/order-status-history.model';
 import { getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { ToastService } from '../../../core/services/toast.service';
 import {
   ConfirmationModalState,
   ConfirmationModalVariant,
@@ -39,7 +40,8 @@ export class OrderDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private ordersService: OrdersService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -145,6 +147,8 @@ export class OrderDetailComponent implements OnInit {
     this.ordersService.changeStatus(this.order.orderId, status, reason).subscribe({
       next: () => {
         this.isChangingStatus = false;
+        const statusName = this.allowedStatuses.find(item => item.id === status)?.name ?? 'the selected status';
+        this.toastService.success('Order status updated', `Order moved to ${statusName}.`);
         this.refresh();
       },
       error: (err) => {
@@ -179,6 +183,7 @@ export class OrderDetailComponent implements OnInit {
     this.ordersService.discardDraftOrder(this.order.orderId).subscribe({
       next: () => {
         this.isDiscardingDraft = false;
+        this.toastService.success('Draft discarded', 'The draft order was removed.');
         this.router.navigate(['/orders']);
       },
       error: (err) => {

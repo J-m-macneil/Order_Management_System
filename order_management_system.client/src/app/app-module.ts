@@ -3,6 +3,13 @@ import { CommonModule } from '@angular/common';
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  LucideCircleAlert,
+  LucideCircleCheck,
+  LucideInfo,
+  LucideTriangleAlert,
+  LucideX
+} from '@lucide/angular';
 
 import { AppRoutingModule } from './app-routing-module';
 import { AppComponent } from './app';
@@ -12,13 +19,15 @@ import { NavbarComponent } from './layout/navbar/navbar.component';
 
 import { LoginComponent } from './features/auth/login/login.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { ToastContainerComponent } from './shared/toast-container/toast-container.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MainLayoutComponent,
     NavbarComponent,
-    LoginComponent
+    LoginComponent,
+    ToastContainerComponent
   ],
   imports: [
     BrowserModule,
@@ -26,7 +35,12 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     HttpClientModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    LucideCircleAlert,
+    LucideCircleCheck,
+    LucideInfo,
+    LucideTriangleAlert,
+    LucideX
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

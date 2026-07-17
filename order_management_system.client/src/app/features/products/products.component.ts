@@ -3,6 +3,7 @@ import { ProductList } from '../../core/models/product-list.model';
 import { ProductsService } from '../../core/services/products.service';
 import { ProductCategory } from '../../core/models/product-category.model';
 import { HazardClass } from '../../core/models/hazard-class.model';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-products',
@@ -41,7 +42,10 @@ export class ProductsComponent implements OnInit {
   readonly hazardClasses = signal<HazardClass[]>([]);
   readonly productPendingDelete = signal<ProductList | null>(null);
 
-  constructor(private productsService: ProductsService) { }
+  constructor(
+    private productsService: ProductsService,
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -166,6 +170,7 @@ export class ProductsComponent implements OnInit {
     this.productsService.delete(product.productId).subscribe({
       next: () => {
         this.productPendingDelete.set(null);
+        this.toastService.success('Product deleted', `${product.productName} was removed.`);
 
         if (moveToPreviousPage) {
           this.pageNumber.update(page => page - 1);

@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } fro
 import { AuthService } from '../../../core/auth/auth.service';
 import { SafetyDataSheet } from '../../../core/models/safety-data-sheet-model';
 import { ProductsService } from '../../../core/services/products.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
 
 @Component({
@@ -21,11 +22,11 @@ export class ProductSdsPanelComponent implements OnInit {
   isLoading = false;
   isGenerating = false;
   errorMessage = '';
-  successMessage = '';
 
   constructor(
     private productsService: ProductsService,
     private authService: AuthService,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -44,12 +45,11 @@ export class ProductSdsPanelComponent implements OnInit {
 
     this.isGenerating = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.productsService.generateSafetyDataSheet(this.productId).subscribe({
       next: () => {
         this.isGenerating = false;
-        this.successMessage = 'SDS generated.';
+        this.toastService.success('SDS generated', 'The safety data sheet is ready to view.');
         this.loadSafetyDataSheets();
         this.sdsChanged.emit();
       },
@@ -83,12 +83,11 @@ export class ProductSdsPanelComponent implements OnInit {
 
     const sdsId = this.sdsPendingDelete.safetyDataSheetId;
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.productsService.deleteSafetyDataSheet(this.productId, sdsId).subscribe({
       next: () => {
         this.sdsPendingDelete = null;
-        this.successMessage = 'SDS deleted.';
+        this.toastService.success('SDS deleted', 'The safety data sheet was removed.');
         this.loadSafetyDataSheets();
         this.sdsChanged.emit();
       },

@@ -12,10 +12,17 @@ import { MainLayoutComponent } from './main-layout.component';
 })
 class NavbarStubComponent { }
 
+@Component({
+  selector: 'app-toast-container',
+  standalone: false,
+  template: ''
+})
+class ToastContainerStubComponent { }
+
 describe('MainLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MainLayoutComponent, NavbarStubComponent],
+      declarations: [MainLayoutComponent, NavbarStubComponent, ToastContainerStubComponent],
       imports: [RouterModule.forRoot([])],
       providers: [
         {

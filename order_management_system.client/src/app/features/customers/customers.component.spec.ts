@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 import { Customer } from '../../core/models/customer.model';
 import { PagedResult } from '../../core/models/paged-result.model';
 import { CustomersService } from '../../core/services/customers.service';
+import { ToastService } from '../../core/services/toast.service';
 import { CustomersComponent } from './customers.component';
 
 describe('CustomersComponent', () => {
@@ -31,7 +32,8 @@ describe('CustomersComponent', () => {
       delete: () => of(void 0)
     } as unknown as CustomersService;
 
-    component = new CustomersComponent(service);
+    const toastService = { success: () => undefined } as unknown as ToastService;
+    component = new CustomersComponent(service, toastService);
   });
 
   it('clears advanced filters without clearing search', () => {

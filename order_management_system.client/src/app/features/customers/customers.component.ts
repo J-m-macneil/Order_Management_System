@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Customer } from '../../core/models/customer.model';
 import { CustomersService } from '../../core/services/customers.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-customers',
@@ -36,7 +37,10 @@ export class CustomersComponent implements OnInit {
   readonly industries = signal<string[]>([]);
   readonly customerPendingDelete = signal<Customer | null>(null);
 
-  constructor(private customersService: CustomersService) { }
+  constructor(
+    private customersService: CustomersService,
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -158,6 +162,7 @@ export class CustomersComponent implements OnInit {
     this.customersService.delete(customer.customerId).subscribe({
       next: () => {
         this.customerPendingDelete.set(null);
+        this.toastService.success('Customer deleted', `${customer.companyName} was removed.`);
 
         if (moveToPreviousPage) {
           this.pageNumber.update(page => page - 1);

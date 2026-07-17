@@ -17,6 +17,7 @@ import { Carrier } from '../../../core/models/carrier.model';
 import { Project } from '../../../core/models/project.model';
 import { CreateOrder } from '../../../core/models/create-order.model';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-order-create',
@@ -52,7 +53,8 @@ export class OrderCreateComponent implements OnInit {
     private productsService: ProductsService,
     private warehousesService: WarehousesService,
     private carriersService: CarriersService,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -316,6 +318,7 @@ export class OrderCreateComponent implements OnInit {
     if (this.isEditMode && this.orderId) {
       this.ordersService.updateOrder(this.orderId, dto).subscribe({
         next: () => {
+          this.toastService.success('Order updated', 'The draft order was saved.');
           this.router.navigate(['/orders', this.orderId]);
         },
         error: (err) => {
@@ -328,6 +331,7 @@ export class OrderCreateComponent implements OnInit {
 
     this.ordersService.createOrder(dto).subscribe({
       next: (result) => {
+        this.toastService.success('Order created', 'The draft order was created.');
         this.router.navigate(['/orders', result.orderId]);
       },
       error: (err) => {

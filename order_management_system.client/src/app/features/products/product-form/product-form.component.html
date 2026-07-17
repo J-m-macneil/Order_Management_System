@@ -25,11 +25,6 @@
 </div>
 
 <!-- Success -->
-<div *ngIf="successMessage && !isLoading"
-     class="p-4 app-alert app-alert--success mb-6">
-  <p class="app-alert-text--success">{{ successMessage }}</p>
-</div>
-
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2 space-y-6">
 
