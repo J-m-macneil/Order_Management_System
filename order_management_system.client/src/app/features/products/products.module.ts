@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LucidePackage, LucidePackageCheck, LucideShieldAlert, LucideTriangleAlert } from '@lucide/angular';
 
 import { SharedModule } from '../../shared/shared.module';
 import { ProductAuditPanelComponent } from './product-audit-panel/product-audit-panel.component';
@@ -20,6 +21,10 @@ import { ProductsComponent } from './products.component';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    LucidePackage,
+    LucidePackageCheck,
+    LucideShieldAlert,
+    LucideTriangleAlert,
     SharedModule,
     ProductsRoutingModule
   ]

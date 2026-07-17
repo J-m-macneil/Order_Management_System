@@ -215,7 +215,7 @@ export class AdminUsersComponent implements OnInit {
 
   getRoleClass(role: string): string {
     if (role === 'Admin') {
-      return 'app-badge app-badge--danger';
+      return 'app-badge app-badge--info';
     }
 
     if (role === 'Operations') {

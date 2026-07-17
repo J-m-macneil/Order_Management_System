@@ -7,7 +7,7 @@
 </div>
 
 <div class="form-card">
-  <div class="flex items-center justify-between gap-4 mb-6">
+  <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
     <div>
       <h2 class="app-section-title">Safety Data Sheets</h2>
       <p *ngIf="requiresSds && safetyDataSheets.length > 0" class="text-xs app-muted-text mt-1">
@@ -35,7 +35,7 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="app-empty-state">
+  <div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
     <p>Loading safety data sheets...</p>
   </div>
 

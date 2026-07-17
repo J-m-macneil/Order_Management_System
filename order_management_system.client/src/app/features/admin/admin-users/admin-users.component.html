@@ -8,7 +8,8 @@
       <button type="button"
               class="app-primary-button px-4 py-3"
               (click)="openCreateForm()">
-        + New User
+        <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+        <span>New User</span>
       </button>
     </div>
 
@@ -56,7 +57,7 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading()" class="app-empty-state">
+  <div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
     <p>Loading users...</p>
   </div>
 
@@ -236,19 +237,11 @@
       <div class="form-card">
         <h2 class="app-section-title mb-6">User Actions</h2>
 
-        <div class="space-y-3">
-          <button type="submit"
-                  class="app-primary-button w-full px-4 py-3"
-                  [disabled]="isSaving()">
-            {{ isSaving() ? 'Saving...' : 'Save User' }}
-          </button>
-
-          <button type="button"
-                  class="app-secondary-button w-full px-4 py-3"
-                  (click)="closeUserForm()">
-            Cancel
-          </button>
-        </div>
+        <button type="submit"
+                class="app-primary-button w-full px-4 py-3"
+                [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Save User' }}
+        </button>
       </div>
     </div>
   </form>

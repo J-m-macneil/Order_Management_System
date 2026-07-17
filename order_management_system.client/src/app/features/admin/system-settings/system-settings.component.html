@@ -7,7 +7,7 @@
 </div>
 
 <div class="space-y-6">
-  <div *ngIf="isLoading" class="app-empty-state">
+  <div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
     <p>Loading system settings...</p>
   </div>
 
@@ -15,14 +15,13 @@
     <div *ngFor="let group of settingGroups" class="form-card">
       <div class="app-section-header">
         <h2 class="app-section-title">{{ group }}</h2>
-        <p class="app-section-description">Controlled settings used by the application workflow.</p>
       </div>
 
       <div class="divide-y app-divider">
         <div *ngFor="let setting of settingsByGroup[group]" class="py-5 first:pt-0 last:pb-0">
           <div class="grid grid-cols-1 xl:grid-cols-[1fr_18rem_auto] gap-4 xl:items-center">
             <div>
-              <h3 class="text-sm font-semibold app-strong-text">
+              <h3 class="text-sm app-strong-text">
                 {{ formatSettingName(setting.settingKey) }}
               </h3>
               <p class="text-sm app-muted-text mt-1">{{ setting.description }}</p>

@@ -4,20 +4,18 @@ export interface MetricCard {
   label: string;
   value: number;
   type: MetricType;
-  color: string;
+  description: string;
 }
 
 export interface OrderByStatus {
   status: string;
   count: number;
-  color: string;
 }
 
 export interface TopCustomer {
   name: string;
-  initials: string;
   orders: number;
-  bgColor: string;
+  orderShare: number;
 }
 
 export interface RecentFailure {
@@ -26,6 +24,7 @@ export interface RecentFailure {
   customer: string;
   reason: string;
   date: string;
+  requiresAction: boolean;
 }
 
 export interface PriorityOrder {

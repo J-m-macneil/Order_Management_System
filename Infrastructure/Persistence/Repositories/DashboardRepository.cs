@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Domain.Repositories;
+using Domain.Enums;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,15 @@ public class DashboardRepository : IDashboardRepository
 
     public async Task<DashboardMetrics> GetMetricsAsync(CancellationToken ct)
     {
-        var activeStatusIds = new[] { 2, 3, 4, 5, 6 };
+        var activeStatusIds = new[]
+        {
+            (int)OrderStatusEnum.Submitted,
+            (int)OrderStatusEnum.PendingReview,
+            (int)OrderStatusEnum.Approved,
+            (int)OrderStatusEnum.InProcessing,
+            (int)OrderStatusEnum.AwaitingDispatch
+        };
+        var failedStatusId = (int)OrderStatusEnum.Failed;
 
         var totalOrders = await _db.Orders.CountAsync(o => o.DeletedAt == null, ct);
 
@@ -24,7 +33,7 @@ public class DashboardRepository : IDashboardRepository
             .CountAsync(o => o.DeletedAt == null && activeStatusIds.Contains(o.OrderStatusId), ct);
 
         var failedOrders = await _db.Orders
-            .CountAsync(o => o.DeletedAt == null && o.OrderStatusId == 8, ct);
+            .CountAsync(o => o.DeletedAt == null && o.OrderStatusId == failedStatusId, ct);
 
         var totalValue = await _db.Orders
             .Where(o => o.DeletedAt == null)
@@ -56,17 +65,32 @@ public class DashboardRepository : IDashboardRepository
             .ToListAsync(ct);
 
         var recentFailures = await _db.Orders
-            .Include(o => o.Customer)
-            .Where(o => o.DeletedAt == null && o.OrderStatusId == 8)
-            .OrderByDescending(o => o.UpdatedAt)
-            .Take(5)
-            .Select(o => new RecentFailure
+            .AsNoTracking()
+            .Where(o =>
+                o.DeletedAt == null &&
+                o.OrderStatusHistory.Any(h => h.ToStatusId == failedStatusId))
+            .Select(o => new
             {
-                OrderId = o.OrderId,
-                OrderNumber = o.OrderNumber,
+                o.OrderId,
+                o.OrderNumber,
                 Customer = o.Customer.CompanyName,
-                Reason = o.FailureReason ?? "No failure reason recorded.",
-                Date = o.UpdatedAt
+                o.OrderStatusId,
+                LatestFailure = o.OrderStatusHistory
+                    .Where(h => h.ToStatusId == failedStatusId)
+                    .OrderByDescending(h => h.ChangedAt)
+                    .Select(h => new { h.Reason, h.ChangedAt })
+                    .First()
+            })
+            .OrderByDescending(x => x.LatestFailure.ChangedAt)
+            .Take(5)
+            .Select(x => new RecentFailure
+            {
+                OrderId = x.OrderId,
+                OrderNumber = x.OrderNumber,
+                Customer = x.Customer,
+                Reason = x.LatestFailure.Reason ?? "No failure reason recorded.",
+                Date = x.LatestFailure.ChangedAt,
+                RequiresAction = x.OrderStatusId == failedStatusId
             })
             .ToListAsync(ct);
 

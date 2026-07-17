@@ -42,7 +42,8 @@ public class GetDashboardMetricsQueryHandler
                 OrderNumber = x.OrderNumber,
                 Customer = x.Customer,
                 Reason = x.Reason,
-                Date = x.Date
+                Date = x.Date,
+                RequiresAction = x.RequiresAction
             }).ToList(),
             PriorityOrders = result.PriorityOrders.Select(x => new PriorityOrderDto
             {

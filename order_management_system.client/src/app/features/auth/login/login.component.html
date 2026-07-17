@@ -1,85 +1,67 @@
 <div class="login-page min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md">
-
-    <!-- Logo and Branding -->
-    <div class="text-center mb-6">
-      <img class="login-logo" [src]="themeService.isDarkMode() ? 'login-logo-dark.svg' : 'login-logo-light.svg'" alt="ChemFlow" />
-      <p class="text-xs app-muted-text mt-3">
-        Order Management System
-      </p>
-    </div>
-
-    <!-- Login Card -->
     <div class="login-card app-card p-8">
+      <div class="text-center mb-6">
+        <img
+          class="login-logo"
+          [src]="themeService.isDarkMode() ? 'login-logo-dark.svg' : 'login-logo-light.svg'"
+          alt="Back" />
+        <p class="text-xs app-muted-text mt-3">Order Management System</p>
+      </div>
+
       <div class="mb-6">
-        <h1 class="text-2xl app-strong-text">
-          Sign in
-        </h1>
-        <p class="text-sm app-muted-text mt-1">
-          Access your order management system
-        </p>
+        <h1 class="text-2xl app-strong-text">Sign in</h1>
+        <p class="text-sm app-muted-text mt-1">Access your order management system</p>
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
-
-        <!-- Username/Email Field -->
         <div>
-          <label for="usernameOrEmail" class="form-label">
-            Username or email
-          </label>
+          <label for="usernameOrEmail" class="form-label">Username or email</label>
+          <input
+            id="usernameOrEmail"
+            type="text"
+            formControlName="usernameOrEmail"
+            class="form-input"
+            placeholder="username@example.com" />
 
-          <input id="usernameOrEmail"
-                 type="text"
-                 formControlName="usernameOrEmail"
-                 class="form-input"
-                 placeholder="username@example.com" />
-
-          <div *ngIf="loginForm.get('usernameOrEmail')?.hasError('required') && loginForm.get('usernameOrEmail')?.touched"
-               class="mt-1.5 text-sm app-alert-text--danger">
+          <div
+            *ngIf="loginForm.get('usernameOrEmail')?.hasError('required') && loginForm.get('usernameOrEmail')?.touched"
+            class="mt-1.5 text-sm app-alert-text--danger">
             Username or email is required
           </div>
         </div>
 
-        <!-- Password Field -->
         <div>
-          <label for="password" class="form-label">
-            Password
-          </label>
+          <label for="password" class="form-label">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="form-input"
+            placeholder="Enter your password" />
 
-          <input id="password"
-                 type="password"
-                 formControlName="password"
-                 class="form-input"
-                 placeholder="••••••••" />
-
-          <div *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched"
-               class="mt-1.5 text-sm app-alert-text--danger">
+          <div
+            *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched"
+            class="mt-1.5 text-sm app-alert-text--danger">
             Password is required
           </div>
         </div>
 
-        <!-- Error Message -->
-        <div *ngIf="errorMessage"
-             class="p-4 app-alert app-alert--danger">
-          <p class="text-sm app-alert-text--danger">
-            {{ errorMessage }}
-          </p>
+        <div *ngIf="errorMessage" class="p-4 app-alert app-alert--danger">
+          <p class="text-sm app-alert-text--danger">{{ errorMessage }}</p>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit"
-                [disabled]="isLoading"
-                class="app-primary-button w-full mt-6 px-4 py-2.5">
+        <button
+          type="submit"
+          [disabled]="isLoading"
+          class="app-primary-button w-full mt-6 px-4 py-2.5">
           {{ isLoading ? 'Signing in...' : 'Sign in' }}
         </button>
-
       </form>
+
+      <p class="text-center text-xs app-muted-text mt-6">
+        Protected with industry-standard security
+      </p>
     </div>
-
-    <!-- Footer -->
-    <p class="text-center text-xs app-muted-text mt-6">
-      Protected with industry-standard security
-    </p>
-
   </div>
 </div>

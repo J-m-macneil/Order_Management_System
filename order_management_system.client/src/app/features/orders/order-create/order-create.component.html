@@ -17,7 +17,7 @@
   <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
-<div *ngIf="isLoadingOrder" class="app-empty-state">
+<div *ngIf="isLoadingOrder" class="app-empty-state app-empty-state--loading">
   <p>Loading order...</p>
 </div>
 
@@ -144,7 +144,8 @@
       </div>
     </div>
 
-    <app-order-items-editor [items]="items"
+    <app-order-items-editor class="block"
+                            [items]="items"
                             [products]="products"
                             (itemAdded)="addItem()"
                             (itemRemoved)="removeItem($event)"

@@ -14,8 +14,7 @@ type ProcessingJobDisplay = Partial<ProcessingJob> & {
 @Component({
   selector: 'app-processing-jobs-panel',
   standalone: false,
-  templateUrl: './processing-jobs-panel.component.html',
-  styleUrls: ['./processing-jobs-panel.component.css']
+  templateUrl: './processing-jobs-panel.component.html'
 })
 export class ProcessingJobsPanelComponent implements OnChanges {
   @Input() orderId!: number;

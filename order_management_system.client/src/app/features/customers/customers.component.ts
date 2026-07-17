@@ -27,7 +27,12 @@ export class CustomersComponent implements OnInit {
 
   filtersVisible = false;
 
-  readonly stats = signal<{ label: string; value: string | number }[]>([]);
+  readonly stats = signal<{
+    label: string;
+    value: string | number;
+    type: 'total' | 'active' | 'inactive';
+    description: string;
+  }[]>([]);
   readonly industries = signal<string[]>([]);
   readonly customerPendingDelete = signal<Customer | null>(null);
 
@@ -45,15 +50,21 @@ export class CustomersComponent implements OnInit {
         this.stats.set([
           {
             label: 'Total Customers',
-            value: summary.totalCustomers
+            value: summary.totalCustomers,
+            type: 'total',
+            description: 'All customer accounts'
           },
           {
             label: 'Active',
-            value: summary.activeCustomers
+            value: summary.activeCustomers,
+            type: 'active',
+            description: 'Available for new orders'
           },
           {
             label: 'Inactive',
-            value: summary.inactiveCustomers
+            value: summary.inactiveCustomers,
+            type: 'inactive',
+            description: 'Currently unavailable'
           }
         ]);
       }

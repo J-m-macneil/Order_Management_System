@@ -1,5 +1,5 @@
 <div class="form-card">
-  <div class="flex items-center justify-between gap-4 mb-5">
+  <div class="app-section-header--divided flex items-center justify-between gap-4 mb-5">
     <div>
       <h2 class="app-section-title">Addresses</h2>
       <p class="text-xs app-muted-text mt-1">{{ addresses.length }} total</p>
@@ -8,17 +8,18 @@
     <button type="button"
             (click)="addAddress.emit()"
             class="app-primary-button px-4 py-2">
-      Add Address
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>Add Address</span>
     </button>
   </div>
 
-  <div *ngIf="addresses.length === 0" class="empty-state">
+  <div *ngIf="addresses.length === 0" class="app-empty-state">
     No addresses recorded.
   </div>
 
-  <div *ngIf="addresses.length > 0" class="space-y-3 mb-6">
+  <div *ngIf="addresses.length > 0" class="divide-y app-divider mb-6">
     <div *ngFor="let address of addresses"
-         class="app-sub-card">
+         class="py-4 first:pt-0 last:pb-0">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
@@ -35,20 +36,20 @@
           </p>
         </div>
 
-        <div class="flex flex-wrap gap-2 shrink-0">
+        <div class="app-inline-actions shrink-0">
           <button type="button"
                   (click)="editAddress.emit(address)"
-                  class="app-action-button px-3 py-1 text-xs">
+                  class="app-link-button text-xs">
             Edit
           </button>
           <button type="button"
                   (click)="setBillingAddress.emit(address)"
-                  class="reference-action-button">
+                  class="app-success-link text-xs">
             Set Billing
           </button>
           <button type="button"
                   (click)="setDefaultDeliveryAddress.emit(address)"
-                  class="reference-action-button delivery">
+                  class="app-link-button text-xs">
             Set Delivery
           </button>
           <button type="button"

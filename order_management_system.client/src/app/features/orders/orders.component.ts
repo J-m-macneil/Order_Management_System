@@ -1,4 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { OrdersService } from '../../core/services/orders.service';
 import { Order } from '../../core/models/order.model';
 
@@ -51,9 +52,15 @@ export class OrdersComponent implements OnInit {
     this.orderStatuses.map(status => [status.id, status.badgeClass])
   );
 
-  constructor(private ordersService: OrdersService) { }
+  constructor(
+    private ordersService: OrdersService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
+    this.statusFilter = this.getStatusFilterFromRoute();
+    this.priorityFilter = this.getPriorityFilterFromRoute();
     this.loadOrders();
   }
 
@@ -102,6 +109,16 @@ export class OrdersComponent implements OnInit {
     this.loadOrders();
   }
 
+  onStatusFilterChange(): void {
+    this.updateFilterQueryParameters();
+    this.applyFilters();
+  }
+
+  onPriorityFilterChange(): void {
+    this.updateFilterQueryParameters();
+    this.applyFilters();
+  }
+
   clearFilters(): void {
     this.priorityFilter = '';
     this.restrictedFilter = '';
@@ -110,6 +127,7 @@ export class OrdersComponent implements OnInit {
     this.requestedDeliveryTo = '';
     this.createdFrom = '';
     this.createdTo = '';
+    this.updateFilterQueryParameters();
     this.applyFilters();
   }
 
@@ -126,7 +144,7 @@ export class OrdersComponent implements OnInit {
   }
 
   getPriorityBadgeClass(isPriority: boolean): string {
-    return isPriority ? 'app-badge app-badge--warning' : 'app-badge app-badge--info';
+    return isPriority ? 'app-badge app-badge--warning' : 'app-badge app-badge--neutral';
   }
 
   private getPriorityFilterValue(): boolean | null {
@@ -151,6 +169,34 @@ export class OrdersComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private getStatusFilterFromRoute(): string {
+    const status = this.route.snapshot.queryParamMap.get('status') ?? '';
+
+    return this.orderStatuses.some(option => String(option.id) === status)
+      ? status
+      : '';
+  }
+
+  private getPriorityFilterFromRoute(): string {
+    const priority = this.route.snapshot.queryParamMap.get('priority') ?? '';
+
+    return priority === 'priority' || priority === 'standard'
+      ? priority
+      : '';
+  }
+
+  private updateFilterQueryParameters(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        status: this.statusFilter || null,
+        priority: this.priorityFilter || null
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   get activeFilterCount(): number {

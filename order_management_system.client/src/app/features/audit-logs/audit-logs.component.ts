@@ -186,7 +186,8 @@ export class AuditLogsComponent implements OnInit {
   }
 
   getAuditDescription(log: AuditLog): string {
-    return log.changeSummary || log.notes || 'No notes recorded';
+    const description = log.changeSummary || log.notes || 'No notes recorded';
+    return description.charAt(0).toUpperCase() + description.slice(1);
   }
 
   getActionClass(log: AuditLog): string {

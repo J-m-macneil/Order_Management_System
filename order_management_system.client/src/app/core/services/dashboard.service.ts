@@ -24,6 +24,7 @@ export interface DashboardMetricsResponse {
     customer: string;
     reason: string;
     date: string;
+    requiresAction: boolean;
   }[];
   priorityOrders: {
     orderId: number;

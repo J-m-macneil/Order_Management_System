@@ -4,25 +4,33 @@
     <p class="app-muted-text mt-2">Manage customer accounts and information</p>
   </div>
   <a routerLink="/customers/new" class="app-primary-button app-page-header-action px-4 py-3">
-    + New Customer
+    <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+    <span>New Customer</span>
   </a>
 </div>
 
 <div class="app-stat-grid app-stat-grid--3">
   <div *ngFor="let stat of stats()" class="metric-card">
-    <p class="metric-card-label">
-      {{ stat.label }}
-    </p>
+    <div class="metric-card-header">
+      <span class="metric-card-icon" aria-hidden="true">
+        <svg *ngIf="stat.type === 'total'" lucideUsers [size]="20"></svg>
+        <svg *ngIf="stat.type === 'active'" lucideUserCheck [size]="20"></svg>
+        <svg *ngIf="stat.type === 'inactive'" lucideUserX [size]="20"></svg>
+      </span>
+      <p class="metric-card-label">{{ stat.label }}</p>
+    </div>
     <p class="metric-card-value">
       {{ stat.value }}
     </p>
+    <p class="app-section-description">{{ stat.description }}</p>
   </div>
 </div>
 
 <div class="app-filter-section">
   <div class="app-responsive-action-row">
     <a routerLink="/customers/new" class="app-primary-button px-4 py-3">
-      + New Customer
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>New Customer</span>
     </a>
   </div>
 
@@ -87,7 +95,7 @@
   </div>
 </div>
 
-<div *ngIf="isLoading()" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
   <p>Loading customers...</p>
 </div>
 

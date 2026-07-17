@@ -36,6 +36,7 @@ public class RecentFailureDto
     public string Customer { get; set; } = string.Empty;
     public string Reason { get; set; } = string.Empty;
     public DateTime Date { get; set; }
+    public bool RequiresAction { get; set; }
 }
 
 public class PriorityOrderDto

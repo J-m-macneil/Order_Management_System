@@ -14,7 +14,7 @@
 </div>
 
 <!-- Loading -->
-<div *ngIf="isLoading" class="app-empty-state">
+<div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
   <p>Loading...</p>
 </div>
 
@@ -167,7 +167,7 @@
     </div>
 
     <div *ngIf="!isEditMode" class="form-card">
-      <div class="flex items-center justify-between gap-4 mb-6">
+      <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
         <h2 class="app-section-title">Delivery Address</h2>
 
         <div class="flex items-center gap-4">

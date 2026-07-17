@@ -1,5 +1,5 @@
-<div class="detail-card" mt-6>
-  <div class="flex items-start justify-between gap-3 mb-6">
+<div class="detail-card">
+  <div class="app-section-header--divided flex items-start justify-between gap-3 mb-6">
     <div>
       <h2 class="app-section-title">
         Processing Jobs
@@ -34,10 +34,10 @@
   </div>
 
   <div *ngIf="!isLoading && displayJobs.length > 0; else noProcessingJobs"
-       class="space-y-3">
+       class="divide-y app-divider">
 
     <div *ngFor="let job of displayJobs"
-         class="processing-job-card rounded-lg p-4">
+         class="py-4 first:pt-0 last:pb-0">
 
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">

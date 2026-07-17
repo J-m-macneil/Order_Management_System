@@ -5,7 +5,8 @@
   </div>
   <a routerLink="/orders/create"
      class="app-primary-button app-page-header-action px-4 py-3">
-    + New Order
+    <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+    <span>New Order</span>
   </a>
 </div>
 
@@ -13,7 +14,8 @@
   <div class="app-responsive-action-row">
     <a routerLink="/orders/create"
        class="app-primary-button px-4 py-3">
-      + New Order
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>New Order</span>
     </a>
   </div>
 
@@ -33,7 +35,7 @@
     <div>
       <label class="form-label">Status</label>
       <select [(ngModel)]="statusFilter"
-              (change)="applyFilters()"
+              (change)="onStatusFilterChange()"
               class="form-input">
         <option value="">All statuses</option>
         <option *ngFor="let status of orderStatuses" [value]="status.id">
@@ -45,7 +47,7 @@
     <div>
       <label class="form-label">Priority</label>
       <select [(ngModel)]="priorityFilter"
-              (change)="applyFilters()"
+              (change)="onPriorityFilterChange()"
               class="form-input">
         <option value="">All priorities</option>
         <option value="priority">Priority Orders</option>
@@ -106,7 +108,7 @@
   </div>
 </div>
 
-<div *ngIf="isLoading()" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
   <p>Loading orders...</p>
 </div>
 

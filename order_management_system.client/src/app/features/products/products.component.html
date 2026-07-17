@@ -5,18 +5,26 @@
   </div>
   <a routerLink="/products/create"
      class="app-primary-button app-page-header-action px-4 py-3">
-    + New Product
+    <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+    <span>New Product</span>
   </a>
 </div>
 
 <div class="app-stat-grid app-stat-grid--4">
   <div *ngFor="let stat of stats()" class="metric-card">
-    <p class="metric-card-label">
-      {{ stat.label }}
-    </p>
+    <div class="metric-card-header">
+      <span class="metric-card-icon" aria-hidden="true">
+        <svg *ngIf="stat.type === 'total'" lucidePackage [size]="20"></svg>
+        <svg *ngIf="stat.type === 'active'" lucidePackageCheck [size]="20"></svg>
+        <svg *ngIf="stat.type === 'restricted'" lucideShieldAlert [size]="20"></svg>
+        <svg *ngIf="stat.type === 'hazardous'" lucideTriangleAlert [size]="20"></svg>
+      </span>
+      <p class="metric-card-label">{{ stat.label }}</p>
+    </div>
     <p class="metric-card-value">
       {{ stat.value }}
     </p>
+    <p class="app-section-description">{{ stat.description }}</p>
   </div>
 </div>
 
@@ -24,7 +32,8 @@
   <div class="app-responsive-action-row">
     <a routerLink="/products/create"
        class="app-primary-button px-4 py-3">
-      + New Product
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>New Product</span>
     </a>
   </div>
 
@@ -111,7 +120,7 @@
   </div>
 </div>
 
-<div *ngIf="isLoading()" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
   <p>Loading products...</p>
 </div>
 

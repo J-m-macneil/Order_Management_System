@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
+
+import { MetricCard, OrderByStatus, PriorityOrder, RecentFailure, TopCustomer } from '../../core/models/dashboard.models';
+import { OrderStatus } from '../../core/models/order-status.enum';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { MetricCard, OrderByStatus, RecentFailure, PriorityOrder, TopCustomer } from '../../core/models/dashboard.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,6 +19,7 @@ export class DashboardComponent implements OnInit {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
+  readonly failedOrderStatus = OrderStatus.Failed;
 
   constructor(private dashboardService: DashboardService) { }
 
@@ -30,99 +33,66 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getMetrics().subscribe({
       next: (data) => {
+        const totalOrders = data.metrics.totalOrders;
+        const activePercentage = totalOrders > 0
+          ? Math.round((data.metrics.activeOrders / totalOrders) * 100)
+          : 0;
+
         this.metrics.set([
-          { label: 'Total Orders', value: data.metrics.totalOrders, type: 'orders', color: 'text-blue-600' },
-          { label: 'Active Orders', value: data.metrics.activeOrders, type: 'activeOrders', color: 'text-emerald-500' },
-          { label: 'Failed Orders', value: data.metrics.failedOrders, type: 'failedOrders', color: 'text-red-500' },
-          { label: 'Total Value', value: data.metrics.totalValue, type: 'totalValue', color: 'text-purple-500' }
+          {
+            label: 'Total Orders',
+            value: totalOrders,
+            type: 'orders',
+            description: 'All recorded orders'
+          },
+          {
+            label: 'Active Orders',
+            value: data.metrics.activeOrders,
+            type: 'activeOrders',
+            description: `${activePercentage}% of all orders`
+          },
+          {
+            label: 'Failed Orders',
+            value: data.metrics.failedOrders,
+            type: 'failedOrders',
+            description: data.metrics.failedOrders > 0 ? 'Requires attention' : 'No current failures'
+          },
+          {
+            label: 'Total Value',
+            value: data.metrics.totalValue,
+            type: 'totalValue',
+            description: 'Across all orders'
+          }
         ]);
 
-        this.ordersByStatus.set(data.ordersByStatus.map(x => ({
-          status: x.status,
-          count: x.count,
-          color: this.getStatusColor(x.status)
+        this.ordersByStatus.set(data.ordersByStatus);
+
+        const highestOrderCount = Math.max(...data.topCustomers.map(customer => customer.orders), 1);
+
+        this.topCustomers.set(data.topCustomers.map(customer => ({
+          name: customer.name,
+          orders: customer.orders,
+          orderShare: Math.round((customer.orders / highestOrderCount) * 100)
         })));
 
-        this.topCustomers.set(data.topCustomers.map((x, index) => ({
-          name: x.name,
-          initials: this.getInitials(x.name),
-          orders: x.orders,
-          bgColor: this.getCustomerColor(index)
-        })));
+        this.recentFailures.set(data.recentFailures);
 
-        this.recentFailures.set(data.recentFailures.map(x => ({
-          orderId: x.orderId,
-          orderNumber: x.orderNumber,
-          customer: x.customer,
-          reason: x.reason,
-          date: x.date
-        })));
-
-        this.priorityOrders.set(data.priorityOrders.map(x => ({
-          orderId: x.orderId,
-          orderNumber: x.orderNumber,
-          customer: x.customer,
-          priority: x.priority,
-          dueDate: x.dueDate
+        this.priorityOrders.set(data.priorityOrders.map(order => ({
+          orderId: order.orderId,
+          orderNumber: order.orderNumber,
+          customer: order.customer,
+          priority: order.priority,
+          dueDate: order.dueDate
         })));
 
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Dashboard metrics error:', err);
+      error: (error) => {
+        console.error('Dashboard metrics error:', error);
         this.errorMessage.set('Failed to load dashboard metrics.');
         this.isLoading.set(false);
       }
     });
   }
 
-  getStatusColor(status: string): string {
-    const colors: Record<string, string> = {
-      'Draft': 'bg-slate-300 dark:bg-slate-400',
-      'Submitted': 'bg-blue-300 dark:bg-blue-400',
-      'Pending Review': 'bg-violet-300 dark:bg-violet-400',
-      'Approved': 'bg-emerald-300 dark:bg-emerald-400',
-      'In Processing': 'bg-amber-300 dark:bg-amber-400',
-      'Awaiting Dispatch': 'bg-orange-300 dark:bg-orange-400',
-      'Completed': 'bg-teal-300 dark:bg-teal-400',
-      'Failed': 'bg-red-300 dark:bg-red-400',
-      'Cancelled': 'bg-zinc-300 dark:bg-zinc-400'
-    };
-
-    return colors[status] || 'bg-slate-300 dark:bg-slate-400';
-  }
-
-  getCustomerColor(index: number): string {
-    const colors = [
-      'bg-blue-600',
-      'bg-purple-600',
-      'bg-emerald-600',
-      'bg-amber-600',
-      'bg-red-600'
-    ];
-
-    return colors[index % colors.length];
-  }
-
-  getInitials(name: string): string {
-    if (!name) return '—';
-
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map(part => part[0].toUpperCase())
-      .join('');
-  }
-
-  getPriorityBadgeClass(priority: string): string {
-    const colors: Record<string, string> = {
-      low: 'app-badge--neutral',
-      medium: 'app-badge--info',
-      high: 'app-badge--warning',
-      urgent: 'app-badge--danger'
-    };
-
-    return colors[priority.toLowerCase()] || colors['low'];
-  }
 }

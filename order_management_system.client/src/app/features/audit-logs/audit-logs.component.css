@@ -3,7 +3,7 @@
   overflow: auto;
   border-radius: 0.5rem;
   border: 1px solid var(--app-border);
-  background: var(--app-muted-surface);
+  background: var(--app-surface);
   padding: 1rem;
   font-size: 0.75rem;
   line-height: 1.5;

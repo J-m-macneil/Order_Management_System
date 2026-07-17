@@ -1,0 +1,12 @@
+<div class="status-grid">
+  <a
+    *ngFor="let status of statusItems()"
+    class="status-row"
+    [ngClass]="status.cssClass"
+    routerLink="/orders"
+    [queryParams]="{ status: status.id }">
+    <span class="status-marker" aria-hidden="true"></span>
+    <span class="status-name">{{ status.status }}</span>
+    <strong class="status-count">{{ status.count | number }}</strong>
+  </a>
+</div>

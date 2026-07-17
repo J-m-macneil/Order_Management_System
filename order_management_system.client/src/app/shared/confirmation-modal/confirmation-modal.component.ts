@@ -23,9 +23,15 @@ export class ConfirmationModalComponent {
   reason = '';
 
   get confirmButtonClass(): string {
-    return this.variant === 'danger'
-      ? 'app-danger-button px-4 py-2 text-sm'
-      : 'app-primary-button px-4 py-2 text-sm';
+    if (this.variant === 'danger') {
+      return 'app-danger-button px-4 py-2 text-sm';
+    }
+
+    if (this.variant === 'warning') {
+      return 'app-reset-button px-4 py-2 text-sm';
+    }
+
+    return 'app-primary-button px-4 py-2 text-sm';
   }
 
   submit(): void {

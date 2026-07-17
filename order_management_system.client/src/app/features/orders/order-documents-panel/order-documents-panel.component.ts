@@ -5,8 +5,7 @@ import { DocumentsService } from '../../../core/services/documents.service';
 @Component({
   selector: 'app-order-documents-panel',
   standalone: false,
-  templateUrl: './order-documents-panel.component.html',
-  styleUrls: ['./order-documents-panel.component.css']
+  templateUrl: './order-documents-panel.component.html'
 })
 export class OrderDocumentsPanelComponent implements OnChanges {
   @Input() orderId!: number;

@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25rem;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: 0.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  border-bottom: 1px solid var(--app-border);
+  background: transparent;
+  padding: 0.8rem 0.35rem;
+  color: var(--app-text);
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+
+.status-row:hover {
+  background: var(--app-secondary-surface);
+}
+
+.status-row:focus-visible {
+  outline: 2px solid var(--app-field-focus-border);
+  outline-offset: 2px;
+}
+
+.status-marker {
+  width: 0.25rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--status-color);
+}
+
+.status-count {
+  color: var(--app-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-draft { --status-color: var(--app-status-draft); }
+.status-submitted { --status-color: var(--app-status-submitted); }
+.status-pending-review { --status-color: var(--app-status-pending-review); }
+.status-approved { --status-color: var(--app-status-approved); }
+.status-processing { --status-color: var(--app-status-processing); }
+.status-awaiting-dispatch { --status-color: var(--app-status-awaiting-dispatch); }
+.status-completed { --status-color: var(--app-status-completed); }
+.status-failed { --status-color: var(--app-status-failed); }
+.status-cancelled { --status-color: var(--app-status-cancelled); }
+
+.status-name {
+  overflow: hidden;
+  color: var(--app-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+}

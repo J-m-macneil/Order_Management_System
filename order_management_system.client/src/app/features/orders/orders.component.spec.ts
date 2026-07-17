@@ -1,4 +1,5 @@
 import { of } from 'rxjs';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 
 import { PagedResult } from '../../core/models/paged-result.model';
 import { Order } from '../../core/models/order.model';
@@ -29,7 +30,14 @@ describe('OrdersComponent', () => {
       }
     } as unknown as OrdersService;
 
-    component = new OrdersComponent(service);
+    const route = {
+      snapshot: { queryParamMap: convertToParamMap({}) }
+    } as unknown as ActivatedRoute;
+    const router = {
+      navigate: () => Promise.resolve(true)
+    } as unknown as Router;
+
+    component = new OrdersComponent(service, route, router);
   });
 
   it('resets pagination and trims search when filters are applied', () => {

@@ -1,6 +1,9 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-  <div class="app-card w-full max-w-md p-6">
-    <h2 class="app-section-title mb-3">
+<div class="app-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="app-card w-full max-w-md p-6"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="confirmation-modal-title">
+    <h2 id="confirmation-modal-title" class="app-section-title mb-3">
       {{ title }}
     </h2>
 
@@ -25,6 +28,7 @@
 
       <button type="button"
               (click)="submit()"
+              [disabled]="requireReason && !reason.trim()"
               [class]="confirmButtonClass">
         {{ confirmText }}
       </button>

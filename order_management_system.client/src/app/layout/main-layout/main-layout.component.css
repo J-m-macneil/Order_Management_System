@@ -5,41 +5,41 @@
   min-height: 0;
   overflow: hidden;
   padding: 1.5rem;
-  background: var(--app-shell-page-bg);
+  background: var(--app-page-bg);
 }
 
-  .app-shell {
-    display: grid;
-    grid-template-columns: 5rem minmax(0, 1fr);
-    height: calc(100dvh - 3rem);
-    min-height: 0;
-    max-width: 1500px;
-    margin: 0 auto;
-    overflow: hidden;
-    border: 1px solid var(--app-shell-border);
-    border-radius: 24px;
-    background: var(--app-shell-bg);
-    box-shadow: var(--app-shell-shadow);
-  }
+.app-shell {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  width: min(100%, clamp(80rem, 78vw, 106.25rem));
+  height: calc(100dvh - 3rem);
+  min-height: 0;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--app-shell-border);
+  border-radius: 24px;
+  background: var(--app-shell-bg);
+  box-shadow: var(--app-shell-shadow);
+}
 
-  .app-content {
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    overflow: auto;
-    padding: 2rem;
-  }
+.app-content {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  padding: 2rem;
+}
 
-  .nav-shell {
-    display: block;
-    min-height: 0;
-    height: 100%;
-  }
+.nav-shell {
+  display: block;
+  min-height: 0;
+  height: 100%;
+}
 
-  .mobile-nav-header,
-  .mobile-backdrop {
-    display: none;
-  }
+.mobile-nav-header,
+.mobile-backdrop {
+  display: none;
+}
 
 @media (max-width: 900px) {
   :host {
@@ -95,9 +95,9 @@
     z-index: 50;
   }
 
-    .nav-shell.open {
-      transform: translateX(0);
-    }
+  .nav-shell.open {
+    transform: translateX(0);
+  }
 
   .mobile-backdrop.open {
     position: fixed;

@@ -12,7 +12,6 @@
   align-items: center;
   min-height: 100%;
   padding: 1rem 0.75rem;
-  border-right: 1px solid var(--app-nav-border);
   background: var(--app-nav-bg);
 }
 
@@ -73,9 +72,15 @@ button.nav-icon {
 .nav-icon svg {
   width: 1.15rem;
   height: 1.15rem;
+  stroke-width: 1.8;
 }
 
-.nav-icon:hover,
+.nav-icon:hover {
+  color: var(--app-nav-item-hover-text);
+  background: var(--app-nav-item-hover-bg);
+  transform: translateY(-1px);
+}
+
 .nav-icon.nav-active {
   color: var(--app-nav-item-active-text);
   background: var(--app-nav-item-active-bg);

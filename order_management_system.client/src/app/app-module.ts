@@ -9,7 +9,6 @@ import { AppComponent } from './app';
 
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { NavbarComponent } from './layout/navbar/navbar.component';
-import { SidebarComponent } from './layout/sidebar/sidebar.component';
 
 import { LoginComponent } from './features/auth/login/login.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
@@ -19,7 +18,6 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     AppComponent,
     MainLayoutComponent,
     NavbarComponent,
-    SidebarComponent,
     LoginComponent
   ],
   imports: [

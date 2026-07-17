@@ -81,7 +81,7 @@
   </div>
 </div>
 
-<div *ngIf="isLoading()" class="app-empty-state">
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
   <p>Loading audit logs...</p>
 </div>
 
@@ -140,32 +140,40 @@
             <td colspan="5" class="px-6 py-5">
               <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
                 <div>
-                  <p class="form-label">Entity</p>
-                  <p class="text-sm app-body-text mt-1">{{ log.entityType }} #{{ log.entityId }}</p>
+                  <p class="form-label mb-2">Entity</p>
+                  <div class="app-sub-card app-sub-card--surface">
+                    <p class="text-sm app-body-text">{{ log.entityType }} #{{ log.entityId }}</p>
+                  </div>
                 </div>
                 <div>
-                  <p class="form-label">Actor</p>
-                  <p class="text-sm app-body-text mt-1">{{ getActorLabel(log) }}</p>
+                  <p class="form-label mb-2">Actor</p>
+                  <div class="app-sub-card app-sub-card--surface">
+                    <p class="text-sm app-body-text">{{ getActorLabel(log) }}</p>
+                  </div>
                 </div>
                 <div>
-                  <p class="form-label">Recorded</p>
-                  <p class="text-sm app-body-text mt-1">{{ log.performedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
+                  <p class="form-label mb-2">Recorded</p>
+                  <div class="app-sub-card app-sub-card--surface">
+                    <p class="text-sm app-body-text">{{ log.performedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
+                  </div>
                 </div>
               </div>
 
-              <div *ngIf="log.changeSummary" class="app-sub-card mb-5">
-                <p class="form-label mb-2">Changes</p>
-                <p class="text-sm app-body-text">{{ log.changeSummary }}</p>
-              </div>
-
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div>
-                  <p class="form-label mb-2">Old Values JSON</p>
-                  <pre class="audit-json">{{ formatJson(log.oldValuesJson) }}</pre>
+              <div>
+                <h3 class="app-section-title mb-2">Changes</h3>
+                <div class="app-sub-card app-sub-card--surface mb-4">
+                  <p class="text-sm app-body-text">{{ getAuditDescription(log) }}</p>
                 </div>
-                <div>
-                  <p class="form-label mb-2">New Values JSON</p>
-                  <pre class="audit-json">{{ formatJson(log.newValuesJson) }}</pre>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div>
+                    <p class="form-label mb-2">Previous values</p>
+                    <pre class="audit-json">{{ formatJson(log.oldValuesJson) }}</pre>
+                  </div>
+                  <div>
+                    <p class="form-label mb-2">New values</p>
+                    <pre class="audit-json">{{ formatJson(log.newValuesJson) }}</pre>
+                  </div>
                 </div>
               </div>
             </td>

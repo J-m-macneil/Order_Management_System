@@ -31,7 +31,12 @@ export class ProductsComponent implements OnInit {
 
   filtersVisible = false;
 
-  readonly stats = signal<{ label: string; value: string | number }[]>([]);
+  readonly stats = signal<{
+    label: string;
+    value: string | number;
+    type: 'total' | 'active' | 'restricted' | 'hazardous';
+    description: string;
+  }[]>([]);
   readonly categories = signal<ProductCategory[]>([]);
   readonly hazardClasses = signal<HazardClass[]>([]);
   readonly productPendingDelete = signal<ProductList | null>(null);
@@ -64,19 +69,27 @@ export class ProductsComponent implements OnInit {
         this.stats.set([
           {
             label: 'Total Products',
-            value: summary.totalProducts
+            value: summary.totalProducts,
+            type: 'total',
+            description: 'Products in the catalogue'
           },
           {
             label: 'Active Products',
-            value: summary.activeProducts
+            value: summary.activeProducts,
+            type: 'active',
+            description: 'Available to order'
           },
           {
             label: 'Restricted',
-            value: summary.restrictedProducts
+            value: summary.restrictedProducts,
+            type: 'restricted',
+            description: 'Require additional controls'
           },
           {
             label: 'Hazardous',
-            value: summary.hazardousProducts
+            value: summary.hazardousProducts,
+            type: 'hazardous',
+            description: 'Classified with a hazard'
           }
         ]);
       }

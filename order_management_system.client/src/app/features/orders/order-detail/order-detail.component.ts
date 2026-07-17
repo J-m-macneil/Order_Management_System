@@ -262,6 +262,10 @@ export class OrderDetailComponent implements OnInit {
   }
 
   private getReasonModalVariant(status: OrderStatus): ConfirmationModalVariant {
+    if (status === OrderStatus.Draft) {
+      return 'default';
+    }
+
     return status === OrderStatus.Cancelled || status === OrderStatus.Failed
       ? 'danger'
       : 'warning';
