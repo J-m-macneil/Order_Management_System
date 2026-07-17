@@ -14,6 +14,7 @@ internal class OrderDocumentPdfBuilder
     private const string Muted = "#64748B";
     private const string Border = "#D7DEE8";
     private const string Surface = "#F8FAFC";
+    private const float TableBorderWidth = 1.5f;
     private const string DocumentLogoPath = "Assets/login-logo-light.svg";
     private static readonly CultureInfo UkCulture = CultureInfo.GetCultureInfo("en-GB");
 
@@ -134,7 +135,7 @@ internal class OrderDocumentPdfBuilder
             .Text("This bundle contains the active safety data sheets for the order products that require safety documentation.")
             .FontColor(Ink);
 
-        column.Item().Border(1).BorderColor(Border).Table(table =>
+        column.Item().Border(TableBorderWidth).BorderColor(Border).Table(table =>
         {
             table.ColumnsDefinition(columns =>
             {
@@ -174,7 +175,7 @@ internal class OrderDocumentPdfBuilder
     {
         AddSectionTitle(column, "Order Items");
 
-        column.Item().Border(1).BorderColor(Border).Table(table =>
+        column.Item().Border(TableBorderWidth).BorderColor(Border).Table(table =>
         {
             table.ColumnsDefinition(columns =>
             {
@@ -187,17 +188,17 @@ internal class OrderDocumentPdfBuilder
             table.Header(header =>
             {
                 AddHeaderCell(header.Cell(), "Product");
-                AddHeaderCell(header.Cell().AlignRight(), "Qty");
-                AddHeaderCell(header.Cell().AlignRight(), "Unit");
-                AddHeaderCell(header.Cell().AlignRight(), "Line Total");
+                AddHeaderCell(header.Cell(), "Qty", alignRight: true);
+                AddHeaderCell(header.Cell(), "Unit", alignRight: true);
+                AddHeaderCell(header.Cell(), "Line Total", alignRight: true);
             });
 
             foreach (var item in order.OrderItems)
             {
                 AddBodyCell(table.Cell(), item.Product?.ProductName ?? $"Product #{item.ProductId}");
-                AddBodyCell(table.Cell().AlignRight(), item.Quantity.ToString());
-                AddBodyCell(table.Cell().AlignRight(), FormatMoney(item.UnitPrice, order.Currency));
-                AddBodyCell(table.Cell().AlignRight(), FormatMoney(item.LineTotal, order.Currency));
+                AddBodyCell(table.Cell(), item.Quantity.ToString(), alignRight: true);
+                AddBodyCell(table.Cell(), FormatMoney(item.UnitPrice, order.Currency), alignRight: true);
+                AddBodyCell(table.Cell(), FormatMoney(item.LineTotal, order.Currency), alignRight: true);
             }
         });
     }
@@ -233,28 +234,45 @@ internal class OrderDocumentPdfBuilder
             .FontColor(Ink);
     }
 
-    private static void AddHeaderCell(IContainer cell, string value)
+    private static void AddHeaderCell(IContainer cell, string value, bool alignRight = false)
     {
-        cell.Background(Surface)
-            .BorderRight(1)
-            .BorderBottom(1)
-            .BorderColor(Border)
-            .PaddingHorizontal(8)
-            .PaddingVertical(7)
-            .Text(value)
-            .SemiBold()
-            .FontColor(Ink);
+        StyleTableCell(cell, Surface)
+            .Text(text =>
+            {
+                if (alignRight)
+                {
+                    text.AlignRight();
+                }
+
+                text.Span(value)
+                    .SemiBold()
+                    .FontColor(Ink);
+            });
     }
 
-    private static void AddBodyCell(IContainer cell, string value)
+    private static void AddBodyCell(IContainer cell, string value, bool alignRight = false)
     {
-        cell.BorderRight(1)
-            .BorderBottom(1)
+        StyleTableCell(cell, Colors.White)
+            .Text(text =>
+            {
+                if (alignRight)
+                {
+                    text.AlignRight();
+                }
+
+                text.Span(value).FontColor(Ink);
+            });
+    }
+
+    private static IContainer StyleTableCell(IContainer cell, string background)
+    {
+        return cell
+            .BorderRight(TableBorderWidth)
+            .BorderBottom(TableBorderWidth)
             .BorderColor(Border)
+            .Background(background)
             .PaddingHorizontal(8)
-            .PaddingVertical(7)
-            .Text(value)
-            .FontColor(Ink);
+            .PaddingVertical(7);
     }
 
     private static void AddTotalRow(ColumnDescriptor totals, string label, string value)
