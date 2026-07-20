@@ -192,13 +192,11 @@ export class OrderCreateComponent implements OnInit {
     this.customersService.getAddresses(customerId).subscribe({
       next: (customerAddresses) => {
         this.setCustomerAddresses(customerAddresses);
-
-        const defaultBilling = this.billingAddresses.find(x => x.isPrimary);
-        const defaultDelivery = this.deliveryAddresses.find(x => x.isPrimary);
+        const customer = this.customers.find(x => x.customerId === customerId);
 
         this.orderForm.patchValue({
-          billingAddressId: defaultBilling?.addressId ?? null,
-          deliveryAddressId: defaultDelivery?.addressId ?? null
+          billingAddressId: customer?.billingAddressId ?? null,
+          deliveryAddressId: customer?.defaultDeliveryAddressId ?? null
         });
 
         this.cdr.markForCheck();

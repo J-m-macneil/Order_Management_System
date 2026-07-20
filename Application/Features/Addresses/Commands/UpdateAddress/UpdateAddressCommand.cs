@@ -21,5 +21,4 @@ public class UpdateAddressCommand : IRequest<Unit>
     public string? ContactPhone { get; set; }
 
     public string? DeliveryInstructions { get; set; }
-    public bool IsPrimary { get; set; }
 }

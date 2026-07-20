@@ -43,7 +43,6 @@ public class UpdateAddressCommandHandlerTests
         address.ContactName.Should().Be(command.ContactName);
         address.ContactPhone.Should().Be(command.ContactPhone);
         address.DeliveryInstructions.Should().Be(command.DeliveryInstructions);
-        address.IsPrimary.Should().Be(command.IsPrimary);
 
         await repo.Received(1)
             .GetByIdAsync(command.CustomerId, command.AddressId, Arg.Any<CancellationToken>());
@@ -117,7 +116,6 @@ public class UpdateAddressCommandHandlerTests
             ContactName = "Old Contact",
             ContactPhone = "00000000000",
             DeliveryInstructions = "Old instructions",
-            IsPrimary = false,
             IsActive = true,
             CreatedAt = new DateTime(2026, 1, 1)
         };
@@ -139,8 +137,7 @@ public class UpdateAddressCommandHandlerTests
             Country = "United Kingdom",
             ContactName = "Jane Smith",
             ContactPhone = "01234567890",
-            DeliveryInstructions = "Use loading bay",
-            IsPrimary = true
+            DeliveryInstructions = "Use loading bay"
         };
     }
 }

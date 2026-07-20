@@ -38,7 +38,6 @@ public class CreateAddressCommandHandler : IRequestHandler<CreateAddressCommand,
             ContactName = request.ContactName,
             ContactPhone = request.ContactPhone,
             DeliveryInstructions = request.DeliveryInstructions,
-            IsPrimary = request.IsPrimary,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -68,8 +67,7 @@ public class CreateAddressCommandHandler : IRequestHandler<CreateAddressCommand,
             Country = address.Country,
             ContactName = address.ContactName,
             ContactPhone = address.ContactPhone,
-            DeliveryInstructions = address.DeliveryInstructions,
-            IsPrimary = address.IsPrimary
+            DeliveryInstructions = address.DeliveryInstructions
         };
     }
 
@@ -106,7 +104,6 @@ public class CreateAddressCommandHandler : IRequestHandler<CreateAddressCommand,
             address.ContactName,
             address.ContactPhone,
             address.DeliveryInstructions,
-            address.IsPrimary,
             address.IsActive,
             address.DeletedAt
         };

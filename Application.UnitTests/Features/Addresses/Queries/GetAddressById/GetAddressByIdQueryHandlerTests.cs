@@ -42,7 +42,6 @@ public class GetAddressByIdQueryHandlerTests
         result.ContactName.Should().Be(address.ContactName);
         result.ContactPhone.Should().Be(address.ContactPhone);
         result.DeliveryInstructions.Should().Be(address.DeliveryInstructions);
-        result.IsPrimary.Should().Be(address.IsPrimary);
 
         await repo.Received(1)
             .GetByIdAsync(query.CustomerId, query.AddressId, Arg.Any<CancellationToken>());
@@ -90,7 +89,6 @@ public class GetAddressByIdQueryHandlerTests
             ContactName = "Jane Smith",
             ContactPhone = "01234567890",
             DeliveryInstructions = "Use side entrance",
-            IsPrimary = true,
             IsActive = true,
             CreatedAt = new DateTime(2026, 1, 1)
         };

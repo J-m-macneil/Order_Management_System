@@ -121,8 +121,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             Country = address.Country,
             ContactName = address.ContactName,
             ContactPhone = address.ContactPhone,
-            DeliveryInstructions = address.DeliveryInstructions,
-            IsPrimary = address.IsPrimary
+            DeliveryInstructions = address.DeliveryInstructions
         };
     }
 }

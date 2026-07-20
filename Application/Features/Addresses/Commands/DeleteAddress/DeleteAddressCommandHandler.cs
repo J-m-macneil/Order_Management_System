@@ -58,7 +58,6 @@ public class DeleteAddressCommandHandler : IRequestHandler<DeleteAddressCommand,
             address.ContactName,
             address.ContactPhone,
             address.DeliveryInstructions,
-            address.IsPrimary,
             address.IsActive,
             address.DeletedAt
         };

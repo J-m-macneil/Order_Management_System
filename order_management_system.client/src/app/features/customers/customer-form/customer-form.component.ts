@@ -72,8 +72,8 @@ export class CustomerFormComponent implements OnInit {
 
     this.loadPricingTiers();
 
-    this.billingAddressForm = this.createCustomerAddressForm('Billing', true);
-    this.deliveryAddressForm = this.createCustomerAddressForm('DeliverySite', true);
+    this.billingAddressForm = this.createCustomerAddressForm('Billing');
+    this.deliveryAddressForm = this.createCustomerAddressForm('DeliverySite');
 
     this.addressForm = this.fb.group({
       addressType: ['', Validators.required],
@@ -86,8 +86,7 @@ export class CustomerFormComponent implements OnInit {
       country: ['United Kingdom', Validators.required],
       contactName: [''],
       contactPhone: ['', Validators.pattern(PHONE_NUMBER_PATTERN)],
-      deliveryInstructions: [''],
-      isPrimary: [false]
+      deliveryInstructions: ['']
     });
 
     this.contactForm = this.fb.group({
@@ -165,7 +164,7 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
-  createCustomerAddressForm(addressType: 'Billing' | 'DeliverySite', isPrimary: boolean): FormGroup {
+  createCustomerAddressForm(addressType: 'Billing' | 'DeliverySite'): FormGroup {
     return this.fb.group({
       addressType: [addressType, Validators.required],
       siteName: ['', Validators.required],
@@ -177,8 +176,7 @@ export class CustomerFormComponent implements OnInit {
       country: ['United Kingdom', Validators.required],
       contactName: [''],
       contactPhone: ['', Validators.pattern(PHONE_NUMBER_PATTERN)],
-      deliveryInstructions: [''],
-      isPrimary: [isPrimary]
+      deliveryInstructions: ['']
     });
   }
 
@@ -196,8 +194,7 @@ export class CustomerFormComponent implements OnInit {
       country: value.country,
       contactName: value.contactName,
       contactPhone: value.contactPhone,
-      deliveryInstructions: value.deliveryInstructions,
-      isPrimary: value.isPrimary
+      deliveryInstructions: value.deliveryInstructions
     };
   }
 
@@ -261,18 +258,15 @@ export class CustomerFormComponent implements OnInit {
       contactName: address?.contactName ?? '',
       contactPhone: address?.contactPhone ?? '',
       deliveryInstructions: address?.deliveryInstructions ?? '',
-      isPrimary: address?.isPrimary ?? true
     });
   }
 
   private populateAddressForms(customer: Customer, addresses: Address[]): void {
     const billingAddress = addresses.find(x => x.addressId === customer.billingAddressId)
-      ?? addresses.find(x => x.addressType === 'Billing' && x.isPrimary)
       ?? addresses.find(x => x.addressType === 'Billing')
       ?? null;
 
     const deliveryAddress = addresses.find(x => x.addressId === customer.defaultDeliveryAddressId)
-      ?? addresses.find(x => x.addressType === 'DeliverySite' && x.isPrimary)
       ?? addresses.find(x => x.addressType === 'DeliverySite')
       ?? null;
 
@@ -615,8 +609,7 @@ export class CustomerFormComponent implements OnInit {
       country: 'United Kingdom',
       contactName: '',
       contactPhone: '',
-      deliveryInstructions: '',
-      isPrimary: false
+      deliveryInstructions: ''
     });
   }
 
@@ -641,8 +634,7 @@ export class CustomerFormComponent implements OnInit {
       country: 'United Kingdom',
       contactName: '',
       contactPhone: '',
-      deliveryInstructions: '',
-      isPrimary: false
+      deliveryInstructions: ''
     });
   }
 
@@ -667,8 +659,7 @@ export class CustomerFormComponent implements OnInit {
       country: this.addressForm.value.country,
       contactName: this.addressForm.value.contactName,
       contactPhone: this.addressForm.value.contactPhone,
-      deliveryInstructions: this.addressForm.value.deliveryInstructions,
-      isPrimary: this.addressForm.value.isPrimary
+      deliveryInstructions: this.addressForm.value.deliveryInstructions
     };
 
     const save$ = this.editingAddressId

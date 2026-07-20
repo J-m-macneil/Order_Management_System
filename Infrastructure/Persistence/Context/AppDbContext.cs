@@ -599,9 +599,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(x => x.DeliveryInstructions)
                 .HasMaxLength(255);
 
-            entity.Property(x => x.IsPrimary)
-                .IsRequired();
-
             entity.Property(x => x.IsActive)
                 .IsRequired();
 

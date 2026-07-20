@@ -41,7 +41,6 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
         address.ContactName = request.ContactName;
         address.ContactPhone = request.ContactPhone;
         address.DeliveryInstructions = request.DeliveryInstructions;
-        address.IsPrimary = request.IsPrimary;
 
         await _repo.SaveChangesAsync(ct);
 
@@ -93,7 +92,6 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
             address.ContactName,
             address.ContactPhone,
             address.DeliveryInstructions,
-            address.IsPrimary,
             address.IsActive,
             address.DeletedAt
         };

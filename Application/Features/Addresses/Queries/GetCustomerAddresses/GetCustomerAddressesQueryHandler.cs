@@ -20,7 +20,6 @@ public class GetCustomerAddressesQueryHandler
 
         return addresses
             .OrderBy(x => x.AddressType)
-            .ThenByDescending(x => x.IsPrimary)
             .ThenBy(x => x.SiteName)
             .Select(x => new AddressDto
             {
@@ -36,8 +35,7 @@ public class GetCustomerAddressesQueryHandler
                 Country = x.Country,
                 ContactName = x.ContactName,
                 ContactPhone = x.ContactPhone,
-                DeliveryInstructions = x.DeliveryInstructions,
-                IsPrimary = x.IsPrimary
+                DeliveryInstructions = x.DeliveryInstructions
             })
             .ToList();
     }

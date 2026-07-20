@@ -14,7 +14,6 @@ export interface Address {
   contactName?: string | null;
   contactPhone?: string | null;
   deliveryInstructions?: string | null;
-  isPrimary: boolean;
 }
 
 export interface CreateAddressRequest {
@@ -29,7 +28,6 @@ export interface CreateAddressRequest {
   contactName?: string | null;
   contactPhone?: string | null;
   deliveryInstructions?: string | null;
-  isPrimary: boolean;
 }
 
 export interface UpdateAddressRequest extends CreateAddressRequest { }

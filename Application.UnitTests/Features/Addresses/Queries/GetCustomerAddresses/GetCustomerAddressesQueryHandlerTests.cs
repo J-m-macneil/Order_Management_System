@@ -17,9 +17,9 @@ public class GetCustomerAddressesQueryHandlerTests
         var query = new GetCustomerAddressesQuery { CustomerId = 123 };
         var addresses = new List<Address>
         {
-            CreateAddress(3, "DeliverySite", "Secondary Site", isPrimary: false),
-            CreateAddress(2, "Billing", "Billing Site", isPrimary: false),
-            CreateAddress(1, "DeliverySite", "Primary Site", isPrimary: true)
+            CreateAddress(3, "DeliverySite", "Secondary Site"),
+            CreateAddress(2, "Billing", "Billing Site"),
+            CreateAddress(1, "DeliverySite", "Delivery Site A")
         };
 
         repo.GetByCustomerAsync(query.CustomerId, Arg.Any<CancellationToken>())
@@ -33,10 +33,8 @@ public class GetCustomerAddressesQueryHandlerTests
         result.Select(x => x.AddressId).Should().Equal(2, 1, 3);
 
         result[0].AddressType.Should().Be("Billing");
-        result[1].IsPrimary.Should().BeTrue();
-        result[2].IsPrimary.Should().BeFalse();
 
-        result[1].SiteName.Should().Be("Primary Site");
+        result[1].SiteName.Should().Be("Delivery Site A");
         result[1].Line1.Should().Be("1 Test Street");
         result[1].City.Should().Be("Liverpool");
         result[1].Postcode.Should().Be("L1 1AA");
@@ -71,8 +69,7 @@ public class GetCustomerAddressesQueryHandlerTests
     private static Address CreateAddress(
         int addressId,
         string addressType,
-        string siteName,
-        bool isPrimary)
+        string siteName)
     {
         return new Address
         {
@@ -89,7 +86,6 @@ public class GetCustomerAddressesQueryHandlerTests
             ContactName = "Jane Smith",
             ContactPhone = "01234567890",
             DeliveryInstructions = "Use side entrance",
-            IsPrimary = isPrimary,
             IsActive = true,
             CreatedAt = new DateTime(2026, 1, 1)
         };

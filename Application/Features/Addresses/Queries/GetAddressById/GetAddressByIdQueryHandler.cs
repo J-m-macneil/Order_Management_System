@@ -35,8 +35,7 @@ public class GetAddressByIdQueryHandler
             Country = address.Country,
             ContactName = address.ContactName,
             ContactPhone = address.ContactPhone,
-            DeliveryInstructions = address.DeliveryInstructions,
-            IsPrimary = address.IsPrimary
+            DeliveryInstructions = address.DeliveryInstructions
         };
     }
 }

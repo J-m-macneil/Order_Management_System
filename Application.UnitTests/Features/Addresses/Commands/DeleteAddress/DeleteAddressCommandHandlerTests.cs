@@ -110,7 +110,6 @@ public class DeleteAddressCommandHandlerTests
             ContactName = "Jane Smith",
             ContactPhone = "01234567890",
             DeliveryInstructions = "Use side entrance",
-            IsPrimary = true,
             IsActive = true,
             CreatedAt = new DateTime(2026, 1, 1),
             DeletedAt = null

@@ -49,7 +49,6 @@ public class CreateAddressCommandHandlerTests
         savedAddress.ContactName.Should().Be(command.ContactName);
         savedAddress.ContactPhone.Should().Be(command.ContactPhone);
         savedAddress.DeliveryInstructions.Should().Be(command.DeliveryInstructions);
-        savedAddress.IsPrimary.Should().Be(command.IsPrimary);
         savedAddress.IsActive.Should().BeTrue();
         savedAddress.CreatedAt.Should().BeOnOrAfter(before);
         savedAddress.CreatedAt.Should().BeOnOrBefore(after);
@@ -70,7 +69,6 @@ public class CreateAddressCommandHandlerTests
         result.ContactName.Should().Be(command.ContactName);
         result.ContactPhone.Should().Be(command.ContactPhone);
         result.DeliveryInstructions.Should().Be(command.DeliveryInstructions);
-        result.IsPrimary.Should().Be(command.IsPrimary);
 
         await audit.Received(1).LogAsync(
             Arg.Is<string>(value => value == "Address"),
@@ -99,8 +97,7 @@ public class CreateAddressCommandHandlerTests
             Country = "United Kingdom",
             ContactName = "Jane Smith",
             ContactPhone = "01234567890",
-            DeliveryInstructions = "Use side entrance",
-            IsPrimary = true
+            DeliveryInstructions = "Use side entrance"
         };
     }
 }
