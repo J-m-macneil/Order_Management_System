@@ -8,6 +8,8 @@ public interface ICustomerRepository
 
     Task<Customer?> GetByIdAsync(int customerId, CancellationToken ct);
 
+    Task<bool> AccountNumberExistsAsync(string accountNumber, int? excludingCustomerId, CancellationToken ct);
+
     Task<List<Customer>> GetAllAsync(CancellationToken ct);
 
     Task<int> CountActiveAsync(

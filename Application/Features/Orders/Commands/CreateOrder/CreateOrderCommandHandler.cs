@@ -1,5 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
+using Application.Common.Validation;
 using Application.Features.Orders.Commands.CreateOrder;
 using Application.Interfaces;
 using Domain.Entities.Orders;
@@ -24,6 +25,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Cre
 
     public async Task<CreateOrderResponse> Handle(CreateOrderCommand dto, CancellationToken ct)
     {
+        ValidateRequest(dto);
+
         var userId = _currentUser.UserId
             ?? throw new UnauthorizedException("User is not authenticated.");
 
@@ -93,5 +96,36 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Cre
         {
             OrderId = order.OrderId
         };
+    }
+
+    private static void ValidateRequest(CreateOrderCommand request)
+    {
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.PositiveId(request.DeliveryAddressId, "Delivery address");
+        CommandValidation.PositiveId(request.BillingAddressId, "Billing address");
+        CommandValidation.PositiveId(request.WarehouseId, "Warehouse");
+        CommandValidation.Date(request.RequestedDeliveryDate, "Requested delivery date");
+        CommandValidation.OptionalText(request.PurchaseOrderReference, "Customer PO reference", 40);
+        CommandValidation.OptionalText(request.SpecialInstructions, "Special instructions", 255);
+        CommandValidation.OptionalText(request.InternalNotes, "Internal notes", 255);
+
+        if (request.Items.Count == 0)
+        {
+            throw new BadRequestException("An order must have at least one order line.");
+        }
+
+        foreach (var item in request.Items)
+        {
+            ValidateOrderItem(item);
+        }
+    }
+
+    private static void ValidateOrderItem(CreateOrderItemCommand item)
+    {
+        CommandValidation.PositiveId(item.ProductId, "Product");
+        CommandValidation.Positive(item.Quantity, "Quantity");
+        CommandValidation.NonNegative(item.UnitPrice, "Unit price");
+        CommandValidation.Percentage(item.DiscountPercent, "Discount");
+        CommandValidation.OptionalText(item.Notes, "Order line notes", 255);
     }
 }

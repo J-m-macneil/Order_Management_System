@@ -164,9 +164,13 @@
           <input
             type="text"
             formControlName="purchaseOrderReference"
+            maxlength="40"
             class="form-input"
             placeholder="Enter PO reference number"
           />
+          <p *ngIf="orderForm.get('purchaseOrderReference')?.hasError('maxlength') && orderForm.get('purchaseOrderReference')?.touched" class="mt-1 app-validation-message">
+            PO reference must be 40 characters or fewer.
+          </p>
         </div>
 
         <!-- Project -->
@@ -193,9 +197,13 @@
           <textarea
             formControlName="specialInstructions"
             rows="3"
+            maxlength="255"
             class="form-input resize-none"
             placeholder="Enter any special instructions for this order..."
           ></textarea>
+          <p *ngIf="orderForm.get('specialInstructions')?.hasError('maxlength') && orderForm.get('specialInstructions')?.touched" class="mt-1 app-validation-message">
+            Special instructions must be 255 characters or fewer.
+          </p>
         </div>
 
         <!-- Internal Notes -->
@@ -206,9 +214,13 @@
           <textarea
             formControlName="internalNotes"
             rows="3"
+            maxlength="255"
             class="form-input resize-none"
             placeholder="Internal notes (not visible to customer)..."
           ></textarea>
+          <p *ngIf="orderForm.get('internalNotes')?.hasError('maxlength') && orderForm.get('internalNotes')?.touched" class="mt-1 app-validation-message">
+            Internal notes must be 255 characters or fewer.
+          </p>
         </div>
 
         <!-- Priority Checkbox -->

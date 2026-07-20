@@ -5,6 +5,7 @@ import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { getValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,8 @@ import { getApiErrorMessage } from '../../../core/utils/api-error-message';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+  readonly validationMessage = getValidationMessage;
+
   isLoading = false;
   errorMessage = '';
 

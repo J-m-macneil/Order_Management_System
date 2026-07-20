@@ -355,7 +355,7 @@ export class OrderCreateComponent implements OnInit {
   }
 
   private onSaveError(error: ApiErrorResponse, fallbackMessage: string): void {
-    this.errorMessage = getApiErrorMessage(error, fallbackMessage);
+    this.toastService.error('Order save failed', getApiErrorMessage(error, fallbackMessage));
     this.isSaving = false;
     this.cdr.markForCheck();
   }

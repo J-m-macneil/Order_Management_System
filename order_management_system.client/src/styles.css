@@ -154,7 +154,7 @@
   /* Alerts */
   --app-alert-danger-bg: #fef2f2;
   --app-alert-danger-border: #fecaca;
-  --app-alert-danger-text: var(--app-badge-danger-text);
+  --app-alert-danger-text: #dc2626;
   --app-alert-success-bg: #ecfdf5;
   --app-alert-success-border: #a7f3d0;
   --app-alert-success-text: var(--app-badge-success-text);

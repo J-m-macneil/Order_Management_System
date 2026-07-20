@@ -55,7 +55,7 @@ export class ProductSdsPanelComponent implements OnInit {
       },
       error: (error: ApiErrorResponse) => {
         console.error('Failed to generate SDS', error);
-        this.errorMessage = getApiErrorMessage(error, 'Failed to generate SDS.');
+        this.toastService.error('SDS generation failed', getApiErrorMessage(error, 'Failed to generate SDS.'));
         this.isGenerating = false;
         this.cdr.markForCheck();
       }
@@ -93,7 +93,7 @@ export class ProductSdsPanelComponent implements OnInit {
       },
       error: (error: ApiErrorResponse) => {
         console.error('Failed to delete SDS', error);
-        this.errorMessage = getApiErrorMessage(error, 'Failed to delete SDS.');
+        this.toastService.error('SDS deletion failed', getApiErrorMessage(error, 'Failed to delete SDS.'));
         this.sdsPendingDelete = null;
         this.cdr.markForCheck();
       }

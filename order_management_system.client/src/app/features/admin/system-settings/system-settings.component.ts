@@ -59,7 +59,7 @@ export class SystemSettingsComponent implements OnInit {
     const validationError = this.validateSettingValue(setting, value);
 
     if (validationError) {
-      this.errorMessage = validationError;
+      this.toastService.error('Invalid setting value', validationError);
       return;
     }
 
@@ -78,7 +78,7 @@ export class SystemSettingsComponent implements OnInit {
       error: (err: ApiErrorResponse) => {
         console.error('Failed to update system setting', err);
         this.savingSettingIds.delete(setting.systemSettingId);
-        this.errorMessage = getApiErrorMessage(err, 'Failed to update system setting.');
+        this.toastService.error('Setting update failed', getApiErrorMessage(err, 'Failed to update system setting.'));
         this.cdr.markForCheck();
       }
     });

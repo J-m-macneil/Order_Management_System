@@ -33,6 +33,13 @@ public class ProductRepository : IProductRepository
             .FirstOrDefaultAsync(x => x.ProductId == id && x.DeletedAt == null, ct);
     }
 
+    public Task<bool> SkuExistsAsync(string sku, int? excludingProductId, CancellationToken ct)
+    {
+        return _db.Products.AnyAsync(x =>
+            x.SKU == sku &&
+            (!excludingProductId.HasValue || x.ProductId != excludingProductId.Value), ct);
+    }
+
     public async Task AddAsync(Product product, CancellationToken ct)
     {
         _db.Products.Add(product);

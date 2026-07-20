@@ -159,22 +159,26 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="block">
             <span class="form-label">First name</span>
-            <input type="text" formControlName="firstName" class="form-input" />
+            <input type="text" maxlength="80" autocomplete="given-name" formControlName="firstName" class="form-input" />
+            <span *ngIf="validationMessage(userForm.get('firstName'), 'First name') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
 
           <label class="block">
             <span class="form-label">Last name</span>
-            <input type="text" formControlName="lastName" class="form-input" />
+            <input type="text" maxlength="80" autocomplete="family-name" formControlName="lastName" class="form-input" />
+            <span *ngIf="validationMessage(userForm.get('lastName'), 'Last name') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
 
           <label class="block">
             <span class="form-label">Email</span>
-            <input type="email" formControlName="email" class="form-input" />
+            <input type="email" maxlength="255" autocomplete="email" formControlName="email" class="form-input" />
+            <span *ngIf="validationMessage(userForm.get('email'), 'Email') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
 
           <label class="block">
             <span class="form-label">Username</span>
-            <input type="text" formControlName="username" class="form-input" />
+            <input type="text" maxlength="50" autocomplete="username" formControlName="username" class="form-input" />
+            <span *ngIf="validationMessage(userForm.get('username'), 'Username') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
 
           <label class="block">
@@ -183,11 +187,13 @@
             </span>
             <input type="password" formControlName="password" autocomplete="new-password" class="form-input" />
             <span *ngIf="selectedUser()" class="block mt-1 text-xs app-muted-text">Leave blank to keep the current password.</span>
+            <span *ngIf="validationMessage(userForm.get('password'), 'Password') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
 
           <label class="block">
             <span class="form-label">Job title</span>
-            <input type="text" formControlName="jobTitle" class="form-input" />
+            <input type="text" maxlength="120" autocomplete="organization-title" formControlName="jobTitle" class="form-input" />
+            <span *ngIf="validationMessage(userForm.get('jobTitle'), 'Job title') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
         </div>
       </div>
@@ -202,6 +208,7 @@
               <option [ngValue]="null">Select role</option>
               <option *ngFor="let role of roles()" [ngValue]="role.roleId">{{ role.name }}</option>
             </select>
+            <span *ngIf="validationMessage(userForm.get('roleId'), 'Role') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
 
           <label class="block">
@@ -210,6 +217,7 @@
               <option [ngValue]="null">Select department</option>
               <option *ngFor="let department of departments()" [ngValue]="department.departmentId">{{ department.name }}</option>
             </select>
+            <span *ngIf="validationMessage(userForm.get('departmentId'), 'Department') as message" class="block mt-1 app-validation-message">{{ message }}</span>
           </label>
         </div>
       </div>

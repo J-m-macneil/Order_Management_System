@@ -10,6 +10,8 @@ import { CustomersService } from '../../../core/services/customers.service';
 import { PricingTier } from '../../../core/models/pricing-tier.model';
 import { PricingService } from '../../../core/services/pricing.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { getValidationMessage, PHONE_NUMBER_PATTERN } from '../../../core/utils/form-validation';
 import { forkJoin, map, switchMap } from 'rxjs';
 
 @Component({
@@ -18,6 +20,8 @@ import { forkJoin, map, switchMap } from 'rxjs';
   templateUrl: './customer-form.component.html'
 })
 export class CustomerFormComponent implements OnInit {
+  readonly validationMessage = getValidationMessage;
+
   form!: FormGroup;
   addressForm!: FormGroup;
   billingAddressForm!: FormGroup;
@@ -60,7 +64,7 @@ export class CustomerFormComponent implements OnInit {
       billingAddressId: [null],
       defaultDeliveryAddressId: [null],
       pricingTierId: [1, Validators.required],
-      paymentTermsDays: [30, Validators.required],
+      paymentTermsDays: [30, [Validators.required, Validators.min(0)]],
       creditLimit: [0, [Validators.required, Validators.min(0)]],
       deliverySameAsBilling: [true],
       isActive: [true]
@@ -81,7 +85,7 @@ export class CustomerFormComponent implements OnInit {
       postcode: ['', Validators.required],
       country: ['United Kingdom', Validators.required],
       contactName: [''],
-      contactPhone: [''],
+      contactPhone: ['', Validators.pattern(PHONE_NUMBER_PATTERN)],
       deliveryInstructions: [''],
       isPrimary: [false]
     });
@@ -90,7 +94,7 @@ export class CustomerFormComponent implements OnInit {
       name: ['', Validators.required],
       jobTitle: [''],
       email: ['', [Validators.required, Validators.email]],
-      phone: [''],
+      phone: ['', Validators.pattern(PHONE_NUMBER_PATTERN)],
       isPrimary: [false]
     });
 
@@ -172,7 +176,7 @@ export class CustomerFormComponent implements OnInit {
       postcode: ['', Validators.required],
       country: ['United Kingdom', Validators.required],
       contactName: [''],
-      contactPhone: [''],
+      contactPhone: ['', Validators.pattern(PHONE_NUMBER_PATTERN)],
       deliveryInstructions: [''],
       isPrimary: [isPrimary]
     });
@@ -304,9 +308,9 @@ export class CustomerFormComponent implements OnInit {
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to update customer', err);
-        this.errorMessage = 'Failed to update customer.';
+        this.toastService.error('Customer update failed', getApiErrorMessage(err, 'The customer details could not be saved.'));
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -337,9 +341,9 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerAddresses(this.customerId!);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to delete address', err);
-        this.errorMessage = 'Failed to delete address.';
+        this.toastService.error('Address deletion failed', getApiErrorMessage(err, 'The address could not be deleted.'));
         this.addressPendingDelete = null;
         this.cdr.markForCheck();
       }
@@ -357,9 +361,9 @@ export class CustomerFormComponent implements OnInit {
 
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to load addresses', err);
-        this.errorMessage = 'Failed to load addresses.';
+        this.toastService.error('Addresses unavailable', getApiErrorMessage(err, 'Customer addresses could not be loaded.'));
         this.cdr.markForCheck();
       }
     });
@@ -371,9 +375,9 @@ export class CustomerFormComponent implements OnInit {
         this.contacts = data;
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to load contacts', err);
-        this.errorMessage = 'Failed to load contacts.';
+        this.toastService.error('Contacts unavailable', getApiErrorMessage(err, 'Customer contacts could not be loaded.'));
         this.cdr.markForCheck();
       }
     });
@@ -403,9 +407,9 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to create contact', err);
-        this.errorMessage = 'Failed to create contact.';
+        this.toastService.error('Contact creation failed', getApiErrorMessage(err, 'The contact could not be added.'));
         this.cdr.markForCheck();
       }
     });
@@ -473,9 +477,9 @@ export class CustomerFormComponent implements OnInit {
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to update customer address references', err);
-        this.errorMessage = 'Failed to update customer address selection.';
+        this.toastService.error('Address preference update failed', getApiErrorMessage(err, 'The address selection could not be saved.'));
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -515,9 +519,9 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to set primary contact', err);
-        this.errorMessage = 'Failed to set primary contact.';
+        this.toastService.error('Primary contact update failed', getApiErrorMessage(err, 'The primary contact could not be changed.'));
         this.cdr.markForCheck();
       }
     });
@@ -539,9 +543,9 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to update contact', err);
-        this.errorMessage = 'Failed to update contact.';
+        this.toastService.error('Contact update failed', getApiErrorMessage(err, 'The contact details could not be saved.'));
         this.cdr.markForCheck();
       }
     });
@@ -587,9 +591,9 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerContacts(this.customerId!);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to delete contact', err);
-        this.errorMessage = 'Failed to delete contact.';
+        this.toastService.error('Contact deletion failed', getApiErrorMessage(err, 'The contact could not be deleted.'));
         this.contactPendingDelete = null;
         this.cdr.markForCheck();
       }
@@ -684,9 +688,9 @@ export class CustomerFormComponent implements OnInit {
         this.getCustomerAddresses(this.customerId!);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: ApiErrorResponse) => {
         console.error('Failed to save address', err);
-        this.errorMessage = 'Failed to save address.';
+        this.toastService.error('Address save failed', getApiErrorMessage(err, 'The address could not be saved.'));
         this.cdr.markForCheck();
       }
     });
@@ -776,9 +780,9 @@ export class CustomerFormComponent implements OnInit {
           this.toastService.success('Customer created', 'The customer account was created successfully.');
           this.router.navigate(['/customers']);
         },
-        error: (err) => {
+        error: (err: ApiErrorResponse) => {
           console.error('Failed to create customer', err);
-          this.errorMessage = 'Failed to create customer.';
+          this.toastService.error('Customer creation failed', getApiErrorMessage(err, 'The customer account could not be created.'));
           this.isLoading = false;
           this.cdr.markForCheck();
         }

@@ -1,5 +1,6 @@
 using Application.Features.Customers.DTOs;
 using Application.Interfaces;
+using Application.Common.Validation;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -23,10 +24,21 @@ public class CreateCustomerContactCommandHandler
         _audit = audit;
     }
 
+    private static void ValidateRequest(CreateCustomerContactCommand request)
+    {
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.RequiredText(request.Name, "Contact name", 120);
+        CommandValidation.OptionalText(request.JobTitle, "Job title", 120);
+        CommandValidation.Email(request.Email);
+        CommandValidation.OptionalPhone(request.Phone);
+    }
+
     public async Task<CustomerContactDto> Handle(
         CreateCustomerContactCommand request,
         CancellationToken ct)
     {
+        ValidateRequest(request);
+
         var contact = new CustomerContact
         {
             CustomerId = request.CustomerId,

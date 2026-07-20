@@ -60,6 +60,7 @@
     <div>
       <label class="form-label">Name</label>
       <input type="text" formControlName="name" class="form-input" />
+      <p *ngIf="validationMessage(contactForm.get('name'), 'Name') as message" class="mt-1 app-validation-message">{{ message }}</p>
     </div>
 
     <div>
@@ -69,12 +70,14 @@
 
     <div>
       <label class="form-label">Email</label>
-      <input type="email" formControlName="email" class="form-input" />
+      <input type="email" autocomplete="email" formControlName="email" class="form-input" />
+      <p *ngIf="validationMessage(contactForm.get('email'), 'Email') as message" class="mt-1 app-validation-message">{{ message }}</p>
     </div>
 
     <div>
       <label class="form-label">Phone</label>
-      <input type="text" formControlName="phone" class="form-input" />
+      <input type="tel" inputmode="tel" autocomplete="tel" formControlName="phone" class="form-input" />
+      <p *ngIf="validationMessage(contactForm.get('phone'), 'Phone number') as message" class="mt-1 app-validation-message">{{ message }}</p>
     </div>
 
     <label class="flex items-center gap-2">

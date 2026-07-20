@@ -181,7 +181,7 @@ export class ProductsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to delete product', err);
-        this.errorMessage.set('Failed to delete product.');
+        this.toastService.error('Product deletion failed', 'The product could not be deleted.');
         this.productPendingDelete.set(null);
       }
     });

@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { CustomerContact } from '../../../core/models/customer-contact.model';
+import { getValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-customer-contacts-section',
@@ -9,6 +10,8 @@ import { CustomerContact } from '../../../core/models/customer-contact.model';
   host: { class: 'block' }
 })
 export class CustomerContactsSectionComponent {
+  readonly validationMessage = getValidationMessage;
+
   @Input({ required: true }) contacts: CustomerContact[] = [];
   @Input({ required: true }) contactForm!: FormGroup;
   @Input() isContactFormOpen = false;

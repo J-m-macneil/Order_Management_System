@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Common.Validation;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -20,6 +21,8 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
 
     public async Task<Unit> Handle(UpdateAddressCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
         var address = await _repo.GetByIdAsync(request.CustomerId, request.AddressId, ct);
 
         if (address == null)
@@ -54,6 +57,23 @@ public class UpdateAddressCommandHanlder : IRequestHandler<UpdateAddressCommand,
             ct);
 
         return Unit.Value;
+    }
+
+    private static void ValidateRequest(UpdateAddressCommand request)
+    {
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.PositiveId(request.AddressId, "Address");
+        CommandValidation.RequiredText(request.AddressType, "Address type", 50);
+        CommandValidation.RequiredText(request.SiteName, "Site name", 120);
+        CommandValidation.RequiredText(request.Line1, "Address line 1", 120);
+        CommandValidation.OptionalText(request.Line2, "Address line 2", 120);
+        CommandValidation.RequiredText(request.City, "City", 80);
+        CommandValidation.OptionalText(request.County, "County", 80);
+        CommandValidation.RequiredText(request.Postcode, "Postcode", 20);
+        CommandValidation.RequiredText(request.Country, "Country", 80);
+        CommandValidation.OptionalText(request.ContactName, "Contact name", 120);
+        CommandValidation.OptionalPhone(request.ContactPhone, "Contact phone");
+        CommandValidation.OptionalText(request.DeliveryInstructions, "Delivery instructions", 255);
     }
 
     private static object CreateSnapshot(Address address)

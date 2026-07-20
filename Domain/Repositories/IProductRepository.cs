@@ -6,6 +6,7 @@ public interface IProductRepository
 {
     Task<List<Product>> GetAllAsync(CancellationToken ct);
     Task<Product?> GetByIdAsync(int id, CancellationToken ct);
+    Task<bool> SkuExistsAsync(string sku, int? excludingProductId, CancellationToken ct);
     Task AddAsync(Product product, CancellationToken ct);
     Task UpdateAsync(Product product, CancellationToken ct);
     Task SaveChangesAsync(CancellationToken ct);

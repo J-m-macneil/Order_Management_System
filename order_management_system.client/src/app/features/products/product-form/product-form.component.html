@@ -34,12 +34,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="form-label">SKU</label>
-          <input type="text" formControlName="sku" class="form-input" />
+          <input type="text" autocomplete="off" formControlName="sku" class="form-input" />
+          <p *ngIf="validationMessage(form.get('sku'), 'SKU') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div>
           <label class="form-label">Product Name</label>
           <input type="text" formControlName="productName" class="form-input" />
+          <p *ngIf="validationMessage(form.get('productName'), 'Product name') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div class="sm:col-span-2">
@@ -50,34 +52,41 @@
         <div>
           <label class="form-label">Category</label>
           <select formControlName="productCategoryId" class="form-input">
+            <option [ngValue]="null" disabled>Select category</option>
             <option *ngFor="let category of productCategories" [value]="category.productCategoryId">
               {{ category.name }}
             </option>
           </select>
+          <p *ngIf="validationMessage(form.get('productCategoryId'), 'Category') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div>
           <label class="form-label">Unit Of Measure</label>
           <select formControlName="unitOfMeasureId" class="form-input">
+            <option [ngValue]="null" disabled>Select unit of measure</option>
             <option *ngFor="let unit of unitsOfMeasure" [value]="unit.unitOfMeasureId">
               {{ unit.name }} ({{ unit.code }})
             </option>
           </select>
+          <p *ngIf="validationMessage(form.get('unitOfMeasureId'), 'Unit of measure') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div>
           <label class="form-label">Pack Size</label>
           <input type="text" formControlName="packSize" class="form-input" />
+          <p *ngIf="validationMessage(form.get('packSize'), 'Pack size') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div>
           <label class="form-label">Base Price</label>
-          <input type="number" formControlName="basePrice" class="form-input" />
+          <input type="number" min="0" step="0.01" inputmode="decimal" formControlName="basePrice" class="form-input" />
+          <p *ngIf="validationMessage(form.get('basePrice'), 'Base price') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div>
           <label class="form-label">Currency</label>
-          <input type="text" formControlName="currency" class="form-input" />
+          <input type="text" maxlength="3" autocomplete="off" formControlName="currency" class="form-input" />
+          <p *ngIf="validationMessage(form.get('currency'), 'Currency code') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
       </div>
     </div>
@@ -89,10 +98,12 @@
         <div>
           <label class="form-label">Hazard Class</label>
           <select formControlName="hazardClassId" class="form-input">
+            <option [ngValue]="null" disabled>Select hazard class</option>
             <option *ngFor="let hazard of hazardClasses" [value]="hazard.hazardClassId">
               {{ hazard.name }}
             </option>
           </select>
+          <p *ngIf="validationMessage(form.get('hazardClassId'), 'Hazard class') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
         <div>

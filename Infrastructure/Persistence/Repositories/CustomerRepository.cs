@@ -30,6 +30,16 @@ public class CustomerRepository : ICustomerRepository
                 c.DeletedAt == null, ct);
     }
 
+    public Task<bool> AccountNumberExistsAsync(
+        string accountNumber,
+        int? excludingCustomerId,
+        CancellationToken ct)
+    {
+        return _db.Customers.AnyAsync(c =>
+            c.AccountNumber == accountNumber &&
+            (!excludingCustomerId.HasValue || c.CustomerId != excludingCustomerId.Value), ct);
+    }
+
     public async Task<List<Customer>> GetAllAsync(CancellationToken ct)
     {
         return await _db.Customers

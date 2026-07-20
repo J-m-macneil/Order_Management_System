@@ -1,4 +1,6 @@
 using Application.Interfaces;
+using Application.Common.Exceptions;
+using Application.Common.Validation;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -20,14 +22,23 @@ public class UpdateCustomerCommandHanlder : IRequestHandler<UpdateCustomerComman
 
     public async Task<Unit> Handle(UpdateCustomerCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
         var customer = await _repo.GetByIdAsync(request.CustomerId, ct);
 
         if (customer == null)
             throw new Exception("Customer not found");
 
+        var accountNumber = request.AccountNumber.Trim();
+
+        if (await _repo.AccountNumberExistsAsync(accountNumber, customer.CustomerId, ct))
+        {
+            throw new ConflictException("A customer with this account number already exists.");
+        }
+
         var oldValues = CreateSnapshot(customer);
 
-        customer.AccountNumber = request.AccountNumber;
+        customer.AccountNumber = accountNumber;
         customer.CompanyName = request.CompanyName;
         customer.IndustryType = request.IndustryType;
         customer.BillingAddressId = request.BillingAddressId;
@@ -51,6 +62,22 @@ public class UpdateCustomerCommandHanlder : IRequestHandler<UpdateCustomerComman
             ct);
 
         return Unit.Value;
+    }
+
+    private static void ValidateRequest(UpdateCustomerCommand request)
+    {
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.RequiredText(request.AccountNumber, "Account number", 30);
+        CommandValidation.RequiredText(request.CompanyName, "Company name", 160);
+        CommandValidation.RequiredText(request.IndustryType, "Industry type", 80);
+        CommandValidation.PositiveId(request.PricingTierId, "Pricing tier");
+
+        if (request.PaymentTermsDays < 0)
+        {
+            throw new BadRequestException("Payment terms cannot be negative.");
+        }
+
+        CommandValidation.NonNegative(request.CreditLimit, "Credit limit");
     }
 
     private static object CreateSnapshot(Customer customer)

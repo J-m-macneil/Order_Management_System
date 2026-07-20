@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Application.Common.Validation;
 using Application.Interfaces;
 using Domain.Entities.Identity;
 using Domain.Repositories;
@@ -25,7 +26,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
     public async Task<Unit> Handle(UpdateUserRequest request, CancellationToken ct)
     {
         var dto = request.Data;
-        ValidateRequired(dto);
+        ValidateRequest(dto);
 
         var user = await _repo.GetByIdAsync(request.UserId, ct);
 
@@ -95,14 +96,19 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserRequest, Unit>
         }
     }
 
-    private static void ValidateRequired(UpdateUserCommand request)
+    private static void ValidateRequest(UpdateUserCommand request)
     {
-        if (string.IsNullOrWhiteSpace(request.FirstName) ||
-            string.IsNullOrWhiteSpace(request.LastName) ||
-            string.IsNullOrWhiteSpace(request.Email) ||
-            string.IsNullOrWhiteSpace(request.Username))
+        CommandValidation.RequiredText(request.FirstName, "First name", 80);
+        CommandValidation.RequiredText(request.LastName, "Last name", 80);
+        CommandValidation.Email(request.Email);
+        CommandValidation.RequiredText(request.Username, "Username", 50);
+        CommandValidation.OptionalText(request.JobTitle, "Job title", 120);
+        CommandValidation.PositiveId(request.RoleId, "Role");
+        CommandValidation.PositiveId(request.DepartmentId, "Department");
+
+        if (!string.IsNullOrWhiteSpace(request.Password))
         {
-            throw new BadRequestException("First name, last name, email and username are required.");
+            CommandValidation.MinimumLength(request.Password, "Password", 8);
         }
     }
 

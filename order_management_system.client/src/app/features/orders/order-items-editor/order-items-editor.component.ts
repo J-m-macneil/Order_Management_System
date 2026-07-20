@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 
 import { ProductList } from '../../../core/models/product-list.model';
+import { getValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-order-items-editor',
@@ -9,6 +10,8 @@ import { ProductList } from '../../../core/models/product-list.model';
   templateUrl: './order-items-editor.component.html'
 })
 export class OrderItemsEditorComponent {
+  readonly validationMessage = getValidationMessage;
+
   @Input({ required: true }) items!: FormArray<FormGroup>;
   @Input() products: ProductList[] = [];
 

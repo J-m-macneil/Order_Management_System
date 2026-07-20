@@ -6,6 +6,7 @@ import { Department, Role, User, UserSaveRequest } from '../../../core/models/us
 import { UsersService } from '../../../core/services/users.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { getValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-admin-users',
@@ -13,6 +14,8 @@ import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-er
   templateUrl: './admin-users.component.html'
 })
 export class AdminUsersComponent implements OnInit {
+  readonly validationMessage = getValidationMessage;
+
   @Output() formModeChange = new EventEmitter<boolean>();
 
   readonly users = signal<User[]>([]);
@@ -254,7 +257,7 @@ export class AdminUsersComponent implements OnInit {
 
   private onSaveError(err: ApiErrorResponse): void {
     console.error('Failed to save user', err);
-    this.errorMessage.set(getApiErrorMessage(err, 'Failed to save user.'));
+    this.toastService.error('User save failed', getApiErrorMessage(err, 'Failed to save user.'));
     this.isSaving.set(false);
   }
 

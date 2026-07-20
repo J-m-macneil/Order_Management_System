@@ -107,8 +107,10 @@ export class ProcessingJobsPanelComponent implements OnChanges {
         this.loadProcessingJobs();
       },
       error: (err) => {
-        this.errorMessage =
-          getApiErrorMessage(err, 'Failed to retry processing job.');
+        this.toastService.error(
+          'Processing job retry failed',
+          getApiErrorMessage(err, 'Failed to retry processing job.')
+        );
         this.isRetryingJobId = null;
         this.cdr.markForCheck();
       }

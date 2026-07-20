@@ -152,8 +152,10 @@ export class OrderDetailComponent implements OnInit {
         this.refresh();
       },
       error: (err) => {
-        this.errorMessage =
-          getApiErrorMessage(err, 'Failed to change order status.');
+        this.toastService.error(
+          'Order status update failed',
+          getApiErrorMessage(err, 'Failed to change order status.')
+        );
         this.isChangingStatus = false;
         this.cdr.markForCheck();
       }
@@ -187,7 +189,10 @@ export class OrderDetailComponent implements OnInit {
         this.router.navigate(['/orders']);
       },
       error: (err) => {
-        this.errorMessage = getApiErrorMessage(err, 'Failed to discard draft order.');
+        this.toastService.error(
+          'Draft order discard failed',
+          getApiErrorMessage(err, 'Failed to discard draft order.')
+        );
         this.isDiscardingDraft = false;
         this.cdr.markForCheck();
       }

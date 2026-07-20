@@ -1,5 +1,6 @@
 using Application.Features.Addresses.DTOs;
 using Application.Interfaces;
+using Application.Common.Validation;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -21,6 +22,8 @@ public class CreateAddressCommandHandler : IRequestHandler<CreateAddressCommand,
 
     public async Task<AddressDto> Handle(CreateAddressCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
         var address = new Address
         {
             CustomerId = request.CustomerId,
@@ -68,6 +71,22 @@ public class CreateAddressCommandHandler : IRequestHandler<CreateAddressCommand,
             DeliveryInstructions = address.DeliveryInstructions,
             IsPrimary = address.IsPrimary
         };
+    }
+
+    private static void ValidateRequest(CreateAddressCommand request)
+    {
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.RequiredText(request.AddressType, "Address type", 50);
+        CommandValidation.RequiredText(request.SiteName, "Site name", 120);
+        CommandValidation.RequiredText(request.Line1, "Address line 1", 120);
+        CommandValidation.OptionalText(request.Line2, "Address line 2", 120);
+        CommandValidation.RequiredText(request.City, "City", 80);
+        CommandValidation.OptionalText(request.County, "County", 80);
+        CommandValidation.RequiredText(request.Postcode, "Postcode", 20);
+        CommandValidation.RequiredText(request.Country, "Country", 80);
+        CommandValidation.OptionalText(request.ContactName, "Contact name", 120);
+        CommandValidation.OptionalPhone(request.ContactPhone, "Contact phone");
+        CommandValidation.OptionalText(request.DeliveryInstructions, "Delivery instructions", 255);
     }
 
     private static object CreateSnapshot(Address address)

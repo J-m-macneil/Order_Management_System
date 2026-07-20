@@ -1,5 +1,7 @@
 using Application.Features.Customers.DTOs;
 using Application.Interfaces;
+using Application.Common.Exceptions;
+using Application.Common.Validation;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -22,9 +24,18 @@ public class CreateCustomerCommandHandler
 
     public async Task<CustomerDto> Handle(CreateCustomerCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
+        var accountNumber = request.AccountNumber.Trim();
+
+        if (await _repo.AccountNumberExistsAsync(accountNumber, null, ct))
+        {
+            throw new ConflictException("A customer with this account number already exists.");
+        }
+
         var customer = new Customer
         {
-            AccountNumber = request.AccountNumber,
+            AccountNumber = accountNumber,
             CompanyName = request.CompanyName,
             IndustryType = request.IndustryType,
             MainContactName = request.MainContactName,
@@ -66,6 +77,24 @@ public class CreateCustomerCommandHandler
             CreditLimit = customer.CreditLimit,
             IsActive = customer.IsActive
         };
+    }
+
+    private static void ValidateRequest(CreateCustomerCommand request)
+    {
+        CommandValidation.RequiredText(request.AccountNumber, "Account number", 30);
+        CommandValidation.RequiredText(request.CompanyName, "Company name", 160);
+        CommandValidation.RequiredText(request.IndustryType, "Industry type", 80);
+        CommandValidation.RequiredText(request.MainContactName, "Main contact name", 120);
+        CommandValidation.Email(request.MainContactEmail, "Main contact email");
+        CommandValidation.OptionalPhone(request.MainContactPhone, "Main contact phone");
+        CommandValidation.PositiveId(request.PricingTierId, "Pricing tier");
+
+        if (request.PaymentTermsDays < 0)
+        {
+            throw new BadRequestException("Payment terms cannot be negative.");
+        }
+
+        CommandValidation.NonNegative(request.CreditLimit, "Credit limit");
     }
 
     private static object CreateSnapshot(Customer customer)

@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { OrderDocument } from '../../../core/models/order-document.model';
 import { DocumentsService } from '../../../core/services/documents.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-order-documents-panel',
@@ -16,6 +17,7 @@ export class OrderDocumentsPanelComponent implements OnChanges {
 
   constructor(
     private documentsService: DocumentsService,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -57,7 +59,7 @@ export class OrderDocumentsPanelComponent implements OnChanges {
         window.URL.revokeObjectURL(url);
       },
       error: () => {
-        this.errorMessage = 'Failed to download document.';
+        this.toastService.error('Document download failed', 'The document could not be downloaded.');
         this.cdr.markForCheck();
       }
     });
@@ -70,7 +72,7 @@ export class OrderDocumentsPanelComponent implements OnChanges {
         window.open(fileURL);
       },
       error: () => {
-        this.errorMessage = 'Failed to open document.';
+        this.toastService.error('Document open failed', 'The document could not be opened.');
         this.cdr.markForCheck();
       }
     });

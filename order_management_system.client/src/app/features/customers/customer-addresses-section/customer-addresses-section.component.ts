@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Address } from '../../../core/models/address.model';
+import { getValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-customer-addresses-section',
@@ -9,6 +10,8 @@ import { Address } from '../../../core/models/address.model';
   host: { class: 'block' }
 })
 export class CustomerAddressesSectionComponent {
+  readonly validationMessage = getValidationMessage;
+
   @Input({ required: true }) addresses: Address[] = [];
   @Input({ required: true }) addressForm!: FormGroup;
   @Input() isAddressFormOpen = false;

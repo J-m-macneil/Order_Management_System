@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Common.Validation;
 using Domain.Entities.Customers;
 using Domain.Repositories;
 using MediatR;
@@ -24,6 +25,8 @@ public class UpdateCustomerContactCommandHandler
 
     public async Task<Unit> Handle(UpdateCustomerContactCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
         var contact = await _repo.GetByIdAsync(
             request.CustomerId,
             request.CustomerContactId,
@@ -72,6 +75,16 @@ public class UpdateCustomerContactCommandHandler
             ct);
 
         return Unit.Value;
+    }
+
+    private static void ValidateRequest(UpdateCustomerContactCommand request)
+    {
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.PositiveId(request.CustomerContactId, "Customer contact");
+        CommandValidation.RequiredText(request.Name, "Contact name", 120);
+        CommandValidation.OptionalText(request.JobTitle, "Job title", 120);
+        CommandValidation.Email(request.Email);
+        CommandValidation.OptionalPhone(request.Phone);
     }
 
     private static object CreateSnapshot(CustomerContact contact)

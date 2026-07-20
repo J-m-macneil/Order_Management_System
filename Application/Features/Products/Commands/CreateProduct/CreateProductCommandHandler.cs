@@ -1,5 +1,7 @@
 using Application.Features.Products.DTOs;
+using Application.Common.Exceptions;
 using Application.Interfaces;
+using Application.Common.Validation;
 using Domain.Entities;
 using Domain.Repositories;
 using MediatR;
@@ -21,9 +23,18 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
     public async Task<ProductDto> Handle(CreateProductCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
+        var sku = request.SKU.Trim();
+
+        if (await _repo.SkuExistsAsync(sku, null, ct))
+        {
+            throw new ConflictException("A product with this SKU already exists.");
+        }
+
         var product = new Product
         {
-            SKU = request.SKU,
+            SKU = sku,
             ProductName = request.ProductName,
             Description = request.Description,
             ProductCategoryId = request.ProductCategoryId,
@@ -69,6 +80,21 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             IsRestricted = product.IsRestricted,
             IsActive = product.IsActive
         };
+    }
+
+    private static void ValidateRequest(CreateProductCommand request)
+    {
+        CommandValidation.RequiredText(request.SKU, "SKU", 40);
+        CommandValidation.RequiredText(request.ProductName, "Product name", 160);
+        CommandValidation.OptionalText(request.Description, "Description", 255);
+        CommandValidation.PositiveId(request.ProductCategoryId, "Product category");
+        CommandValidation.PositiveId(request.UnitOfMeasureId, "Unit of measure");
+        CommandValidation.RequiredText(request.PackSize, "Pack size", 40);
+        CommandValidation.NonNegative(request.BasePrice, "Base price");
+        CommandValidation.Currency(request.Currency);
+        CommandValidation.PositiveId(request.HazardClassId, "Hazard class");
+        CommandValidation.OptionalText(request.UNNumber, "UN number", 20);
+        CommandValidation.OptionalText(request.StorageRequirement, "Storage requirement", 120);
     }
 
     private static object CreateSnapshot(Product product)

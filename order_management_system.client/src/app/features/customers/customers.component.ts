@@ -172,7 +172,7 @@ export class CustomersComponent implements OnInit {
         this.loadCustomers();
       },
       error: () => {
-        this.errorMessage.set('Failed to delete customer.');
+        this.toastService.error('Customer deletion failed', 'The customer could not be deleted.');
         this.customerPendingDelete.set(null);
       }
     });

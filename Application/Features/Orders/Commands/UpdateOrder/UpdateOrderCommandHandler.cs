@@ -1,5 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
+using Application.Common.Validation;
 using Application.Interfaces;
 using Domain.Entities.Orders;
 using Domain.Enums;
@@ -26,6 +27,8 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
 
     public async Task Handle(UpdateOrderCommand request, CancellationToken ct)
     {
+        ValidateRequest(request);
+
         var order = await _orders.GetByIdAsync(request.OrderId, ct);
 
         if (order == null)
@@ -36,9 +39,6 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
 
         if (!CanEditDraftOrder(_currentUser.Roles))
             throw new ForbiddenException("Only Sales or Admin users can edit draft orders.");
-
-        if (request.Items.Count == 0)
-            throw new BadRequestException("An order must have at least one order line.");
 
         var oldValues = CreateSnapshot(order);
 
@@ -91,6 +91,33 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
             newValues,
             $"Order updated: {order.OrderNumber}.",
             ct);
+    }
+
+    private static void ValidateRequest(UpdateOrderCommand request)
+    {
+        CommandValidation.PositiveId(request.OrderId, "Order");
+        CommandValidation.PositiveId(request.CustomerId, "Customer");
+        CommandValidation.PositiveId(request.DeliveryAddressId, "Delivery address");
+        CommandValidation.PositiveId(request.BillingAddressId, "Billing address");
+        CommandValidation.PositiveId(request.WarehouseId, "Warehouse");
+        CommandValidation.Date(request.RequestedDeliveryDate, "Requested delivery date");
+        CommandValidation.OptionalText(request.PurchaseOrderReference, "Customer PO reference", 40);
+        CommandValidation.OptionalText(request.SpecialInstructions, "Special instructions", 255);
+        CommandValidation.OptionalText(request.InternalNotes, "Internal notes", 255);
+
+        if (request.Items.Count == 0)
+        {
+            throw new BadRequestException("An order must have at least one order line.");
+        }
+
+        foreach (var item in request.Items)
+        {
+            CommandValidation.PositiveId(item.ProductId, "Product");
+            CommandValidation.Positive(item.Quantity, "Quantity");
+            CommandValidation.NonNegative(item.UnitPrice, "Unit price");
+            CommandValidation.Percentage(item.DiscountPercent, "Discount");
+            CommandValidation.OptionalText(item.Notes, "Order line notes", 255);
+        }
     }
 
     private static object CreateSnapshot(Order order)

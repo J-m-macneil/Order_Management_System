@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Application.Common.Validation;
 using Application.Features.Users.DTOs;
 using Application.Interfaces;
 using Domain.Entities.Identity;
@@ -25,7 +26,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
 
     public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken ct)
     {
-        ValidateRequired(request);
+        ValidateRequest(request);
 
         var username = request.Username.Trim();
         var email = request.Email.Trim();
@@ -100,16 +101,17 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
         }
     }
 
-    private static void ValidateRequired(CreateUserCommand request)
+    private static void ValidateRequest(CreateUserCommand request)
     {
-        if (string.IsNullOrWhiteSpace(request.FirstName) ||
-            string.IsNullOrWhiteSpace(request.LastName) ||
-            string.IsNullOrWhiteSpace(request.Email) ||
-            string.IsNullOrWhiteSpace(request.Username) ||
-            string.IsNullOrWhiteSpace(request.Password))
-        {
-            throw new BadRequestException("First name, last name, email, username and password are required.");
-        }
+        CommandValidation.RequiredText(request.FirstName, "First name", 80);
+        CommandValidation.RequiredText(request.LastName, "Last name", 80);
+        CommandValidation.Email(request.Email);
+        CommandValidation.RequiredText(request.Username, "Username", 50);
+        CommandValidation.Required(request.Password, "Password");
+        CommandValidation.MinimumLength(request.Password, "Password", 8);
+        CommandValidation.OptionalText(request.JobTitle, "Job title", 120);
+        CommandValidation.PositiveId(request.RoleId, "Role");
+        CommandValidation.PositiveId(request.DepartmentId, "Department");
     }
 
     private static object CreateSnapshot(User user)
