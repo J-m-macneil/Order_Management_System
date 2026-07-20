@@ -39,13 +39,11 @@ describe('ProductsComponent', () => {
   it('preserves false boolean filter values in the request', () => {
     component.activeFilter = 'inactive';
     component.restrictedFilter = 'unrestricted';
-    component.hazardousFilter = 'nonhazardous';
 
     component.applyFilters();
 
     expect(requests[0]['isActive']).toBe(false);
     expect(requests[0]['isRestricted']).toBe(false);
-    expect(requests[0]['isHazardous']).toBe(false);
   });
 
   it('returns to the previous page after deleting its final product', () => {

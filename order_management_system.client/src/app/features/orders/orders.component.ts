@@ -23,12 +23,9 @@ export class OrdersComponent implements OnInit {
 
   searchTerm = '';
   priorityFilter = '';
-  restrictedFilter = '';
   statusFilter = '';
   requestedDeliveryFrom = '';
   requestedDeliveryTo = '';
-  createdFrom = '';
-  createdTo = '';
 
   filtersVisible = false;
 
@@ -74,11 +71,8 @@ export class OrdersComponent implements OnInit {
       searchTerm: this.searchTerm.trim() || undefined,
       orderStatusId: this.statusFilter ? Number(this.statusFilter) : null,
       isPriorityOrder: this.getPriorityFilterValue(),
-      hasRestrictedItems: this.getRestrictedFilterValue(),
       requestedDeliveryFrom: this.requestedDeliveryFrom || undefined,
-      requestedDeliveryTo: this.requestedDeliveryTo || undefined,
-      createdFrom: this.createdFrom || undefined,
-      createdTo: this.createdTo || undefined
+      requestedDeliveryTo: this.requestedDeliveryTo || undefined
     };
 
     this.ordersService.getOrders(request)
@@ -121,12 +115,9 @@ export class OrdersComponent implements OnInit {
 
   clearFilters(): void {
     this.priorityFilter = '';
-    this.restrictedFilter = '';
     this.statusFilter = '';
     this.requestedDeliveryFrom = '';
     this.requestedDeliveryTo = '';
-    this.createdFrom = '';
-    this.createdTo = '';
     this.updateFilterQueryParameters();
     this.applyFilters();
   }
@@ -153,18 +144,6 @@ export class OrdersComponent implements OnInit {
     }
 
     if (this.priorityFilter === 'standard') {
-      return false;
-    }
-
-    return null;
-  }
-
-  private getRestrictedFilterValue(): boolean | null {
-    if (this.restrictedFilter === 'restricted') {
-      return true;
-    }
-
-    if (this.restrictedFilter === 'standard') {
       return false;
     }
 
@@ -202,12 +181,9 @@ export class OrdersComponent implements OnInit {
   get activeFilterCount(): number {
     return [
       this.priorityFilter,
-      this.restrictedFilter,
       this.statusFilter,
       this.requestedDeliveryFrom,
-      this.requestedDeliveryTo,
-      this.createdFrom,
-      this.createdTo
+      this.requestedDeliveryTo
     ].filter(Boolean).length;
   }
 

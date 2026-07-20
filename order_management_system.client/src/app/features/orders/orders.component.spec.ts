@@ -50,14 +50,12 @@ describe('OrdersComponent', () => {
     expect(requests[0]['searchTerm']).toBe('ORD-1001');
   });
 
-  it('preserves false boolean filter values in the request', () => {
+  it('preserves the standard priority filter value in the request', () => {
     component.priorityFilter = 'standard';
-    component.restrictedFilter = 'standard';
 
     component.applyFilters();
 
     expect(requests[0]['isPriorityOrder']).toBe(false);
-    expect(requests[0]['hasRestrictedItems']).toBe(false);
   });
 
   it('loads the requested page and resets to page one when page size changes', () => {

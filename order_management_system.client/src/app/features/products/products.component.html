@@ -98,17 +98,6 @@
       </select>
     </div>
 
-    <div>
-      <label class="form-label">Hazardous</label>
-      <select [(ngModel)]="hazardousFilter"
-              (change)="applyFilters()"
-              class="form-input">
-        <option value="">All</option>
-        <option value="hazardous">Hazardous</option>
-        <option value="nonhazardous">Non-Hazardous</option>
-      </select>
-    </div>
-
     <div class="app-filter-actions app-filter-actions--full">
       <button type="button"
               (click)="clearFilters()"

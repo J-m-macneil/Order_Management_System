@@ -26,7 +26,6 @@ export class ProductsComponent implements OnInit {
   searchTerm = '';
   activeFilter = '';
   restrictedFilter = '';
-  hazardousFilter = '';
   categoryFilter: number | null = null;
   hazardClassFilter: number | null = null;
 
@@ -110,7 +109,6 @@ export class ProductsComponent implements OnInit {
       searchTerm: this.searchTerm.trim() || undefined,
       isActive: this.getActiveFilterValue(),
       isRestricted: this.getRestrictedFilterValue(),
-      isHazardous: this.getHazardousFilterValue(),
       productCategoryId: this.categoryFilter,
       hazardClassId: this.hazardClassFilter
     })
@@ -145,7 +143,6 @@ export class ProductsComponent implements OnInit {
   clearFilters(): void {
     this.activeFilter = '';
     this.restrictedFilter = '';
-    this.hazardousFilter = '';
     this.categoryFilter = null;
     this.hazardClassFilter = null;
     this.applyFilters();
@@ -222,18 +219,6 @@ export class ProductsComponent implements OnInit {
     return null;
   }
 
-  private getHazardousFilterValue(): boolean | null {
-    if (this.hazardousFilter === 'hazardous') {
-      return true;
-    }
-
-    if (this.hazardousFilter === 'nonhazardous') {
-      return false;
-    }
-
-    return null;
-  }
-
   getHazardClassBadge(hazardClassName: string): string {
     return hazardClassName && hazardClassName !== 'Non-Hazardous'
       ? 'app-badge app-badge--warning'
@@ -244,7 +229,6 @@ export class ProductsComponent implements OnInit {
     return [
       this.activeFilter,
       this.restrictedFilter,
-      this.hazardousFilter,
       this.categoryFilter,
       this.hazardClassFilter
     ].filter(Boolean).length;

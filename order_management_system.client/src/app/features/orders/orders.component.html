@@ -56,17 +56,6 @@
     </div>
 
     <div>
-      <label class="form-label">Review Type</label>
-      <select [(ngModel)]="restrictedFilter"
-              (change)="applyFilters()"
-              class="form-input">
-        <option value="">All orders</option>
-        <option value="restricted">Restricted items</option>
-        <option value="standard">No restricted items</option>
-      </select>
-    </div>
-
-    <div>
       <label class="form-label">Delivery From</label>
       <input type="date"
              [(ngModel)]="requestedDeliveryFrom"
@@ -78,22 +67,6 @@
       <label class="form-label">Delivery To</label>
       <input type="date"
              [(ngModel)]="requestedDeliveryTo"
-             (change)="applyFilters()"
-             class="form-input" />
-    </div>
-
-    <div>
-      <label class="form-label">Created From</label>
-      <input type="date"
-             [(ngModel)]="createdFrom"
-             (change)="applyFilters()"
-             class="form-input" />
-    </div>
-
-    <div>
-      <label class="form-label">Created To</label>
-      <input type="date"
-             [(ngModel)]="createdTo"
              (change)="applyFilters()"
              class="form-input" />
     </div>
