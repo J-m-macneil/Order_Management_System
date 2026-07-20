@@ -6,11 +6,11 @@ import { Injectable, signal } from '@angular/core';
 export class ThemeService {
   private readonly storageKey = 'darkMode';
 
-  isDarkMode = signal(true);
+  isDarkMode = signal(false);
 
   initialize(): void {
     const savedDarkMode = localStorage.getItem(this.storageKey);
-    const useDarkMode = savedDarkMode === null ? true : savedDarkMode === 'true';
+    const useDarkMode = savedDarkMode === null ? false : savedDarkMode === 'true';
 
     this.setDarkMode(useDarkMode);
   }

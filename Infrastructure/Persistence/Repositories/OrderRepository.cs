@@ -157,13 +157,13 @@ public class OrderRepository : IOrderRepository
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var term = searchTerm.Trim();
+            var pattern = $"%{searchTerm.Trim()}%";
 
             query = query.Where(o =>
-                o.OrderNumber.Contains(term) ||
-                (o.Customer != null && o.Customer.CompanyName.Contains(term)) ||
-                o.CustomerId.ToString().Contains(term) ||
-                (o.PurchaseOrderReference != null && o.PurchaseOrderReference.Contains(term)));
+                EF.Functions.ILike(o.OrderNumber, pattern) ||
+                (o.Customer != null && EF.Functions.ILike(o.Customer.CompanyName, pattern)) ||
+                o.CustomerId.ToString().Contains(searchTerm.Trim()) ||
+                (o.PurchaseOrderReference != null && EF.Functions.ILike(o.PurchaseOrderReference, pattern)));
         }
 
         if (orderStatusId == (int)OrderStatusEnum.Failed)

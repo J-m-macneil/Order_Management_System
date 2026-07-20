@@ -31,6 +31,7 @@ public class OrderDocumentGenerator : IOrderDocumentGenerator
         CancellationToken cancellationToken = default)
     {
         var order = await _dbContext.Orders
+            .AsSplitQuery()
             .Include(o => o.Customer)
             .Include(o => o.Warehouse)
             .Include(o => o.Carrier)

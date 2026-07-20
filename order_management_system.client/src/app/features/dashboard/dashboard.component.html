@@ -6,8 +6,8 @@
   <p>Your operational statistics are ready.</p>
 </div>
 
-<div *ngIf="isLoading()" class="app-sub-card">
-  Loading dashboard metrics...
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
+  <p>Loading dashboard metrics...</p>
 </div>
 
 <div *ngIf="errorMessage() && !isLoading()" class="app-alert app-alert--danger p-4">

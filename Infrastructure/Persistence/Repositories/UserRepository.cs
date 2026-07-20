@@ -99,13 +99,13 @@ public class UserRepository : IUserRepository
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var term = searchTerm.Trim();
+            var pattern = $"%{searchTerm.Trim()}%";
             query = query.Where(x =>
-                x.FirstName.Contains(term) ||
-                x.LastName.Contains(term) ||
-                x.FullName.Contains(term) ||
-                x.Username.Contains(term) ||
-                x.Email.Contains(term));
+                EF.Functions.ILike(x.FirstName, pattern) ||
+                EF.Functions.ILike(x.LastName, pattern) ||
+                EF.Functions.ILike(x.FullName, pattern) ||
+                EF.Functions.ILike(x.Username, pattern) ||
+                EF.Functions.ILike(x.Email, pattern));
         }
 
         if (roleId.HasValue)
