@@ -138,15 +138,15 @@ public class ProductRepository : IProductRepository
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var pattern = $"%{searchTerm.Trim()}%";
+            var pattern = $"%{searchTerm.Trim().ToLower()}%";
 
             query = query.Where(x =>
-                EF.Functions.ILike(x.SKU, pattern) ||
-                EF.Functions.ILike(x.ProductName, pattern) ||
-                (x.PackSize != null && EF.Functions.ILike(x.PackSize, pattern)) ||
-                EF.Functions.ILike(x.ProductCategory.Name, pattern) ||
-                EF.Functions.ILike(x.UnitOfMeasure.Name, pattern) ||
-                EF.Functions.ILike(x.HazardClass.Name, pattern));
+                EF.Functions.Like(x.SKU.ToLower(), pattern) ||
+                EF.Functions.Like(x.ProductName.ToLower(), pattern) ||
+                (x.PackSize != null && EF.Functions.Like(x.PackSize.ToLower(), pattern)) ||
+                EF.Functions.Like(x.ProductCategory.Name.ToLower(), pattern) ||
+                EF.Functions.Like(x.UnitOfMeasure.Name.ToLower(), pattern) ||
+                EF.Functions.Like(x.HazardClass.Name.ToLower(), pattern));
         }
 
         if (isActive.HasValue)

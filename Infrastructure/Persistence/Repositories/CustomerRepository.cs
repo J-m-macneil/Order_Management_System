@@ -137,14 +137,14 @@ public class CustomerRepository : ICustomerRepository
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var pattern = $"%{searchTerm.Trim()}%";
+            var pattern = $"%{searchTerm.Trim().ToLower()}%";
 
             query = query.Where(c =>
-                EF.Functions.ILike(c.AccountNumber, pattern) ||
-                EF.Functions.ILike(c.CompanyName, pattern) ||
-                (c.IndustryType != null && EF.Functions.ILike(c.IndustryType, pattern)) ||
-                (c.MainContactName != null && EF.Functions.ILike(c.MainContactName, pattern)) ||
-                (c.MainContactEmail != null && EF.Functions.ILike(c.MainContactEmail, pattern)));
+                EF.Functions.Like(c.AccountNumber.ToLower(), pattern) ||
+                EF.Functions.Like(c.CompanyName.ToLower(), pattern) ||
+                (c.IndustryType != null && EF.Functions.Like(c.IndustryType.ToLower(), pattern)) ||
+                (c.MainContactName != null && EF.Functions.Like(c.MainContactName.ToLower(), pattern)) ||
+                (c.MainContactEmail != null && EF.Functions.Like(c.MainContactEmail.ToLower(), pattern)));
         }
 
         if (!string.IsNullOrWhiteSpace(industryType))
