@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
@@ -19,6 +19,11 @@ export class MainLayoutComponent {
 
   closeNav() {
     this.isNavOpen = false;
+  }
+
+  @HostListener('window:orientationchange')
+  onOrientationChange() {
+    this.closeNav();
   }
 
 }
