@@ -11,3 +11,18 @@
   overflow: auto;
   background: var(--app-page-bg);
 }
+
+@media (max-height: 34rem) and (orientation: landscape) {
+  .login-page {
+    align-items: flex-start;
+    padding-block: 1rem;
+  }
+
+  .login-card {
+    padding: 1.5rem;
+  }
+
+  .login-logo {
+    width: 9rem;
+  }
+}
