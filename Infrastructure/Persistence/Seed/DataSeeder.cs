@@ -1,9 +1,11 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Customers;
+using Domain.Entities.Documents;
 using Domain.Entities.Orders;
 using Domain.Entities.Organisation;
 using Domain.Entities.Status;
+using Domain.Enums;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +13,25 @@ namespace Infrastructure.Persistence.Seed;
 
 public class DataSeeder : IDataSeeder
 {
+    private const int SeedDocumentUserId = 1;
     private readonly AppDbContext _dbContext;
+    private readonly IOrderDocumentService _orderDocumentService;
+    private readonly ISafetyDataSheetDocumentGenerator _safetyDataSheetDocumentGenerator;
 
-    public DataSeeder(AppDbContext dbContext)
+    private static DateTime Utc(int year, int month, int day)
+        => new(year, month, day, 0, 0, 0, DateTimeKind.Utc);
+
+    private static DateTime Utc(int year, int month, int day, int hour, int minute, int second)
+        => new(year, month, day, hour, minute, second, DateTimeKind.Utc);
+
+    public DataSeeder(
+        AppDbContext dbContext,
+        IOrderDocumentService orderDocumentService,
+        ISafetyDataSheetDocumentGenerator safetyDataSheetDocumentGenerator)
     {
         _dbContext = dbContext;
+        _orderDocumentService = orderDocumentService;
+        _safetyDataSheetDocumentGenerator = safetyDataSheetDocumentGenerator;
     }
 
     public async Task SeedAsync()
@@ -39,7 +55,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 45,
                     CreditLimit = 40000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 1, 24)
+                    CreatedAt = Utc(2024, 1, 24)
                 },
                 new Customer
                 {
@@ -53,7 +69,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 15000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 2, 2)
+                    CreatedAt = Utc(2024, 2, 2)
                 },
                 new Customer
                 {
@@ -67,7 +83,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 40000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 2, 11)
+                    CreatedAt = Utc(2024, 2, 11)
                 },
                 new Customer
                 {
@@ -81,7 +97,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 100000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 2, 20)
+                    CreatedAt = Utc(2024, 2, 20)
                 },
                 new Customer
                 {
@@ -95,7 +111,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 50000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 2, 29)
+                    CreatedAt = Utc(2024, 2, 29)
                 },
                 new Customer
                 {
@@ -109,7 +125,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 25000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 3, 9)
+                    CreatedAt = Utc(2024, 3, 9)
                 },
                 new Customer
                 {
@@ -123,7 +139,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 100000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 3, 18)
+                    CreatedAt = Utc(2024, 3, 18)
                 },
                 new Customer
                 {
@@ -137,7 +153,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 40000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 3, 27)
+                    CreatedAt = Utc(2024, 3, 27)
                 },
                 new Customer
                 {
@@ -151,7 +167,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 60,
                     CreditLimit = 75000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 4, 5)
+                    CreatedAt = Utc(2024, 4, 5)
                 },
                 new Customer
                 {
@@ -165,7 +181,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 60,
                     CreditLimit = 15000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 4, 14)
+                    CreatedAt = Utc(2024, 4, 14)
                 },
                 new Customer
                 {
@@ -179,7 +195,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 75000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 4, 23)
+                    CreatedAt = Utc(2024, 4, 23)
                 },
                 new Customer
                 {
@@ -193,7 +209,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 75000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 5, 2)
+                    CreatedAt = Utc(2024, 5, 2)
                 },
                 new Customer
                 {
@@ -207,7 +223,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 45,
                     CreditLimit = 25000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 5, 11)
+                    CreatedAt = Utc(2024, 5, 11)
                 },
                 new Customer
                 {
@@ -221,7 +237,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 75000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 5, 20)
+                    CreatedAt = Utc(2024, 5, 20)
                 },
                 new Customer
                 {
@@ -235,7 +251,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 75000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 5, 29)
+                    CreatedAt = Utc(2024, 5, 29)
                 },
                 new Customer
                 {
@@ -249,7 +265,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 60,
                     CreditLimit = 25000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 6, 7)
+                    CreatedAt = Utc(2024, 6, 7)
                 },
                 new Customer
                 {
@@ -263,7 +279,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 25000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 6, 16)
+                    CreatedAt = Utc(2024, 6, 16)
                 },
                 new Customer
                 {
@@ -277,7 +293,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 50000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 6, 25)
+                    CreatedAt = Utc(2024, 6, 25)
                 },
                 new Customer
                 {
@@ -291,7 +307,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 75000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 7, 4)
+                    CreatedAt = Utc(2024, 7, 4)
                 },
                 new Customer
                 {
@@ -305,7 +321,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 45,
                     CreditLimit = 25000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 7, 13)
+                    CreatedAt = Utc(2024, 7, 13)
                 },
                 new Customer
                 {
@@ -319,7 +335,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 25000.00m,
                     IsActive = false,
-                    CreatedAt = new DateTime(2024, 7, 22)
+                    CreatedAt = Utc(2024, 7, 22)
                 },
                 new Customer
                 {
@@ -333,7 +349,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 60,
                     CreditLimit = 40000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 7, 31)
+                    CreatedAt = Utc(2024, 7, 31)
                 },
                 new Customer
                 {
@@ -347,7 +363,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 100000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 8, 9)
+                    CreatedAt = Utc(2024, 8, 9)
                 },
                 new Customer
                 {
@@ -361,7 +377,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 60,
                     CreditLimit = 50000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 8, 18)
+                    CreatedAt = Utc(2024, 8, 18)
                 },
                 new Customer
                 {
@@ -375,7 +391,7 @@ public class DataSeeder : IDataSeeder
                     PaymentTermsDays = 30,
                     CreditLimit = 25000.00m,
                     IsActive = true,
-                    CreatedAt = new DateTime(2024, 8, 27)
+                    CreatedAt = Utc(2024, 8, 27)
                 }
             };
 
@@ -704,8 +720,8 @@ public class DataSeeder : IDataSeeder
                 ProjectCode = "PRJ-1001",
                 ProjectName = "Boiler Water Treatment Refresh",
                 Description = "12-month refresh programme for water treatment chemistry and consumables.",
-                StartDate = new DateTime(2026, 1, 10),
-                EndDate = new DateTime(2026, 12, 20),
+                StartDate = Utc(2026, 1, 10),
+                EndDate = Utc(2026, 12, 20),
                 Status = "Active"
             },
             new Project
@@ -714,8 +730,8 @@ public class DataSeeder : IDataSeeder
                 ProjectCode = "PRJ-1002",
                 ProjectName = "New Production Line Cleaning Rollout",
                 Description = "Initial rollout of CIP and sanitation products for a new production line.",
-                StartDate = new DateTime(2026, 2, 1),
-                EndDate = new DateTime(2026, 9, 30),
+                StartDate = Utc(2026, 2, 1),
+                EndDate = Utc(2026, 9, 30),
                 Status = "Active"
             },
             new Project
@@ -724,8 +740,8 @@ public class DataSeeder : IDataSeeder
                 ProjectCode = "PRJ-1003",
                 ProjectName = "Lab Solvent Supply Contract Renewal",
                 Description = "Contract renewal and rationalisation of laboratory solvent supply.",
-                StartDate = new DateTime(2026, 1, 15),
-                EndDate = new DateTime(2026, 8, 31),
+                StartDate = Utc(2026, 1, 15),
+                EndDate = Utc(2026, 8, 31),
                 Status = "In Review"
             },
             new Project
@@ -734,8 +750,8 @@ public class DataSeeder : IDataSeeder
                 ProjectCode = "PRJ-1004",
                 ProjectName = "Blend Plant Expansion Support",
                 Description = "Supply support for pilot-scale blend plant capacity expansion.",
-                StartDate = new DateTime(2025, 11, 5),
-                EndDate = new DateTime(2026, 7, 31),
+                StartDate = Utc(2025, 11, 5),
+                EndDate = Utc(2026, 7, 31),
                 Status = "Active"
             },
             new Project
@@ -744,8 +760,8 @@ public class DataSeeder : IDataSeeder
                 ProjectCode = "PRJ-1005",
                 ProjectName = "Coatings Line Solvent Optimisation",
                 Description = "Customer trial of alternative solvents and degreasing products.",
-                StartDate = new DateTime(2025, 10, 20),
-                EndDate = new DateTime(2026, 5, 31),
+                StartDate = Utc(2025, 10, 20),
+                EndDate = Utc(2026, 5, 31),
                 Status = "Closing"
             },
             new Project
@@ -754,8 +770,8 @@ public class DataSeeder : IDataSeeder
                 ProjectCode = "PRJ-1006",
                 ProjectName = "Municipal Dosing Chemical Framework",
                 Description = "Framework agreement covering strategic water-treatment chemicals.",
-                StartDate = new DateTime(2026, 1, 1),
-                EndDate = new DateTime(2027, 1, 1),
+                StartDate = Utc(2026, 1, 1),
+                EndDate = Utc(2027, 1, 1),
                 Status = "Active"
             }
         };
@@ -771,50 +787,50 @@ public class DataSeeder : IDataSeeder
         {
             var products = new List<Product>
             {
-                new Product { SKU = "ACET-25", ProductName = "Acetone 25L Drum", Description = "Acetone 25L Drum supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 85.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1090", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 2, 7) },
-                new Product { SKU = "IPA-20", ProductName = "Isopropyl Alcohol 99.9% 20L", Description = "Isopropyl Alcohol 99.9% 20L supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 92.50m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1219", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 2, 13) },
-                new Product { SKU = "METH-25", ProductName = "Methanol 25L Drum", Description = "Methanol 25L Drum supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 88.00m, Currency = "GBP", HazardClassId = 4, UNNumber = "UN1230", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = new DateTime(2024, 2, 19) },
-                new Product { SKU = "ETHD-205", ProductName = "Ethanol Denatured 205L Drum", Description = "Ethanol Denatured 205L Drum supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "205L", BasePrice = 610.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1170", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 2, 25) },
-                new Product { SKU = "WS-25", ProductName = "White Spirit 25L", Description = "White Spirit 25L supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 74.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1300", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 3, 2) },
-                new Product { SKU = "XYLE-20", ProductName = "Xylene Blend 20L", Description = "Xylene Blend 20L supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 105.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1307", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = new DateTime(2024, 3, 8) },
-                new Product { SKU = "HCL-32-25", ProductName = "Hydrochloric Acid 32% 25L", Description = "Hydrochloric Acid 32% 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 69.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1789", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 3, 14) },
-                new Product { SKU = "H2SO4-96-25", ProductName = "Sulphuric Acid 96% 25L", Description = "Sulphuric Acid 96% 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 95.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1830", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = new DateTime(2024, 3, 20) },
-                new Product { SKU = "HNO3-10-10", ProductName = "Nitric Acid 10% 10L", Description = "Nitric Acid 10% 10L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "10L", BasePrice = 56.00m, Currency = "GBP", HazardClassId = 5, UNNumber = "UN2031", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = new DateTime(2024, 3, 26) },
-                new Product { SKU = "PHOS-85-25", ProductName = "Phosphoric Acid 85% 25L", Description = "Phosphoric Acid 85% 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 81.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1805", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 4, 1) },
-                new Product { SKU = "CIT-25", ProductName = "Citric Acid Solution 25L", Description = "Citric Acid Solution 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 41.50m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "General chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 4, 7) },
-                new Product { SKU = "NAOH-25", ProductName = "Sodium Hydroxide 25kg", Description = "Sodium Hydroxide 25kg supplied for industrial and commercial use.", ProductCategoryId = 3, UnitOfMeasureId = 7, PackSize = "25kg", BasePrice = 49.50m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1823", StorageRequirement = "Alkali bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 4, 13) },
-                new Product { SKU = "KOH-25", ProductName = "Potassium Hydroxide 25kg", Description = "Potassium Hydroxide 25kg supplied for industrial and commercial use.", ProductCategoryId = 3, UnitOfMeasureId = 7, PackSize = "25kg", BasePrice = 62.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1813", StorageRequirement = "Alkali bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 4, 19) },
-                new Product { SKU = "CAUS-25", ProductName = "Caustic Soda Solution 25L", Description = "Caustic Soda Solution 25L supplied for industrial and commercial use.", ProductCategoryId = 3, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 44.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1824", StorageRequirement = "Alkali bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 4, 25) },
-                new Product { SKU = "HYPO-25", ProductName = "Sodium Hypochlorite 25L", Description = "Sodium Hypochlorite 25L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 38.00m, Currency = "GBP", HazardClassId = 7, UNNumber = "UN1791", StorageRequirement = "Cool chemical store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 5, 1) },
-                new Product { SKU = "FERR-25", ProductName = "Ferric Chloride 25L", Description = "Ferric Chloride 25L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 52.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN2582", StorageRequirement = "Water treatment bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 5, 7) },
-                new Product { SKU = "WT200-25", ProductName = "Coagulant Blend WT-200 25L", Description = "Coagulant Blend WT-200 25L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 57.50m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Water treatment bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 5, 13) },
-                new Product { SKU = "PHBUF-5", ProductName = "pH Buffer Solution 5L", Description = "pH Buffer Solution 5L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 5, PackSize = "5L", BasePrice = 22.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 5, 19) },
-                new Product { SKU = "AFOAM-10", ProductName = "Anti-Foam Agent 10L", Description = "Anti-Foam Agent 10L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "10L", BasePrice = 48.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "General chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 5, 25) },
-                new Product { SKU = "DEGR-20", ProductName = "Industrial Degreaser 20L", Description = "Industrial Degreaser 20L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 46.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 5, 31) },
-                new Product { SKU = "FLOOR-20", ProductName = "Heavy Duty Floor Cleaner 20L", Description = "Heavy Duty Floor Cleaner 20L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 36.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 6, 6) },
-                new Product { SKU = "NSC-5", ProductName = "Neutral Surface Cleaner 5L", Description = "Neutral Surface Cleaner 5L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 5, PackSize = "5L", BasePrice = 15.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 6, 12) },
-                new Product { SKU = "SANI-10", ProductName = "Chlorinated Sanitiser 10L", Description = "Chlorinated Sanitiser 10L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "10L", BasePrice = 29.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 6, 18) },
-                new Product { SKU = "CIP-25", ProductName = "CIP Alkaline Cleaner 25L", Description = "CIP Alkaline Cleaner 25L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 51.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1824", StorageRequirement = "Cleaning bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 6, 24) },
-                new Product { SKU = "FGDESC-20", ProductName = "Food Grade Descaler 20L", Description = "Food Grade Descaler 20L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 54.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN3265", StorageRequirement = "Food-safe chemical store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 6, 30) },
-                new Product { SKU = "DIW-25", ProductName = "Deionised Water 25L", Description = "Deionised Water 25L supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 18.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 7, 6) },
-                new Product { SKU = "BUF4-1", ProductName = "Buffer Solution pH 4.0", Description = "Buffer Solution pH 4.0 supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 5, PackSize = "1L", BasePrice = 12.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 7, 12) },
-                new Product { SKU = "BUF7-1", ProductName = "Buffer Solution pH 7.0", Description = "Buffer Solution pH 7.0 supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 5, PackSize = "1L", BasePrice = 12.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 7, 18) },
-                new Product { SKU = "BUF10-1", ProductName = "Buffer Solution pH 10.0", Description = "Buffer Solution pH 10.0 supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 5, PackSize = "1L", BasePrice = 12.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 7, 24) },
-                new Product { SKU = "NACL-AR-5", ProductName = "Sodium Chloride AR Grade 5kg", Description = "Sodium Chloride AR Grade 5kg supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 7, PackSize = "5kg", BasePrice = 27.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 7, 30) },
-                new Product { SKU = "KNO3-5", ProductName = "Potassium Nitrate 5kg", Description = "Potassium Nitrate 5kg supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 7, PackSize = "5kg", BasePrice = 31.00m, Currency = "GBP", HazardClassId = 5, UNNumber = "UN1486", StorageRequirement = "Laboratory shelf", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 8, 5) },
-                new Product { SKU = "FGCC-20", ProductName = "Food Grade Caustic Cleaner 20L", Description = "Food Grade Caustic Cleaner 20L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 58.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1824", StorageRequirement = "Food-safe chemical store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 8, 11) },
-                new Product { SKU = "GLYC-25", ProductName = "Glycerine USP 25L", Description = "Glycerine USP 25L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 72.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Food-safe chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 8, 17) },
-                new Product { SKU = "PG-25", ProductName = "Propylene Glycol USP 25L", Description = "Propylene Glycol USP 25L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 79.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Food-safe chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 8, 23) },
-                new Product { SKU = "SPILL-KIT", ProductName = "Chemical Spill Kit", Description = "Chemical Spill Kit supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "1 kit", BasePrice = 64.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 8, 29) },
-                new Product { SKU = "ABS-PADS", ProductName = "Absorbent Pads Pack", Description = "Absorbent Pads Pack supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "100 pads", BasePrice = 29.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 9, 4) },
-                new Product { SKU = "HDPE-25", ProductName = "HDPE 25L Drum", Description = "HDPE 25L Drum supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 14.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 9, 10) },
-                new Product { SKU = "TPLABEL-50", ProductName = "Tamper-Proof Labels Pack", Description = "Tamper-Proof Labels Pack supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "50 labels", BasePrice = 11.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 9, 16) },
-                new Product { SKU = "SAMPLE-12", ProductName = "Sample Bottle Pack", Description = "Sample Bottle Pack supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "12 bottles", BasePrice = 16.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = false, CreatedAt = new DateTime(2024, 9, 22) },
-                new Product { SKU = "PUMP-STD", ProductName = "Chemical Transfer Pump", Description = "Chemical Transfer Pump supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "1 unit", BasePrice = 78.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 9, 28) },
-                new Product { SKU = "BIOCIDE-20", ProductName = "Closed System Biocide 20L", Description = "Closed System Biocide 20L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 67.00m, Currency = "GBP", HazardClassId = 7, UNNumber = "UN3082", StorageRequirement = "Water treatment bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 10, 4) },
-                new Product { SKU = "INHIB-20", ProductName = "Corrosion Inhibitor 20L", Description = "Corrosion Inhibitor 20L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 73.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Water treatment bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 10, 10) },
-                new Product { SKU = "DEFAM-5", ProductName = "Defoamer Concentrate 5L", Description = "Defoamer Concentrate 5L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 5, PackSize = "5L", BasePrice = 34.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Water treatment bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 10, 16) },
-                new Product { SKU = "WTPH-25", ProductName = "Wastewater pH Reducer 25L", Description = "Wastewater pH Reducer 25L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 43.50m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN3265", StorageRequirement = "Water treatment bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = new DateTime(2024, 10, 22) }
+                new Product { SKU = "ACET-25", ProductName = "Acetone 25L Drum", Description = "Acetone 25L Drum supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 85.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1090", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 2, 7) },
+                new Product { SKU = "IPA-20", ProductName = "Isopropyl Alcohol 99.9% 20L", Description = "Isopropyl Alcohol 99.9% 20L supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 92.50m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1219", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 2, 13) },
+                new Product { SKU = "METH-25", ProductName = "Methanol 25L Drum", Description = "Methanol 25L Drum supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 88.00m, Currency = "GBP", HazardClassId = 4, UNNumber = "UN1230", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = Utc(2024, 2, 19) },
+                new Product { SKU = "ETHD-205", ProductName = "Ethanol Denatured 205L Drum", Description = "Ethanol Denatured 205L Drum supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "205L", BasePrice = 610.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1170", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 2, 25) },
+                new Product { SKU = "WS-25", ProductName = "White Spirit 25L", Description = "White Spirit 25L supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 74.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1300", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 3, 2) },
+                new Product { SKU = "XYLE-20", ProductName = "Xylene Blend 20L", Description = "Xylene Blend 20L supplied for industrial and commercial use.", ProductCategoryId = 1, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 105.00m, Currency = "GBP", HazardClassId = 2, UNNumber = "UN1307", StorageRequirement = "Flammable store", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = Utc(2024, 3, 8) },
+                new Product { SKU = "HCL-32-25", ProductName = "Hydrochloric Acid 32% 25L", Description = "Hydrochloric Acid 32% 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 69.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1789", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 3, 14) },
+                new Product { SKU = "H2SO4-96-25", ProductName = "Sulphuric Acid 96% 25L", Description = "Sulphuric Acid 96% 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 95.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1830", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = Utc(2024, 3, 20) },
+                new Product { SKU = "HNO3-10-10", ProductName = "Nitric Acid 10% 10L", Description = "Nitric Acid 10% 10L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "10L", BasePrice = 56.00m, Currency = "GBP", HazardClassId = 5, UNNumber = "UN2031", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = true, IsActive = true, CreatedAt = Utc(2024, 3, 26) },
+                new Product { SKU = "PHOS-85-25", ProductName = "Phosphoric Acid 85% 25L", Description = "Phosphoric Acid 85% 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 81.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1805", StorageRequirement = "Acid bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 4, 1) },
+                new Product { SKU = "CIT-25", ProductName = "Citric Acid Solution 25L", Description = "Citric Acid Solution 25L supplied for industrial and commercial use.", ProductCategoryId = 2, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 41.50m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "General chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 4, 7) },
+                new Product { SKU = "NAOH-25", ProductName = "Sodium Hydroxide 25kg", Description = "Sodium Hydroxide 25kg supplied for industrial and commercial use.", ProductCategoryId = 3, UnitOfMeasureId = 7, PackSize = "25kg", BasePrice = 49.50m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1823", StorageRequirement = "Alkali bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 4, 13) },
+                new Product { SKU = "KOH-25", ProductName = "Potassium Hydroxide 25kg", Description = "Potassium Hydroxide 25kg supplied for industrial and commercial use.", ProductCategoryId = 3, UnitOfMeasureId = 7, PackSize = "25kg", BasePrice = 62.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1813", StorageRequirement = "Alkali bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 4, 19) },
+                new Product { SKU = "CAUS-25", ProductName = "Caustic Soda Solution 25L", Description = "Caustic Soda Solution 25L supplied for industrial and commercial use.", ProductCategoryId = 3, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 44.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1824", StorageRequirement = "Alkali bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 4, 25) },
+                new Product { SKU = "HYPO-25", ProductName = "Sodium Hypochlorite 25L", Description = "Sodium Hypochlorite 25L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 38.00m, Currency = "GBP", HazardClassId = 7, UNNumber = "UN1791", StorageRequirement = "Cool chemical store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 5, 1) },
+                new Product { SKU = "FERR-25", ProductName = "Ferric Chloride 25L", Description = "Ferric Chloride 25L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 52.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN2582", StorageRequirement = "Water treatment bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 5, 7) },
+                new Product { SKU = "WT200-25", ProductName = "Coagulant Blend WT-200 25L", Description = "Coagulant Blend WT-200 25L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 57.50m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Water treatment bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 5, 13) },
+                new Product { SKU = "PHBUF-5", ProductName = "pH Buffer Solution 5L", Description = "pH Buffer Solution 5L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 5, PackSize = "5L", BasePrice = 22.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 5, 19) },
+                new Product { SKU = "AFOAM-10", ProductName = "Anti-Foam Agent 10L", Description = "Anti-Foam Agent 10L supplied for industrial and commercial use.", ProductCategoryId = 4, UnitOfMeasureId = 3, PackSize = "10L", BasePrice = 48.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "General chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 5, 25) },
+                new Product { SKU = "DEGR-20", ProductName = "Industrial Degreaser 20L", Description = "Industrial Degreaser 20L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 46.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 5, 31) },
+                new Product { SKU = "FLOOR-20", ProductName = "Heavy Duty Floor Cleaner 20L", Description = "Heavy Duty Floor Cleaner 20L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 36.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 6, 6) },
+                new Product { SKU = "NSC-5", ProductName = "Neutral Surface Cleaner 5L", Description = "Neutral Surface Cleaner 5L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 5, PackSize = "5L", BasePrice = 15.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 6, 12) },
+                new Product { SKU = "SANI-10", ProductName = "Chlorinated Sanitiser 10L", Description = "Chlorinated Sanitiser 10L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "10L", BasePrice = 29.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Cleaning bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 6, 18) },
+                new Product { SKU = "CIP-25", ProductName = "CIP Alkaline Cleaner 25L", Description = "CIP Alkaline Cleaner 25L supplied for industrial and commercial use.", ProductCategoryId = 5, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 51.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1824", StorageRequirement = "Cleaning bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 6, 24) },
+                new Product { SKU = "FGDESC-20", ProductName = "Food Grade Descaler 20L", Description = "Food Grade Descaler 20L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 54.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN3265", StorageRequirement = "Food-safe chemical store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 6, 30) },
+                new Product { SKU = "DIW-25", ProductName = "Deionised Water 25L", Description = "Deionised Water 25L supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 18.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 7, 6) },
+                new Product { SKU = "BUF4-1", ProductName = "Buffer Solution pH 4.0", Description = "Buffer Solution pH 4.0 supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 5, PackSize = "1L", BasePrice = 12.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 7, 12) },
+                new Product { SKU = "BUF7-1", ProductName = "Buffer Solution pH 7.0", Description = "Buffer Solution pH 7.0 supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 5, PackSize = "1L", BasePrice = 12.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 7, 18) },
+                new Product { SKU = "BUF10-1", ProductName = "Buffer Solution pH 10.0", Description = "Buffer Solution pH 10.0 supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 5, PackSize = "1L", BasePrice = 12.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 7, 24) },
+                new Product { SKU = "NACL-AR-5", ProductName = "Sodium Chloride AR Grade 5kg", Description = "Sodium Chloride AR Grade 5kg supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 7, PackSize = "5kg", BasePrice = 27.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Laboratory shelf", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 7, 30) },
+                new Product { SKU = "KNO3-5", ProductName = "Potassium Nitrate 5kg", Description = "Potassium Nitrate 5kg supplied for industrial and commercial use.", ProductCategoryId = 6, UnitOfMeasureId = 7, PackSize = "5kg", BasePrice = 31.00m, Currency = "GBP", HazardClassId = 5, UNNumber = "UN1486", StorageRequirement = "Laboratory shelf", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 8, 5) },
+                new Product { SKU = "FGCC-20", ProductName = "Food Grade Caustic Cleaner 20L", Description = "Food Grade Caustic Cleaner 20L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 58.00m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN1824", StorageRequirement = "Food-safe chemical store", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 8, 11) },
+                new Product { SKU = "GLYC-25", ProductName = "Glycerine USP 25L", Description = "Glycerine USP 25L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 72.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Food-safe chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 8, 17) },
+                new Product { SKU = "PG-25", ProductName = "Propylene Glycol USP 25L", Description = "Propylene Glycol USP 25L supplied for industrial and commercial use.", ProductCategoryId = 7, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 79.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Food-safe chemical store", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 8, 23) },
+                new Product { SKU = "SPILL-KIT", ProductName = "Chemical Spill Kit", Description = "Chemical Spill Kit supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "1 kit", BasePrice = 64.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 8, 29) },
+                new Product { SKU = "ABS-PADS", ProductName = "Absorbent Pads Pack", Description = "Absorbent Pads Pack supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "100 pads", BasePrice = 29.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 9, 4) },
+                new Product { SKU = "HDPE-25", ProductName = "HDPE 25L Drum", Description = "HDPE 25L Drum supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 14.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 9, 10) },
+                new Product { SKU = "TPLABEL-50", ProductName = "Tamper-Proof Labels Pack", Description = "Tamper-Proof Labels Pack supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "50 labels", BasePrice = 11.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 9, 16) },
+                new Product { SKU = "SAMPLE-12", ProductName = "Sample Bottle Pack", Description = "Sample Bottle Pack supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "12 bottles", BasePrice = 16.50m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = false, CreatedAt = Utc(2024, 9, 22) },
+                new Product { SKU = "PUMP-STD", ProductName = "Chemical Transfer Pump", Description = "Chemical Transfer Pump supplied for industrial and commercial use.", ProductCategoryId = 8, UnitOfMeasureId = 4, PackSize = "1 unit", BasePrice = 78.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Warehouse consumables", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 9, 28) },
+                new Product { SKU = "BIOCIDE-20", ProductName = "Closed System Biocide 20L", Description = "Closed System Biocide 20L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 67.00m, Currency = "GBP", HazardClassId = 7, UNNumber = "UN3082", StorageRequirement = "Water treatment bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 10, 4) },
+                new Product { SKU = "INHIB-20", ProductName = "Corrosion Inhibitor 20L", Description = "Corrosion Inhibitor 20L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 3, PackSize = "20L", BasePrice = 73.00m, Currency = "GBP", HazardClassId = 6, UNNumber = "UN0000", StorageRequirement = "Water treatment bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 10, 10) },
+                new Product { SKU = "DEFAM-5", ProductName = "Defoamer Concentrate 5L", Description = "Defoamer Concentrate 5L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 5, PackSize = "5L", BasePrice = 34.00m, Currency = "GBP", HazardClassId = 1, UNNumber = "UN0000", StorageRequirement = "Water treatment bay", RequiresSds = false, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 10, 16) },
+                new Product { SKU = "WTPH-25", ProductName = "Wastewater pH Reducer 25L", Description = "Wastewater pH Reducer 25L supplied for industrial and commercial use.", ProductCategoryId = 9, UnitOfMeasureId = 3, PackSize = "25L", BasePrice = 43.50m, Currency = "GBP", HazardClassId = 3, UNNumber = "UN3265", StorageRequirement = "Water treatment bay", RequiresSds = true, IsRestricted = false, IsActive = true, CreatedAt = Utc(2024, 10, 22) }
             };
 
             await _dbContext.Products.AddRangeAsync(products);
@@ -834,8 +850,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 24,
                     OverridePrice = 49.76m,
                     MinimumOrderQuantity = 1m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -846,8 +862,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 2,
                     OverridePrice = 90.18m,
                     MinimumOrderQuantity = 2m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -858,8 +874,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 15,
                     OverridePrice = 35.80m,
                     MinimumOrderQuantity = 2m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Annual tender pricing",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -870,8 +886,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 32,
                     OverridePrice = 53.79m,
                     MinimumOrderQuantity = 1m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Annual tender pricing",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -883,8 +899,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 33,
                     OverridePrice = 64.14m,
                     MinimumOrderQuantity = 1m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Annual tender pricing",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -895,8 +911,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 20,
                     OverridePrice = 43.46m,
                     MinimumOrderQuantity = 1m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -907,8 +923,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 24,
                     OverridePrice = 47.91m,
                     MinimumOrderQuantity = 5m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Strategic account rate",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -919,8 +935,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 15,
                     OverridePrice = 35.77m,
                     MinimumOrderQuantity = 2m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -932,8 +948,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 44,
                     OverridePrice = 41.64m,
                     MinimumOrderQuantity = 1m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -944,8 +960,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 2,
                     OverridePrice = 84.61m,
                     MinimumOrderQuantity = 5m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Trial pricing agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -956,8 +972,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 15,
                     OverridePrice = 33.70m,
                     MinimumOrderQuantity = 4m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -968,8 +984,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 24,
                     OverridePrice = 49.21m,
                     MinimumOrderQuantity = 5m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -981,8 +997,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 32,
                     OverridePrice = 47.73m,
                     MinimumOrderQuantity = 2m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Trial pricing agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -993,8 +1009,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 24,
                     OverridePrice = 45.51m,
                     MinimumOrderQuantity = 5m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Strategic account rate",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1005,8 +1021,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 33,
                     OverridePrice = 62.30m,
                     MinimumOrderQuantity = 4m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Trial pricing agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1017,8 +1033,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 40,
                     OverridePrice = 72.37m,
                     MinimumOrderQuantity = 1m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Trial pricing agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1030,8 +1046,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 33,
                     OverridePrice = 64.19m,
                     MinimumOrderQuantity = 5m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Trial pricing agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1042,8 +1058,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 2,
                     OverridePrice = 74.40m,
                     MinimumOrderQuantity = 4m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Annual tender pricing",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1054,8 +1070,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 44,
                     OverridePrice = 37.98m,
                     MinimumOrderQuantity = 4m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Trial pricing agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1066,8 +1082,8 @@ public class DataSeeder : IDataSeeder
                     ProductId = 20,
                     OverridePrice = 39.15m,
                     MinimumOrderQuantity = 4m,
-                    EffectiveFrom = new DateTime(2026, 1, 1),
-                    EffectiveTo = new DateTime(2026, 12, 31),
+                    EffectiveFrom = Utc(2026, 1, 1),
+                    EffectiveTo = Utc(2026, 12, 31),
                     Notes = "Framework agreement",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -1096,10 +1112,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 21),
+                    RequestedDeliveryDate = Utc(2025, 12, 21),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 16, 14, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 4, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 14, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 4, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1601.00m,
                     DiscountAmount = 0.00m,
@@ -1123,10 +1139,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 23),
+                    RequestedDeliveryDate = Utc(2025, 12, 23),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 18, 7, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 19, 5, 30, 0),
+                    CreatedAt = Utc(2025, 12, 18, 7, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 19, 5, 30, 0),
                     Currency = "GBP",
                     Subtotal = 839.50m,
                     DiscountAmount = 25.18m,
@@ -1150,10 +1166,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 23),
+                    RequestedDeliveryDate = Utc(2025, 12, 23),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 17, 20, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 23, 17, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 20, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 23, 17, 30, 0),
                     Currency = "GBP",
                     Subtotal = 2166.00m,
                     DiscountAmount = 0.00m,
@@ -1177,10 +1193,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 1,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 21),
+                    RequestedDeliveryDate = Utc(2025, 12, 21),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 16, 14, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 21, 20, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 14, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 21, 20, 30, 0),
                     Currency = "GBP",
                     Subtotal = 2206.00m,
                     DiscountAmount = 0.00m,
@@ -1204,10 +1220,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 20),
+                    RequestedDeliveryDate = Utc(2025, 12, 20),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 17, 20, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 17, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 20, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 17, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1450.50m,
                     DiscountAmount = 43.52m,
@@ -1231,10 +1247,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 22),
+                    RequestedDeliveryDate = Utc(2025, 12, 22),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 18, 2, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 18, 16, 30, 0),
+                    CreatedAt = Utc(2025, 12, 18, 2, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 18, 16, 30, 0),
                     Currency = "GBP",
                     Subtotal = 207.50m,
                     DiscountAmount = 6.22m,
@@ -1258,10 +1274,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 1,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 27),
+                    RequestedDeliveryDate = Utc(2025, 12, 27),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 17, 17, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 6, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 17, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 6, 30, 0),
                     Currency = "GBP",
                     Subtotal = 894.00m,
                     DiscountAmount = 26.82m,
@@ -1285,10 +1301,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 24),
+                    RequestedDeliveryDate = Utc(2025, 12, 24),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 17, 11, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 24, 2, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 11, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 24, 2, 30, 0),
                     Currency = "GBP",
                     Subtotal = 777.50m,
                     DiscountAmount = 0.00m,
@@ -1312,10 +1328,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 27),
+                    RequestedDeliveryDate = Utc(2025, 12, 27),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 17, 2, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 17, 22, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 2, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 17, 22, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1591.96m,
                     DiscountAmount = 0.00m,
@@ -1339,10 +1355,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = null,
                     OrderStatusId = 1,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 24),
+                    RequestedDeliveryDate = Utc(2025, 12, 24),
                     SubmittedAt = null,
-                    CreatedAt = new DateTime(2025, 12, 18, 6, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 20, 23, 30, 0),
+                    CreatedAt = Utc(2025, 12, 18, 6, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 20, 23, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1125.50m,
                     DiscountAmount = 135.06m,
@@ -1366,10 +1382,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 1,
                     CarrierId = 2,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 25),
-                    SubmittedAt = new DateTime(2025, 12, 17, 23, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 21, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 18, 13, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 25),
+                    SubmittedAt = Utc(2025, 12, 17, 23, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 21, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 18, 13, 30, 0),
                     Currency = "GBP",
                     Subtotal = 894.00m,
                     DiscountAmount = 0.00m,
@@ -1393,10 +1409,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 1,
                     CarrierId = 3,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 23),
-                    SubmittedAt = new DateTime(2025, 12, 17, 17, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 15, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 18, 4, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 23),
+                    SubmittedAt = Utc(2025, 12, 17, 17, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 15, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 18, 4, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1328.00m,
                     DiscountAmount = 0.00m,
@@ -1420,10 +1436,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = 2,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 19),
-                    SubmittedAt = new DateTime(2025, 12, 17, 7, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 5, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 5, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 19),
+                    SubmittedAt = Utc(2025, 12, 17, 7, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 5, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 5, 30, 0),
                     Currency = "GBP",
                     Subtotal = 421.00m,
                     DiscountAmount = 50.52m,
@@ -1447,10 +1463,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = 2,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 23),
-                    SubmittedAt = new DateTime(2025, 12, 18, 0, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 22, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 18, 19, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 23),
+                    SubmittedAt = Utc(2025, 12, 18, 0, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 22, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 18, 19, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1232.00m,
                     DiscountAmount = 36.96m,
@@ -1474,10 +1490,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = 3,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 26),
-                    SubmittedAt = new DateTime(2025, 12, 18, 1, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 23, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 18, 8, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 26),
+                    SubmittedAt = Utc(2025, 12, 18, 1, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 23, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 18, 8, 30, 0),
                     Currency = "GBP",
                     Subtotal = 230.00m,
                     DiscountAmount = 6.90m,
@@ -1501,10 +1517,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = 3,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 25),
-                    SubmittedAt = new DateTime(2025, 12, 17, 7, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 5, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 23, 15, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 25),
+                    SubmittedAt = Utc(2025, 12, 17, 7, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 5, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 23, 15, 30, 0),
                     Currency = "GBP",
                     Subtotal = 650.00m,
                     DiscountAmount = 78.00m,
@@ -1528,10 +1544,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = 3,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 24),
-                    SubmittedAt = new DateTime(2025, 12, 17, 22, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 20, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 23, 4, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 24),
+                    SubmittedAt = Utc(2025, 12, 17, 22, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 20, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 23, 4, 30, 0),
                     Currency = "GBP",
                     Subtotal = 384.00m,
                     DiscountAmount = 11.52m,
@@ -1555,10 +1571,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 1,
                     CarrierId = 1,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 19),
-                    SubmittedAt = new DateTime(2025, 12, 17, 17, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 15, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 19, 8, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 19),
+                    SubmittedAt = Utc(2025, 12, 17, 17, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 15, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 19, 8, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1588.00m,
                     DiscountAmount = 119.10m,
@@ -1582,10 +1598,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = 2,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 21),
-                    SubmittedAt = new DateTime(2025, 12, 17, 13, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 11, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 18, 14, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 21),
+                    SubmittedAt = Utc(2025, 12, 17, 13, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 11, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 18, 14, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1334.00m,
                     DiscountAmount = 160.08m,
@@ -1609,10 +1625,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 2,
                     CarrierId = 1,
                     OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 23),
-                    SubmittedAt = new DateTime(2025, 12, 16, 14, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 16, 12, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 20, 22, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 23),
+                    SubmittedAt = Utc(2025, 12, 16, 14, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 12, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 20, 22, 30, 0),
                     Currency = "GBP",
                     Subtotal = 610.00m,
                     DiscountAmount = 0.00m,
@@ -1635,11 +1651,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 11,
                     WarehouseId = 2,
                     CarrierId = 2,
-                    OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 19),
-                    SubmittedAt = new DateTime(2025, 12, 16, 18, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 16, 16, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 20, 13, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Failed,
+                    RequestedDeliveryDate = Utc(2025, 12, 19),
+                    SubmittedAt = Utc(2025, 12, 16, 18, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 16, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 20, 13, 30, 0),
                     Currency = "GBP",
                     Subtotal = 588.50m,
                     DiscountAmount = 70.62m,
@@ -1648,7 +1664,7 @@ public class DataSeeder : IDataSeeder
                     PurchaseOrderReference = "PO-025-5001",
                     SpecialInstructions = "Deliver with updated SDS bundle.",
                     InternalNotes = null,
-                    FailureReason = null,
+                    FailureReason = "SDS bundle could not be generated because a required product SDS is missing.",
                     IsPriorityOrder = true
                 },
                 new Order
@@ -1662,11 +1678,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 11,
                     WarehouseId = 2,
                     CarrierId = 2,
-                    OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 19),
-                    SubmittedAt = new DateTime(2025, 12, 16, 20, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 16, 18, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 20, 7, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Failed,
+                    RequestedDeliveryDate = Utc(2025, 12, 19),
+                    SubmittedAt = Utc(2025, 12, 16, 20, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 18, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 20, 7, 30, 0),
                     Currency = "GBP",
                     Subtotal = 621.00m,
                     DiscountAmount = 18.63m,
@@ -1675,7 +1691,7 @@ public class DataSeeder : IDataSeeder
                     PurchaseOrderReference = "PO-003-5001",
                     SpecialInstructions = null,
                     InternalNotes = null,
-                    FailureReason = null,
+                    FailureReason = "SDS bundle could not be generated because a required product SDS is missing.",
                     IsPriorityOrder = false
                 },
                 new Order
@@ -1689,11 +1705,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 9,
                     WarehouseId = 3,
                     CarrierId = 3,
-                    OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 25),
-                    SubmittedAt = new DateTime(2025, 12, 16, 20, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 16, 18, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 21, 4, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Failed,
+                    RequestedDeliveryDate = Utc(2025, 12, 25),
+                    SubmittedAt = Utc(2025, 12, 16, 20, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 18, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 21, 4, 30, 0),
                     Currency = "GBP",
                     Subtotal = 186.00m,
                     DiscountAmount = 5.58m,
@@ -1702,7 +1718,7 @@ public class DataSeeder : IDataSeeder
                     PurchaseOrderReference = "PO-023-5001",
                     SpecialInstructions = null,
                     InternalNotes = "Priority strategic account.",
-                    FailureReason = null,
+                    FailureReason = "SDS bundle could not be generated because a required product SDS is missing.",
                     IsPriorityOrder = true
                 },
                 new Order
@@ -1716,11 +1732,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 7,
                     WarehouseId = 1,
                     CarrierId = 2,
-                    OrderStatusId = 2,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 23),
-                    SubmittedAt = new DateTime(2025, 12, 17, 5, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 3, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 12, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Failed,
+                    RequestedDeliveryDate = Utc(2025, 12, 23),
+                    SubmittedAt = Utc(2025, 12, 17, 5, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 3, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 12, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1503.00m,
                     DiscountAmount = 45.09m,
@@ -1729,7 +1745,7 @@ public class DataSeeder : IDataSeeder
                     PurchaseOrderReference = "PO-023-5001",
                     SpecialInstructions = "Use customer pallet labels.",
                     InternalNotes = null,
-                    FailureReason = null,
+                    FailureReason = "SDS bundle could not be generated because a required product SDS is missing.",
                     IsPriorityOrder = true
                 },
                 new Order
@@ -1743,11 +1759,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 10,
                     WarehouseId = 2,
                     CarrierId = 3,
-                    OrderStatusId = 3,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 20),
-                    SubmittedAt = new DateTime(2025, 12, 16, 15, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 16, 13, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 19, 7, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.PendingReview,
+                    RequestedDeliveryDate = Utc(2025, 12, 20),
+                    SubmittedAt = Utc(2025, 12, 16, 15, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 13, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 19, 7, 30, 0),
                     Currency = "GBP",
                     Subtotal = 440.00m,
                     DiscountAmount = 52.80m,
@@ -1770,11 +1786,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 7,
                     WarehouseId = 3,
                     CarrierId = 1,
-                    OrderStatusId = 3,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 26),
-                    SubmittedAt = new DateTime(2025, 12, 17, 4, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 2, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 17, 8, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Approved,
+                    RequestedDeliveryDate = Utc(2025, 12, 26),
+                    SubmittedAt = Utc(2025, 12, 17, 4, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 2, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 17, 8, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1040.00m,
                     DiscountAmount = 0.00m,
@@ -1797,11 +1813,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 7,
                     WarehouseId = 3,
                     CarrierId = 3,
-                    OrderStatusId = 3,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 25),
-                    SubmittedAt = new DateTime(2025, 12, 17, 18, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 16, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 21, 1, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Approved,
+                    RequestedDeliveryDate = Utc(2025, 12, 25),
+                    SubmittedAt = Utc(2025, 12, 17, 18, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 16, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 21, 1, 30, 0),
                     Currency = "GBP",
                     Subtotal = 348.00m,
                     DiscountAmount = 0.00m,
@@ -1824,11 +1840,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 9,
                     WarehouseId = 2,
                     CarrierId = 1,
-                    OrderStatusId = 3,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 24),
-                    SubmittedAt = new DateTime(2025, 12, 16, 16, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 16, 14, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 17, 6, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.AwaitingDispatch,
+                    RequestedDeliveryDate = Utc(2025, 12, 24),
+                    SubmittedAt = Utc(2025, 12, 16, 16, 30, 0),
+                    CreatedAt = Utc(2025, 12, 16, 14, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 17, 6, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1630.00m,
                     DiscountAmount = 195.60m,
@@ -1851,11 +1867,11 @@ public class DataSeeder : IDataSeeder
                     AssignedToUserId = 8,
                     WarehouseId = 3,
                     CarrierId = 3,
-                    OrderStatusId = 3,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 20),
-                    SubmittedAt = new DateTime(2025, 12, 17, 2, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 17, 0, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 20, 30, 0),
+                    OrderStatusId = (int)OrderStatusEnum.Completed,
+                    RequestedDeliveryDate = Utc(2025, 12, 20),
+                    SubmittedAt = Utc(2025, 12, 17, 2, 30, 0),
+                    CreatedAt = Utc(2025, 12, 17, 0, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 20, 30, 0),
                     Currency = "GBP",
                     Subtotal = 366.00m,
                     DiscountAmount = 0.00m,
@@ -1879,10 +1895,10 @@ public class DataSeeder : IDataSeeder
                     WarehouseId = 3,
                     CarrierId = 1,
                     OrderStatusId = 3,
-                    RequestedDeliveryDate = new DateTime(2025, 12, 24),
-                    SubmittedAt = new DateTime(2025, 12, 18, 3, 30, 0),
-                    CreatedAt = new DateTime(2025, 12, 18, 1, 30, 0),
-                    UpdatedAt = new DateTime(2025, 12, 22, 20, 30, 0),
+                    RequestedDeliveryDate = Utc(2025, 12, 24),
+                    SubmittedAt = Utc(2025, 12, 18, 3, 30, 0),
+                    CreatedAt = Utc(2025, 12, 18, 1, 30, 0),
+                    UpdatedAt = Utc(2025, 12, 22, 20, 30, 0),
                     Currency = "GBP",
                     Subtotal = 1071.50m,
                     DiscountAmount = 32.14m,
@@ -2045,97 +2061,113 @@ public class DataSeeder : IDataSeeder
             var historyRows = new List<OrderStatusHistory>
             {
                 // ORD-2026-001001 to ORD-2026-001010 (Draft)
-                new OrderStatusHistory { OrderId = 1, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = new DateTime(2025, 12, 16, 14, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 2, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = new DateTime(2025, 12, 18, 7, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 3, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = new DateTime(2025, 12, 17, 20, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 4, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = new DateTime(2025, 12, 16, 14, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 5, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = new DateTime(2025, 12, 17, 20, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 6, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = new DateTime(2025, 12, 18, 2, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 7, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = new DateTime(2025, 12, 17, 17, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 8, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = new DateTime(2025, 12, 17, 11, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 9, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = new DateTime(2025, 12, 17, 2, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 10, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 1, ChangedAt = new DateTime(2025, 12, 18, 6, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 1, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = Utc(2025, 12, 16, 14, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 2, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = Utc(2025, 12, 18, 7, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 3, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = Utc(2025, 12, 17, 20, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 4, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = Utc(2025, 12, 16, 14, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 5, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = Utc(2025, 12, 17, 20, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 6, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = Utc(2025, 12, 18, 2, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 7, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = Utc(2025, 12, 17, 17, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 8, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = Utc(2025, 12, 17, 11, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 9, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = Utc(2025, 12, 17, 2, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 10, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 1, ChangedAt = Utc(2025, 12, 18, 6, 30, 0), Reason = null },
 
                 // ORD-2026-001011 to ORD-2026-001020 (Submitted)
-                new OrderStatusHistory { OrderId = 11, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = new DateTime(2025, 12, 17, 21, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 11, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 17, 23, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 11, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = Utc(2025, 12, 17, 21, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 11, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 17, 23, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 12, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = new DateTime(2025, 12, 17, 15, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 12, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 17, 17, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 12, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 4, ChangedAt = Utc(2025, 12, 17, 15, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 12, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 17, 17, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 13, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = new DateTime(2025, 12, 17, 5, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 13, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 17, 7, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 13, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = Utc(2025, 12, 17, 5, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 13, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 17, 7, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 14, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = new DateTime(2025, 12, 17, 22, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 14, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 18, 0, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 14, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = Utc(2025, 12, 17, 22, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 14, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 18, 0, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 15, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 17, 23, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 15, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 18, 1, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 15, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 17, 23, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 15, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 18, 1, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 16, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = new DateTime(2025, 12, 17, 5, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 16, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 17, 7, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 16, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = Utc(2025, 12, 17, 5, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 16, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 17, 7, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 17, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 17, 20, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 17, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 17, 22, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 17, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 17, 20, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 17, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = Utc(2025, 12, 17, 22, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 18, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 17, 15, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 18, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 17, 17, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 18, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 17, 15, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 18, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 17, 17, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 19, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 17, 11, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 19, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 17, 13, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 19, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 17, 11, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 19, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 17, 13, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 20, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 1, ChangedAt = new DateTime(2025, 12, 16, 12, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 20, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 16, 14, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 20, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 1, ChangedAt = Utc(2025, 12, 16, 12, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 20, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 16, 14, 30, 0), Reason = null },
 
-                // ORD-2026-001021 to ORD-2026-001025 (Pending Review)
-                new OrderStatusHistory { OrderId = 21, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = new DateTime(2025, 12, 16, 16, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 21, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 16, 18, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 21, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 17, 9, 30, 0), Reason = null },
+                // ORD-2026-001021 to ORD-2026-001024 (Failed after SDS bundle validation)
+                new OrderStatusHistory { OrderId = 21, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = Utc(2025, 12, 16, 16, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 21, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 16, 18, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 21, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 17, 9, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 21, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 17, 10, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 21, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 17, 10, 31, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 21, FromStatusId = 5, ToStatusId = 8, ChangedByUserId = SeedDocumentUserId, ChangedAt = Utc(2025, 12, 17, 10, 32, 0), Reason = "SDS bundle could not be generated because a required product SDS is missing." },
 
-                new OrderStatusHistory { OrderId = 22, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = new DateTime(2025, 12, 16, 18, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 22, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 16, 20, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 22, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 18, 0, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 22, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = Utc(2025, 12, 16, 18, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 22, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 16, 20, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 22, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 18, 0, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 22, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 18, 1, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 22, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 18, 1, 31, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 22, FromStatusId = 5, ToStatusId = 8, ChangedByUserId = SeedDocumentUserId, ChangedAt = Utc(2025, 12, 18, 1, 32, 0), Reason = "SDS bundle could not be generated because a required product SDS is missing." },
 
-                new OrderStatusHistory { OrderId = 23, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = new DateTime(2025, 12, 16, 18, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 23, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 16, 20, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 23, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 18, 12, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 23, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 5, ChangedAt = Utc(2025, 12, 16, 18, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 23, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 16, 20, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 23, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 18, 12, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 23, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 18, 13, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 23, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 18, 13, 31, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 23, FromStatusId = 5, ToStatusId = 8, ChangedByUserId = SeedDocumentUserId, ChangedAt = Utc(2025, 12, 18, 13, 32, 0), Reason = "SDS bundle could not be generated because a required product SDS is missing." },
 
-                new OrderStatusHistory { OrderId = 24, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = new DateTime(2025, 12, 17, 3, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 24, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 17, 5, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 24, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 17, 11, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 24, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = Utc(2025, 12, 17, 3, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 24, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 17, 5, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 24, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 17, 11, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 24, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 17, 12, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 24, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 17, 12, 31, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 24, FromStatusId = 5, ToStatusId = 8, ChangedByUserId = SeedDocumentUserId, ChangedAt = Utc(2025, 12, 17, 12, 32, 0), Reason = "SDS bundle could not be generated because a required product SDS is missing." },
 
-                new OrderStatusHistory { OrderId = 25, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 1, ChangedAt = new DateTime(2025, 12, 16, 13, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 25, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 16, 15, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 25, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 1, ChangedAt = new DateTime(2025, 12, 17, 13, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 25, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 1, ChangedAt = Utc(2025, 12, 16, 13, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 25, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = Utc(2025, 12, 16, 15, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 25, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 1, ChangedAt = Utc(2025, 12, 17, 13, 30, 0), Reason = null },
 
                 // ORD-2026-001026 to ORD-2026-001027 (Approved)
-                new OrderStatusHistory { OrderId = 26, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 17, 2, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 26, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 17, 4, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 26, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 18, 9, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 26, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 18, 9, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 26, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 17, 2, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 26, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 17, 4, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 26, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 18, 9, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 26, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 10, ChangedAt = Utc(2025, 12, 18, 9, 30, 0), Reason = null },
 
-                new OrderStatusHistory { OrderId = 27, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = new DateTime(2025, 12, 17, 16, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 27, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 17, 18, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 27, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 1, ChangedAt = new DateTime(2025, 12, 17, 13, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 27, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 17, 3, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 27, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 3, ChangedAt = Utc(2025, 12, 17, 16, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 27, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 17, 18, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 27, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 1, ChangedAt = Utc(2025, 12, 17, 13, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 27, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 17, 3, 30, 0), Reason = null },
 
-                // ORD-2026-001028 to ORD-2026-001029 (In Processing)
-                new OrderStatusHistory { OrderId = 28, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 16, 14, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 28, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 16, 16, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 28, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 17, 11, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 28, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 7, ChangedAt = new DateTime(2025, 12, 18, 23, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 28, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 18, 18, 30, 0), Reason = null },
+                // ORD-2026-001028 (Awaiting Dispatch)
+                new OrderStatusHistory { OrderId = 28, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 16, 14, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 28, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 16, 16, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 28, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 17, 11, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 28, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 7, ChangedAt = Utc(2025, 12, 18, 23, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 28, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 18, 18, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 28, FromStatusId = 5, ToStatusId = 6, ChangedByUserId = SeedDocumentUserId, ChangedAt = Utc(2025, 12, 18, 18, 45, 0), Reason = "Required fulfilment documents generated." },
 
-                new OrderStatusHistory { OrderId = 29, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = new DateTime(2025, 12, 17, 0, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 29, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 17, 2, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 29, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 9, ChangedAt = new DateTime(2025, 12, 18, 12, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 29, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 18, 22, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 29, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 8, ChangedAt = new DateTime(2025, 12, 19, 0, 30, 0), Reason = null },
+                // ORD-2026-001029 (Completed)
+                new OrderStatusHistory { OrderId = 29, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 2, ChangedAt = Utc(2025, 12, 17, 0, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 29, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 17, 2, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 29, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 9, ChangedAt = Utc(2025, 12, 18, 12, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 29, FromStatusId = 3, ToStatusId = 4, ChangedByUserId = 10, ChangedAt = Utc(2025, 12, 18, 22, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 29, FromStatusId = 4, ToStatusId = 5, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 19, 0, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 29, FromStatusId = 5, ToStatusId = 6, ChangedByUserId = SeedDocumentUserId, ChangedAt = Utc(2025, 12, 19, 0, 45, 0), Reason = "Required fulfilment documents generated." },
+                new OrderStatusHistory { OrderId = 29, FromStatusId = 6, ToStatusId = 7, ChangedByUserId = 8, ChangedAt = Utc(2025, 12, 19, 9, 0, 0), Reason = "Dispatch completed successfully." },
 
                 // ORD-2026-001030
-                new OrderStatusHistory { OrderId = 30, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = new DateTime(2025, 12, 18, 1, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 30, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = new DateTime(2025, 12, 18, 3, 30, 0), Reason = null },
-                new OrderStatusHistory { OrderId = 30, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = new DateTime(2025, 12, 18, 7, 30, 0), Reason = null }
+                new OrderStatusHistory { OrderId = 30, FromStatusId = null, ToStatusId = 1, ChangedByUserId = 6, ChangedAt = Utc(2025, 12, 18, 1, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 30, FromStatusId = 1, ToStatusId = 2, ChangedByUserId = 10, ChangedAt = Utc(2025, 12, 18, 3, 30, 0), Reason = null },
+                new OrderStatusHistory { OrderId = 30, FromStatusId = 2, ToStatusId = 3, ChangedByUserId = 11, ChangedAt = Utc(2025, 12, 18, 7, 30, 0), Reason = null }
             };
 
             await _dbContext.OrderStatusHistories.AddRangeAsync(historyRows);
@@ -2161,7 +2193,7 @@ public class DataSeeder : IDataSeeder
                     EntityId = ordersByNumber["ORD-2026-001001"],
                     Action = "Created",
                     PerformedByUserId = 4,
-                    PerformedAt = new DateTime(2025, 12, 16, 14, 30, 0),
+                    PerformedAt = Utc(2025, 12, 16, 14, 30, 0),
                     OldValuesJson = null,
                     NewValuesJson = "{\"orderNumber\":\"ORD-2026-001001\",\"status\":\"Draft\"}",
                     Notes = "Order record created."
@@ -2172,7 +2204,7 @@ public class DataSeeder : IDataSeeder
                     EntityId = ordersByNumber["ORD-2026-001001"],
                     Action = "StatusChanged:Draft",
                     PerformedByUserId = 4,
-                    PerformedAt = new DateTime(2025, 12, 16, 14, 30, 0),
+                    PerformedAt = Utc(2025, 12, 16, 14, 30, 0),
                     OldValuesJson = null,
                     NewValuesJson = "{\"status\":\"Draft\"}",
                     Notes = "Workflow moved to Draft."
@@ -2183,7 +2215,7 @@ public class DataSeeder : IDataSeeder
                     EntityId = ordersByNumber["ORD-2026-001011"],
                     Action = "StatusChanged:Submitted",
                     PerformedByUserId = 4,
-                    PerformedAt = new DateTime(2025, 12, 17, 23, 30, 0),
+                    PerformedAt = Utc(2025, 12, 17, 23, 30, 0),
                     OldValuesJson = "{\"status\":\"Draft\"}",
                     NewValuesJson = "{\"status\":\"Submitted\"}",
                     Notes = "Sales submitted the order for review."
@@ -2229,32 +2261,32 @@ public class DataSeeder : IDataSeeder
                 // ORD-2026-001011
                 // =========================
                 CreateNotification(ordersByNumber, "ORD-2026-001011", "purchasing11@riverlinepackaging.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 18, 0, 25, 0), "Sent",
-                    new DateTime(2025, 12, 18, 0, 30, 0)),
+                    Utc(2025, 12, 18, 0, 25, 0), "Sent",
+                    Utc(2025, 12, 18, 0, 30, 0)),
 
                 CreateNotification(ordersByNumber, "ORD-2026-001011", "purchasing22@granthampackaging.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 17, 18, 25, 0), "Sent",
-                    new DateTime(2025, 12, 17, 18, 30, 0)),
+                    Utc(2025, 12, 17, 18, 25, 0), "Sent",
+                    Utc(2025, 12, 17, 18, 30, 0)),
 
                 // =========================
                 // ORD-2026-001012
                 // =========================
                 CreateNotification(ordersByNumber, "ORD-2026-001012", "purchasing10@northernfoodprocess.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 17, 8, 20, 0), "Sent",
-                    new DateTime(2025, 12, 17, 8, 30, 0)),
+                    Utc(2025, 12, 17, 8, 20, 0), "Sent",
+                    Utc(2025, 12, 17, 8, 30, 0)),
 
                 CreateNotification(ordersByNumber, "ORD-2026-001012", "purchasing3@alderleyanalytical.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 18, 1, 20, 0), "Sent",
-                    new DateTime(2025, 12, 18, 1, 30, 0)),
+                    Utc(2025, 12, 18, 1, 20, 0), "Sent",
+                    Utc(2025, 12, 18, 1, 30, 0)),
 
                 // =========================
                 // ORD-2026-001013 (queued)
                 // =========================
                 CreateNotification(ordersByNumber, "ORD-2026-001013", "purchasing5@redbrickmanufacturing.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 17, 8, 25, 0), "Queued"),
+                    Utc(2025, 12, 17, 8, 25, 0), "Queued"),
 
                 CreateNotification(ordersByNumber, "ORD-2026-001013", "purchasing8@seftonfacilities.co.uk", "OrderSubmitted",
-                    new DateTime(2025, 12, 17, 23, 25, 0), "Queued"),
+                    Utc(2025, 12, 17, 23, 25, 0), "Queued"),
 
                 // Runtime approval/completion notifications are intentionally not seeded.
                 // They are created by the background processor when orders move through the workflow.
@@ -2263,6 +2295,8 @@ public class DataSeeder : IDataSeeder
             await _dbContext.Notifications.AddRangeAsync(notifications);
             await _dbContext.SaveChangesAsync();
         }
+
+        await SeedHistoricalDocumentsAsync();
 
         // =========================
         // 7. Set Default Addresses
@@ -2286,6 +2320,107 @@ public class DataSeeder : IDataSeeder
         }
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task SeedHistoricalDocumentsAsync()
+    {
+        var seededOrders = await _dbContext.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .Where(o => o.OrderNumber.CompareTo("ORD-2026-001001") >= 0 &&
+                        o.OrderNumber.CompareTo("ORD-2026-001030") <= 0)
+            .ToListAsync();
+
+        var ordersWithGeneratedDocuments = seededOrders
+            .Where(o => o.OrderStatusId is
+                (int)OrderStatusEnum.AwaitingDispatch or
+                (int)OrderStatusEnum.Completed or
+                (int)OrderStatusEnum.Failed)
+            .ToList();
+
+        var fulfilledOrders = ordersWithGeneratedDocuments
+            .Where(o => o.OrderStatusId is
+                (int)OrderStatusEnum.AwaitingDispatch or
+                (int)OrderStatusEnum.Completed)
+            .ToList();
+
+        var failedOrderSdsProductIds = seededOrders
+            .Where(o => o.OrderStatusId == (int)OrderStatusEnum.Failed)
+            .SelectMany(o => o.OrderItems)
+            .Where(i => i.DeletedAt == null && i.Product.RequiresSds)
+            .Select(i => i.ProductId)
+            .Distinct()
+            .ToList();
+
+        var fulfilledOrderSdsProductIds = fulfilledOrders
+            .SelectMany(o => o.OrderItems)
+            .Where(i => i.DeletedAt == null && i.Product.RequiresSds)
+            .Select(i => i.ProductId)
+            .Distinct()
+            .ToList();
+
+        var failedOnlySdsProductIds = failedOrderSdsProductIds
+            .Except(fulfilledOrderSdsProductIds)
+            .ToList();
+
+        var requiredSdsProductIds = await _dbContext.Products
+            .Where(p => p.RequiresSds &&
+                        p.IsActive &&
+                        p.DeletedAt == null &&
+                        !failedOnlySdsProductIds.Contains(p.ProductId))
+            .Select(p => p.ProductId)
+            .ToListAsync();
+
+        foreach (var productId in requiredSdsProductIds)
+        {
+            var hasActiveSds = await _dbContext.SafetyDataSheets.AnyAsync(s =>
+                s.ProductId == productId &&
+                s.IsActive &&
+                s.DeletedAt == null);
+
+            if (!hasActiveSds)
+            {
+                await _safetyDataSheetDocumentGenerator.GenerateAsync(productId, SeedDocumentUserId);
+            }
+        }
+
+        foreach (var order in ordersWithGeneratedDocuments)
+        {
+            if (!await DocumentExistsAsync(order.OrderId, DocumentType.OrderSummary))
+            {
+                await _orderDocumentService.GenerateAsync(
+                    order.OrderId,
+                    DocumentType.OrderSummary,
+                    CancellationToken.None);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        foreach (var order in fulfilledOrders.Where(RequiresSafetyDataSheetBundle))
+        {
+            if (!await DocumentExistsAsync(order.OrderId, DocumentType.SafetyDataSheetBundle))
+            {
+                await _orderDocumentService.GenerateAsync(
+                    order.OrderId,
+                    DocumentType.SafetyDataSheetBundle,
+                    CancellationToken.None);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+    }
+
+    private Task<bool> DocumentExistsAsync(int orderId, string documentType)
+    {
+        return _dbContext.Documents.AnyAsync(d =>
+            d.OrderId == orderId &&
+            d.DocumentType == documentType);
+    }
+
+    private static bool RequiresSafetyDataSheetBundle(Order order)
+    {
+        return order.OrderItems.Any(i =>
+            i.DeletedAt == null &&
+            i.Product.RequiresSds);
     }
 }
 

@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Entities.Customers;
 using Domain.Entities.Identity;
 using Domain.Entities.Orders;
@@ -12,6 +12,9 @@ namespace Infrastructure.Persistence.Context;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    private static DateTime Utc(int year, int month, int day, int hour, int minute, int second)
+        => new(year, month, day, hour, minute, second, DateTimeKind.Utc);
+
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -126,11 +129,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.CreatedAt)
-                .IsRequired()
-                .HasColumnType("datetime2");
+                .IsRequired();
 
-            entity.Property(x => x.LastLoginAt)
-                .HasColumnType("datetime2");
+            entity.Property(x => x.LastLoginAt);
 
             entity.HasOne(x => x.Role)
                 .WithMany(x => x.Users)
@@ -156,14 +157,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(x => x.TokenHash)
                 .IsUnique();
 
-            entity.Property(x => x.CreatedAtUtc)
-                .HasColumnType("datetime2");
+            entity.Property(x => x.CreatedAtUtc);
 
-            entity.Property(x => x.ExpiresAtUtc)
-                .HasColumnType("datetime2");
+            entity.Property(x => x.ExpiresAtUtc);
 
-            entity.Property(x => x.RevokedAtUtc)
-                .HasColumnType("datetime2");
+            entity.Property(x => x.RevokedAtUtc);
 
             entity.HasOne(x => x.User)
                 .WithMany(x => x.RefreshTokens)
@@ -185,8 +183,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 1,
                 JobTitle = "Head of Business Systems",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 1, 17, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 3, 21, 8, 15, 0)
+                CreatedAt = Utc(2024, 1, 17, 9, 0, 0),
+                LastLoginAt = Utc(2026, 3, 21, 8, 15, 0)
             },
             new User
             {
@@ -201,8 +199,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 1,
                 JobTitle = "IT Systems Administrator",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 1, 29, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 4, 10, 3, 15, 0)
+                CreatedAt = Utc(2024, 1, 29, 9, 0, 0),
+                LastLoginAt = Utc(2026, 4, 10, 3, 15, 0)
             },
             new User
             {
@@ -217,8 +215,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 2,
                 JobTitle = "Account Manager",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 2, 10, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 4, 2, 7, 15, 0)
+                CreatedAt = Utc(2024, 2, 10, 9, 0, 0),
+                LastLoginAt = Utc(2026, 4, 2, 7, 15, 0)
             },
             new User
             {
@@ -233,8 +231,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 2,
                 JobTitle = "Internal Sales Executive",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 2, 22, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 4, 3, 7, 15, 0)
+                CreatedAt = Utc(2024, 2, 22, 9, 0, 0),
+                LastLoginAt = Utc(2026, 4, 3, 7, 15, 0)
             },
             new User
             {
@@ -249,8 +247,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 2,
                 JobTitle = "Sales Coordinator",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 3, 5, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 3, 18, 8, 15, 0)
+                CreatedAt = Utc(2024, 3, 5, 9, 0, 0),
+                LastLoginAt = Utc(2026, 3, 18, 8, 15, 0)
             },
             new User
             {
@@ -265,8 +263,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 2,
                 JobTitle = "Regional Sales Representative",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 3, 17, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 3, 20, 3, 15, 0)
+                CreatedAt = Utc(2024, 3, 17, 9, 0, 0),
+                LastLoginAt = Utc(2026, 3, 20, 3, 15, 0)
             },
             new User
             {
@@ -281,8 +279,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 3,
                 JobTitle = "Operations Planner",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 3, 29, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 3, 24, 8, 15, 0)
+                CreatedAt = Utc(2024, 3, 29, 9, 0, 0),
+                LastLoginAt = Utc(2026, 3, 24, 8, 15, 0)
             },
             new User
             {
@@ -297,8 +295,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 3,
                 JobTitle = "Logistics Coordinator",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 4, 10, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 3, 23, 5, 15, 0)
+                CreatedAt = Utc(2024, 4, 10, 9, 0, 0),
+                LastLoginAt = Utc(2026, 3, 23, 5, 15, 0)
             },
             new User
             {
@@ -313,8 +311,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 3,
                 JobTitle = "Order Processing Specialist",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 4, 22, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 4, 9, 8, 15, 0)
+                CreatedAt = Utc(2024, 4, 22, 9, 0, 0),
+                LastLoginAt = Utc(2026, 4, 9, 8, 15, 0)
             },
             new User
             {
@@ -329,8 +327,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 3,
                 JobTitle = "Warehouse & Dispatch Coordinator",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 5, 4, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 4, 8, 7, 15, 0)
+                CreatedAt = Utc(2024, 5, 4, 9, 0, 0),
+                LastLoginAt = Utc(2026, 4, 8, 7, 15, 0)
             },
             new User
             {
@@ -345,8 +343,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 3,
                 JobTitle = "Customer Fulfilment Analyst",
                 IsActive = true,
-                CreatedAt = new DateTime(2024, 5, 16, 9, 0, 0),
-                LastLoginAt = new DateTime(2026, 4, 3, 4, 15, 0)
+                CreatedAt = Utc(2024, 5, 16, 9, 0, 0),
+                LastLoginAt = Utc(2026, 4, 3, 4, 15, 0)
             },
             new User
             {
@@ -361,7 +359,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 2,
                 JobTitle = "Former Account Manager",
                 IsActive = false,
-                CreatedAt = new DateTime(2024, 5, 28, 9, 0, 0),
+                CreatedAt = Utc(2024, 5, 28, 9, 0, 0),
                 LastLoginAt = null
             },
             new User
@@ -377,7 +375,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 3,
                 JobTitle = "Former Logistics Coordinator",
                 IsActive = false,
-                CreatedAt = new DateTime(2024, 6, 9, 9, 0, 0),
+                CreatedAt = Utc(2024, 6, 9, 9, 0, 0),
                 LastLoginAt = null
             },
             new User
@@ -393,7 +391,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 1,
                 JobTitle = "Former Systems Analyst",
                 IsActive = false,
-                CreatedAt = new DateTime(2024, 6, 21, 9, 0, 0),
+                CreatedAt = Utc(2024, 6, 21, 9, 0, 0),
                 LastLoginAt = null
             },
             new User
@@ -409,7 +407,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 DepartmentId = 1,
                 JobTitle = "Read-only Demonstration Account",
                 IsActive = true,
-                CreatedAt = new DateTime(2026, 7, 20, 0, 0, 0),
+                CreatedAt = Utc(2026, 7, 20, 0, 0, 0),
                 LastLoginAt = null
             }
         );
@@ -480,11 +478,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2")
                 .IsRequired(false);
 
             entity.HasOne(x => x.BillingAddress)
@@ -624,11 +620,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2")
                 .IsRequired(false);
 
             entity.HasOne(x => x.Customer)
@@ -702,11 +696,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
-            entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2");
+            entity.Property(x => x.DeletedAt);
 
             entity.HasOne(x => x.Customer)
                 .WithMany(x => x.Contacts)
@@ -764,11 +756,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
-            entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2");
+            entity.Property(x => x.DeletedAt);
 
             entity.HasOne(x => x.ProductCategory)
                 .WithMany(x => x.Products)
@@ -935,14 +925,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.UploadedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.IsActive)
                 .IsRequired();
 
             entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2")
                 .IsRequired(false);
 
             entity.HasOne(x => x.Product)
@@ -987,11 +975,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2")
                 .IsRequired(false);
 
             entity.HasOne(x => x.Customer)
@@ -1027,19 +1013,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.Property(x => x.SubmittedAt)
-                .HasColumnType("datetime2")
                 .IsRequired(false);
 
             entity.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.UpdatedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.DeletedAt)
-                .HasColumnType("datetime2")
                 .IsRequired(false);
 
             entity.Property(x => x.Currency)
@@ -1564,7 +1546,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasKey(x => x.OrderStatusHistoryId);
 
             entity.Property(x => x.ChangedAt)
-                .HasColumnType("datetime2")
                 .IsRequired();
 
             entity.Property(x => x.Reason)

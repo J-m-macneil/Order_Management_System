@@ -111,16 +111,16 @@ public class AuditLogRepository : IAuditLogRepository
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var term = searchTerm.Trim();
+            var pattern = $"%{searchTerm.Trim()}%";
 
             query = query.Where(x =>
-                x.EntityType.Contains(term) ||
-                x.Action.Contains(term) ||
-                (x.Notes != null && x.Notes.Contains(term)) ||
+                EF.Functions.ILike(x.EntityType, pattern) ||
+                EF.Functions.ILike(x.Action, pattern) ||
+                (x.Notes != null && EF.Functions.ILike(x.Notes, pattern)) ||
                 (x.PerformedByUser != null &&
-                    (x.PerformedByUser.FullName.Contains(term) ||
-                     x.PerformedByUser.Username.Contains(term) ||
-                     x.PerformedByUser.Email.Contains(term))));
+                    (EF.Functions.ILike(x.PerformedByUser.FullName, pattern) ||
+                     EF.Functions.ILike(x.PerformedByUser.Username, pattern) ||
+                     EF.Functions.ILike(x.PerformedByUser.Email, pattern))));
         }
 
         if (!string.IsNullOrWhiteSpace(entityType))
