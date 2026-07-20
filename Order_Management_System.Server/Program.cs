@@ -12,6 +12,8 @@ using Infrastructure.Services;
 using Infrastructure.Services.ProcessingJobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Server.Services;
@@ -25,6 +27,20 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        var dataProtectionKeyPath = builder.Configuration["DataProtection:KeyPath"]
+            ?? Path.Combine(builder.Environment.ContentRootPath, "data-protection-keys");
+
+        builder.Services.AddDataProtection()
+            .SetApplicationName(builder.Configuration["DataProtection:ApplicationName"] ?? "Back")
+            .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeyPath));
+
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
 
         // PDF License
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
@@ -195,6 +211,7 @@ public static class Program
         var app = builder.Build();
 
         // Middleware
+        app.UseForwardedHeaders();
         app.UseMiddleware<ExceptionMiddleware>();
 
         if (app.Environment.IsDevelopment())

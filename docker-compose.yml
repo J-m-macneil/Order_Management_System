@@ -1,25 +1,25 @@
 services:
   back-db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: back-db
+    image: postgres:18-alpine
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}"
+      POSTGRES_DB: "${POSTGRES_DB:-back_order_management}"
+      POSTGRES_USER: "${POSTGRES_USER:-back_app}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
     volumes:
-      - back-db-data:/var/opt/mssql
+      - back-db-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 10s
+    restart: unless-stopped
 
   back-api:
     build:
       context: .
       dockerfile: Order_Management_System.Server/Dockerfile
     image: back-api
-    container_name: back-api
     depends_on:
       back-db:
         condition: service_healthy
@@ -30,26 +30,28 @@ services:
       Jwt__SecretKey: "${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}"
       AllowedHosts: "${APP_DOMAIN:-localhost}"
       Demo__ReadOnlyMode: "${DEMO_READ_ONLY_MODE:-true}"
-      ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True"
-    expose:
-      - "8080"
+      ConnectionStrings__DefaultConnection: "Host=back-db;Port=5432;Database=${POSTGRES_DB:-back_order_management};Username=${POSTGRES_USER:-back_app};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
+      DocumentStorage__LocalRootPath: "/app/documents"
+      DataProtection__KeyPath: "/app/data-protection-keys"
+      DataProtection__ApplicationName: "Back"
+    volumes:
+      - back-documents:/app/documents
+      - back-data-protection-keys:/app/data-protection-keys
+    restart: unless-stopped
 
   back-client:
     build:
       context: ./order_management_system.client
       dockerfile: Dockerfile
     image: back-client
-    container_name: back-client
     depends_on:
       - back-api
     environment:
       API_BASE_URL: "/api"
-    expose:
-      - "80"
+    restart: unless-stopped
 
   back-proxy:
     image: caddy:2-alpine
-    container_name: back-proxy
     depends_on:
       - back-client
     environment:
@@ -61,8 +63,11 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - back-caddy-data:/data
       - back-caddy-config:/config
+    restart: unless-stopped
 
 volumes:
   back-db-data:
+  back-documents:
+  back-data-protection-keys:
   back-caddy-data:
   back-caddy-config:

@@ -362,6 +362,7 @@ healthchecksdb
 
 # Generated application documents
 Order_Management_System.Server/documents/
+Order_Management_System.Server/data-protection-keys/
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
