@@ -1,5 +1,9 @@
 using Application.Interfaces;
+using Domain.Repositories;
+using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
+using Infrastructure.Persistence.Repositories;
+using Infrastructure.Persistence.Seed;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,13 +19,16 @@ public static class ServiceCollectionExtensions
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection")));
+                configuration.GetConnectionString("DefaultConnection"),
+                sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IDataSeeder, DataSeeder>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+        services.AddScoped<IDataSeeder, Persistence.Seed.DataSeeder>();
 
         return services;
     }

@@ -1,0 +1,25 @@
+<div class="toast-stack">
+  <article *ngFor="let toast of notifications(); trackBy: trackById"
+           class="app-toast"
+           [ngClass]="'app-toast--' + toast.type"
+           [attr.role]="toast.type === 'error' ? 'alert' : 'status'">
+    <span class="toast-icon" aria-hidden="true">
+      <svg *ngIf="toast.type === 'success'" lucideCircleCheck [size]="19"></svg>
+      <svg *ngIf="toast.type === 'error'" lucideCircleAlert [size]="19"></svg>
+      <svg *ngIf="toast.type === 'warning'" lucideTriangleAlert [size]="19"></svg>
+      <svg *ngIf="toast.type === 'info'" lucideInfo [size]="19"></svg>
+    </span>
+
+    <div class="toast-content">
+      <strong>{{ toast.title }}</strong>
+      <p *ngIf="toast.message">{{ toast.message }}</p>
+    </div>
+
+    <button type="button"
+            class="toast-close"
+            (click)="dismiss(toast.id)"
+            aria-label="Dismiss notification">
+      <svg lucideX [size]="17" aria-hidden="true"></svg>
+    </button>
+  </article>
+</div>

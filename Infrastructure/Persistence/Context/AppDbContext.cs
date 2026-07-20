@@ -1,4 +1,11 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Customers;
+using Domain.Entities.Identity;
+using Domain.Entities.Orders;
+using Domain.Entities.Organisation;
+using Domain.Entities.Products;
+using Domain.Entities.Status;
+using Domain.Entities.SystemSettings;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Context;
@@ -7,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<PricingTier> PricingTiers => Set<PricingTier>();
@@ -24,8 +32,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
-
+    public DbSet<ProcessingJob> ProcessingJobs => Set<ProcessingJob>();
     public DbSet<Carrier> Carriers => Set<Carrier>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+      => base.SaveChangesAsync(cancellationToken);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +75,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             {
                 RoleId = 3,
                 Name = "Operations"
+            },
+            new Role
+            {
+                RoleId = 4,
+                Name = "Demo"
             }
         );
 
@@ -121,6 +141,34 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithMany(x => x.Users)
                 .HasForeignKey(x => x.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("RefreshTokens");
+
+            entity.HasKey(x => x.RefreshTokenId);
+
+            entity.Property(x => x.TokenHash)
+                .IsRequired()
+                .HasMaxLength(64);
+
+            entity.HasIndex(x => x.TokenHash)
+                .IsUnique();
+
+            entity.Property(x => x.CreatedAtUtc)
+                .HasColumnType("datetime2");
+
+            entity.Property(x => x.ExpiresAtUtc)
+                .HasColumnType("datetime2");
+
+            entity.Property(x => x.RevokedAtUtc)
+                .HasColumnType("datetime2");
+
+            entity.HasOne(x => x.User)
+                .WithMany(x => x.RefreshTokens)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<User>().HasData(
@@ -347,6 +395,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 IsActive = false,
                 CreatedAt = new DateTime(2024, 6, 21, 9, 0, 0),
                 LastLoginAt = null
+            },
+            new User
+            {
+                UserId = 15,
+                FirstName = "Demo",
+                LastName = "User",
+                FullName = "Demo User",
+                Email = "demo@back.software",
+                Username = "demo",
+                PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                RoleId = 4,
+                DepartmentId = 1,
+                JobTitle = "Read-only Demonstration Account",
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 7, 20, 0, 0, 0),
+                LastLoginAt = null
             }
         );
 
@@ -515,6 +579,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             entity.HasKey(x => x.AddressId);
 
+            entity.Ignore(x => x.Orders);
+
             entity.Property(x => x.AddressType)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -553,9 +619,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             entity.Property(x => x.DeliveryInstructions)
                 .HasMaxLength(255);
-
-            entity.Property(x => x.IsPrimary)
-                .IsRequired();
 
             entity.Property(x => x.IsActive)
                 .IsRequired();
@@ -615,6 +678,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.ToTable("CustomerContacts");
 
             entity.HasKey(x => x.CustomerContactId);
+
+            entity.Ignore(x => x.Orders);
 
             entity.Property(x => x.Name)
                 .IsRequired()
@@ -1058,13 +1123,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .IsRequired();
 
             entity.HasOne(x => x.CreatedByUser)
-                .WithMany()
+                .WithMany(x => x.CreatedOrders)
                 .HasForeignKey(x => x.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             entity.HasOne(x => x.AssignedToUser)
-                .WithMany()
+                .WithMany(x => x.AssignedOrders)
                 .HasForeignKey(x => x.AssignedToUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
@@ -1124,6 +1189,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<ProcessingJob>(entity =>
+        {
+            entity.HasKey(x => x.ProcessingJobId);
+
+            entity.Property(x => x.JobType)
+                .HasMaxLength(80)
+                .IsRequired();
+
+            entity.Property(x => x.Status)
+                .HasMaxLength(40)
+                .IsRequired();
+
+            entity.Property(x => x.ErrorMessage)
+                .HasMaxLength(500);
+
+            entity.HasOne(x => x.Order)
+                .WithMany(x => x.ProcessingJobs)
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Carrier>(entity =>
@@ -1310,6 +1396,166 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
         });
+
+        modelBuilder.Entity<AuditLog>(entity =>
+        {
+            entity.HasKey(x => x.AuditLogId);
+
+            entity.Property(x => x.EntityType)
+                .HasMaxLength(80)
+                .IsRequired();
+
+            entity.Property(x => x.Action)
+                .HasMaxLength(120)
+                .IsRequired();
+
+            entity.Property(x => x.Notes)
+                .HasMaxLength(500);
+
+            entity.HasOne(x => x.PerformedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.PerformedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SystemSetting>(entity =>
+        {
+            entity.HasKey(x => x.SystemSettingId);
+
+            entity.Property(x => x.SettingKey)
+                .HasMaxLength(80)
+                .IsRequired();
+
+            entity.HasIndex(x => x.SettingKey)
+                .IsUnique();
+
+            entity.Property(x => x.SettingValue)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(x => x.DataType)
+                .HasMaxLength(40)
+                .IsRequired();
+
+            entity.Property(x => x.Description)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.CreatedAt)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<Document>(entity =>
+        {
+            entity.HasKey(x => x.DocumentId);
+
+            entity.Property(x => x.DocumentType)
+                .HasMaxLength(80)
+                .IsRequired();
+
+            entity.Property(x => x.FileName)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(x => x.FilePath)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.HasOne(x => x.Order)
+                .WithMany()
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(x => x.NotificationId);
+
+            entity.Property(x => x.RecipientEmail)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(x => x.NotificationType)
+                .HasMaxLength(80)
+                .IsRequired();
+
+            entity.Property(x => x.Subject)
+                .HasMaxLength(160)
+                .IsRequired();
+
+            entity.Property(x => x.Status)
+                .HasMaxLength(40)
+                .IsRequired();
+
+            entity.Property(x => x.FailureReason)
+                .HasMaxLength(255);
+
+            entity.HasOne(x => x.Order)
+                .WithMany()
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SystemSetting>().HasData(
+            new SystemSetting
+            {
+                SystemSettingId = 1,
+                SettingKey = "DefaultTaxRate",
+                SettingValue = "20",
+                DataType = "integer",
+                Description = "Default VAT rate used in order total calculations.",
+                CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new SystemSetting
+            {
+                SystemSettingId = 2,
+                SettingKey = "EnablePriorityOrders",
+                SettingValue = "true",
+                DataType = "boolean",
+                Description = "Whether priority flagging is enabled in the order workflow.",
+                CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new SystemSetting
+            {
+                SystemSettingId = 3,
+                SettingKey = "AutoApproveLowValueOrders",
+                SettingValue = "false",
+                DataType = "boolean",
+                Description = "Whether low-value orders can bypass manual review.",
+                CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new SystemSetting
+            {
+                SystemSettingId = 4,
+                SettingKey = "BackgroundJobRetryLimit",
+                SettingValue = "3",
+                DataType = "integer",
+                Description = "Maximum number of retry attempts for background processing jobs.",
+                CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new SystemSetting
+            {
+                SystemSettingId = 5,
+                SettingKey = "DashboardDefaultDays",
+                SettingValue = "30",
+                DataType = "integer",
+                Description = "Default date window used for the operational dashboard.",
+                CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new SystemSetting
+            {
+                SystemSettingId = 6,
+                SettingKey = "RequireSdsForHazardousProducts",
+                SettingValue = "true",
+                DataType = "boolean",
+                Description = "Whether SDS metadata is mandatory for hazardous or restricted products.",
+                CreatedAt = new DateTime(2025, 12, 16, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
 
         modelBuilder.Entity<OrderStatusHistory>(entity =>
         {

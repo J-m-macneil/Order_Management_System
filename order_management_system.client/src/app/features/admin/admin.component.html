@@ -1,2 +1,40 @@
-<h1>Admin</h1>
-<p>Admin-only page.</p>
+<ng-container *ngIf="!isUserFormOpen">
+  <div class="app-page-header">
+    <div>
+      <h1 class="brand-page-title">Admin Panel<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+      <p class="app-muted-text mt-2">Manage users, access, roles and system configuration</p>
+    </div>
+    <button type="button"
+            *ngIf="activeSection === 'users' && !isDemoUser"
+            class="app-primary-button app-page-header-action px-4 py-3"
+            (click)="openCreateUserForm()">
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>New User</span>
+    </button>
+  </div>
+
+  <div class="app-tabs">
+    <button type="button"
+            class="px-4 py-2 text-sm"
+            [class.app-primary-button]="activeSection === 'users'"
+            [class.app-secondary-button]="activeSection !== 'users'"
+            (click)="showUsersSection()">
+      Users
+    </button>
+
+    <button type="button"
+            class="px-4 py-2 text-sm"
+            [class.app-primary-button]="activeSection === 'settings'"
+            [class.app-secondary-button]="activeSection !== 'settings'"
+            (click)="showSettingsSection()">
+      System Settings
+    </button>
+  </div>
+</ng-container>
+
+<app-admin-users *ngIf="activeSection === 'users'"
+                 (formModeChange)="onUserFormModeChange($event)">
+</app-admin-users>
+
+<app-system-settings *ngIf="activeSection === 'settings'">
+</app-system-settings>

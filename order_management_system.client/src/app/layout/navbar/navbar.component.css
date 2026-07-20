@@ -1,0 +1,102 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+  padding: 1rem 0.75rem;
+  background: var(--app-nav-bg);
+}
+
+.user-avatar {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--app-primary-text);
+  font-weight: 800;
+}
+
+.brand-logo {
+  display: grid;
+  width: 2.5rem;
+  min-height: 2.5rem;
+  place-items: center;
+}
+
+.brand-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.nav-icons {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: auto;
+  padding-block: 1rem;
+}
+
+.sidebar-footer {
+  display: grid;
+  width: 2.65rem;
+  place-items: center;
+  gap: 0.75rem;
+}
+
+.nav-icon {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 1px solid var(--app-nav-item-border);
+  border-radius: 999px;
+  color: var(--app-nav-item-text);
+  background: var(--app-nav-item-bg);
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+button.nav-icon {
+  cursor: pointer;
+}
+
+.nav-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 1.8;
+}
+
+.nav-icon:hover {
+  color: var(--app-nav-item-hover-text);
+  background: var(--app-nav-item-hover-bg);
+  transform: translateY(-1px);
+}
+
+.nav-icon.nav-active {
+  color: var(--app-nav-item-active-text);
+  background: var(--app-nav-item-active-bg);
+  transform: translateY(-1px);
+}
+
+.user-avatar {
+  background: var(--app-nav-avatar-bg);
+  font-size: 0.75rem;
+}
+
+:host::-webkit-scrollbar {
+  width: 0.35rem;
+}
+
+:host::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--app-nav-scrollbar-thumb);
+}

@@ -1,122 +1,88 @@
-﻿using Application.DTOs;
-using Domain.Entities;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Customers.Commands.CreateCustomerContact;
+using Application.Features.Customers.Commands.DeleteCustomerContact;
+using Application.Features.Customers.Commands.UpdateCustomerContact;
+using Application.Features.Customers.DTOs;
+using Application.Features.Customers.Queries.GetCustomerContacts;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace Server.Controllers
+namespace Server.Controllers;
+
+[ApiController]
+[Route("api/customers/{customerId}/contacts")]
+[Authorize]
+public class CustomerContactsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/customers/{customerId}/contacts")]
-    [Authorize]
-    public class CustomerContactsController : ControllerBase
+    private readonly IMediator _mediator;
+
+    public CustomerContactsController(IMediator mediator)
     {
-        private readonly AppDbContext _dbContext;
+        _mediator = mediator;
+    }
 
-        public CustomerContactsController(AppDbContext dbContext)
+    // GET ALL
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<CustomerContactDto>>> Get(int customerId)
+    {
+        var result = await _mediator.Send(new GetCustomerContactsQuery
         {
-            _dbContext = dbContext;
-        }
+            CustomerId = customerId
+        });
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CustomerContactDto>>> Get(int customerId)
+        return Ok(result);
+    }
+
+    // CREATE
+    [HttpPost]
+    public async Task<ActionResult<CustomerContactDto>> Create(
+        int customerId,
+        [FromBody] CreateCustomerContactDto dto)
+    {
+        var result = await _mediator.Send(new CreateCustomerContactCommand
         {
-            var contacts = await _dbContext.CustomerContacts
-                .Where(x => x.CustomerId == customerId && x.IsActive && x.DeletedAt == null)
-                .Select(x => new CustomerContactDto
-                {
-                    CustomerContactId = x.CustomerContactId,
-                    CustomerId = x.CustomerId,
-                    Name = x.Name,
-                    JobTitle = x.JobTitle,
-                    Email = x.Email,
-                    Phone = x.Phone,
-                    IsPrimary = x.IsPrimary
-                })
-                .ToListAsync();
+            CustomerId = customerId,
+            Name = dto.Name,
+            JobTitle = dto.JobTitle,
+            Email = dto.Email,
+            Phone = dto.Phone,
+            IsPrimary = dto.IsPrimary
+        });
 
-            return Ok(contacts);
-        }
+        return Ok(result);
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<CustomerContactDto>> Create(int customerId, [FromBody] CreateCustomerContactDto dto)
+    // UPDATE
+    [HttpPut("{contactId}")]
+    public async Task<IActionResult> Update(
+        int customerId,
+        int contactId,
+        [FromBody] CreateCustomerContactDto dto)
+    {
+        await _mediator.Send(new UpdateCustomerContactCommand
         {
-            var exists = await _dbContext.Customers
-                .AnyAsync(x => x.CustomerId == customerId && x.DeletedAt == null);
+            CustomerId = customerId,
+            CustomerContactId = contactId,
+            Name = dto.Name,
+            JobTitle = dto.JobTitle,
+            Email = dto.Email,
+            Phone = dto.Phone,
+            IsPrimary = dto.IsPrimary
+        });
 
-            if (!exists)
-                return NotFound();
+        return NoContent();
+    }
 
-            var contact = new CustomerContact
-            {
-                CustomerId = customerId,
-                Name = dto.Name,
-                JobTitle = dto.JobTitle,
-                Email = dto.Email,
-                Phone = dto.Phone,
-                IsPrimary = dto.IsPrimary,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _dbContext.CustomerContacts.Add(contact);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(new CustomerContactDto
-            {
-                CustomerContactId = contact.CustomerContactId,
-                CustomerId = contact.CustomerId,
-                Name = contact.Name,
-                JobTitle = contact.JobTitle,
-                Email = contact.Email,
-                Phone = contact.Phone,
-                IsPrimary = contact.IsPrimary
-            });
-        }
-
-        [HttpPut("{contactId}")]
-        public async Task<IActionResult> Update(int customerId, int contactId, [FromBody] UpdateCustomerContactDto dto)
+    // DELETE
+    [HttpDelete("{contactId}")]
+    public async Task<IActionResult> Delete(int customerId, int contactId)
+    {
+        await _mediator.Send(new DeleteCustomerContactCommand
         {
-            var contact = await _dbContext.CustomerContacts
-                .FirstOrDefaultAsync(x =>
-                    x.CustomerContactId == contactId &&
-                    x.CustomerId == customerId &&
-                    x.DeletedAt == null);
+            CustomerId = customerId,
+            CustomerContactId = contactId
+        });
 
-            if (contact == null)
-                return NotFound();
-
-            contact.Name = dto.Name;
-            contact.JobTitle = dto.JobTitle;
-            contact.Email = dto.Email;
-            contact.Phone = dto.Phone;
-            contact.IsPrimary = dto.IsPrimary;
-
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        [HttpDelete("{contactId}")]
-        public async Task<IActionResult> Delete(int customerId, int contactId)
-        {
-            var contact = await _dbContext.CustomerContacts
-                .FirstOrDefaultAsync(x =>
-                    x.CustomerContactId == contactId &&
-                    x.CustomerId == customerId &&
-                    x.DeletedAt == null);
-
-            if (contact == null)
-                return NotFound();
-
-            // ✅ SOFT DELETE
-            contact.IsActive = false;
-            contact.DeletedAt = DateTime.UtcNow;
-
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
-        }
+        return NoContent();
     }
 }

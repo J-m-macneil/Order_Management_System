@@ -1,47 +1,112 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, catchError, finalize, map, of, tap } from 'rxjs';
+import { apiBaseUrl } from '../config/api-url';
+
+export interface AuthUser {
+  userId: number;
+  username: string;
+  fullName: string;
+  role: string;
+}
+
+interface LoginResponse {
+  expiresAtUtc: string;
+  user: AuthUser;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  getToken(): string | null {
-    return localStorage.getItem('auth_token');
+  private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
+  private sessionChecked = false;
+
+  currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor(private http: HttpClient) { }
+
+  login(credentials: { usernameOrEmail: string; password: string }): Observable<AuthUser> {
+    return this.http.post<LoginResponse>(`${apiBaseUrl}/auth/login`, credentials).pipe(
+      tap(response => this.setCurrentUser(response.user)),
+      map(response => response.user)
+    );
   }
 
-  setToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+  loginDemo(): Observable<AuthUser> {
+    return this.http.post<LoginResponse>(`${apiBaseUrl}/auth/demo-login`, {}).pipe(
+      tap(response => this.setCurrentUser(response.user)),
+      map(response => response.user)
+    );
   }
 
-  clearToken(): void {
-    localStorage.removeItem('auth_token');
+  logout(): Observable<void> {
+    return this.http.post<void>(`${apiBaseUrl}/auth/logout`, {}).pipe(
+      catchError(() => of(void 0)),
+      finalize(() => this.clearSession())
+    );
   }
 
-  logout(): void {
-    this.clearToken();
+  refresh(): Observable<void> {
+    return this.http.post<LoginResponse>(`${apiBaseUrl}/auth/refresh`, {}).pipe(
+      tap(response => this.setCurrentUser(response.user)),
+      map(() => void 0)
+    );
+  }
+
+  ensureAuthenticated(): Observable<boolean> {
+    if (this.sessionChecked) {
+      return of(this.isLoggedIn());
+    }
+
+    return this.loadCurrentUser().pipe(
+      map(user => user !== null)
+    );
+  }
+
+  loadCurrentUser(): Observable<AuthUser | null> {
+    return this.http.get<AuthUser>(`${apiBaseUrl}/auth/me`).pipe(
+      tap(user => this.setCurrentUser(user)),
+      catchError(() => {
+        this.setCurrentUser(null);
+        return of(null);
+      })
+    );
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return !!this.currentUserSubject.value;
   }
 
   getUserRole(): string | null {
-    const token = this.getToken();
-    if (!token) return null;
+    return this.currentUserSubject.value?.role ?? null;
+  }
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return (
-        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
-        payload['role'] ||
-        null
-      );
-    } catch {
-      return null;
-    }
+  getUserFullName(): string | null {
+    return this.currentUserSubject.value?.fullName ?? null;
+  }
+
+  getUsername(): string | null {
+    return this.currentUserSubject.value?.username ?? null;
   }
 
   hasRole(...roles: string[]): boolean {
     const userRole = this.getUserRole();
-    return !!userRole && roles.includes(userRole);
+    return !!userRole && roles.some(role =>
+      role.toLowerCase() === userRole.toLowerCase()
+    );
+  }
+
+  isDemoUser(): boolean {
+    return this.hasRole('Demo');
+  }
+
+  clearSession(): void {
+    this.setCurrentUser(null);
+  }
+
+  private setCurrentUser(user: AuthUser | null): void {
+    this.currentUserSubject.next(user);
+    this.sessionChecked = true;
   }
 }

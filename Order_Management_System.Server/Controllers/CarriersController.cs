@@ -1,8 +1,8 @@
-﻿using Domain.Entities;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Carriers.Queries.GetCarriers;
+using Application.Features.Carriers.Queries.GetCarrierById;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -11,33 +11,28 @@ namespace Server.Controllers;
 [Authorize]
 public class CarriersController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public CarriersController(AppDbContext dbContext)
+    public CarriersController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Carrier>>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var carriers = await _dbContext.Carriers
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.Name)
-            .ToListAsync();
-
-        return Ok(carriers);
+        var result = await _mediator.Send(new GetCarriersQuery());
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Carrier>> GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var carrier = await _dbContext.Carriers
-            .FirstOrDefaultAsync(x => x.CarrierId == id && x.IsActive);
+        var result = await _mediator.Send(new GetCarrierByIdQuery { CarrierId = id });
 
-        if (carrier == null)
+        if (result == null)
             return NotFound();
 
-        return Ok(carrier);
+        return Ok(result);
     }
 }

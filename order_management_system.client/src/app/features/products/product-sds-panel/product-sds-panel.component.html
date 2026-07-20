@@ -1,0 +1,98 @@
+<div *ngIf="errorMessage" class="p-4 app-alert app-alert--danger mb-6">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+</div>
+
+<div class="form-card">
+  <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="app-section-title">Safety Data Sheets</h2>
+      <p *ngIf="requiresSds && safetyDataSheets.length > 0" class="text-xs app-muted-text mt-1">
+        {{ safetyDataSheets.length }} total
+      </p>
+    </div>
+
+    <div *ngIf="!isLoading" class="flex items-center gap-3">
+      <span *ngIf="requiresSds && safetyDataSheets.length === 0"
+            class="app-badge app-badge--warning">
+        Required
+      </span>
+
+      <span *ngIf="!requiresSds" class="app-badge app-badge--neutral">
+        Not Required
+      </span>
+
+      <button *ngIf="requiresSds && canManageSds"
+              type="button"
+              appDemoWrite
+              class="app-primary-button px-4 py-2"
+              [disabled]="isGenerating"
+              (click)="generateSafetyDataSheet()">
+        {{ isGenerating ? 'Generating...' : 'Generate SDS' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
+    <p>Loading safety data sheets...</p>
+  </div>
+
+  <div *ngIf="!isLoading && requiresSds && safetyDataSheets.length > 0" class="app-table-scroll">
+    <table class="app-data-table">
+      <thead class="app-table-head">
+        <tr>
+          <th class="app-table-heading">File Name</th>
+          <th class="app-table-heading">Version</th>
+          <th class="app-table-heading">Effective Date</th>
+          <th class="app-table-heading">Uploaded At</th>
+          <th class="app-table-heading">Uploaded By</th>
+          <th class="app-table-heading app-table-heading--center">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="app-table-body">
+        <tr *ngFor="let sds of safetyDataSheets">
+          <td class="px-6 py-4 app-strong-text">{{ sds.fileName }}</td>
+          <td class="px-6 py-4 app-body-text">{{ sds.version }}</td>
+          <td class="px-6 py-4 app-body-text">{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 app-body-text">{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="px-6 py-4 app-body-text">
+            {{ sds.uploadedByUserName || ('User #' + sds.uploadedByUserId) }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <a [href]="getViewUrl(sds)"
+               target="_blank"
+               rel="noopener"
+               class="app-link-button text-xs"
+               [class.mr-3]="canManageSds">
+              View
+            </a>
+
+            <button *ngIf="canManageSds"
+                    type="button"
+                    appDemoWrite
+                    class="app-danger-link text-xs"
+                    (click)="openDeleteModal(sds)">
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!isLoading && requiresSds && safetyDataSheets.length === 0">
+    <p class="app-muted-text">Required, but no SDS records have been added yet.</p>
+  </div>
+
+  <div *ngIf="!isLoading && !requiresSds">
+    <p class="app-muted-text">Not required for this product.</p>
+  </div>
+</div>
+
+<app-confirmation-modal *ngIf="sdsPendingDelete"
+                        title="Delete SDS"
+                        [message]="'Delete SDS record ' + sdsPendingDelete.fileName + '? This action cannot be undone.'"
+                        confirmText="Delete SDS"
+                        variant="danger"
+                        (confirm)="confirmDelete()"
+                        (cancel)="cancelDelete()">
+</app-confirmation-modal>

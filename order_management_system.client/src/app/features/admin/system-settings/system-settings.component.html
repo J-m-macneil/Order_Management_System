@@ -1,0 +1,72 @@
+<div *ngIf="errorMessage" class="mb-4 p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+</div>
+
+<div class="space-y-6">
+  <div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
+    <p>Loading system settings...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <div *ngFor="let group of settingGroups" class="form-card">
+      <div class="app-section-header">
+        <h2 class="app-section-title">{{ group }}</h2>
+      </div>
+
+      <div class="divide-y app-divider">
+        <div *ngFor="let setting of settingsByGroup[group]" class="py-5 first:pt-0 last:pb-0">
+          <div class="grid grid-cols-1 xl:grid-cols-[1fr_18rem_auto] gap-4 xl:items-center">
+            <div>
+              <h3 class="text-sm app-strong-text">
+                {{ formatSettingName(setting.settingKey) }}
+              </h3>
+              <p class="text-sm app-muted-text mt-1">{{ setting.description }}</p>
+              <p class="text-xs app-muted-text mt-2">{{ setting.settingKey }} &middot; {{ setting.dataType }}</p>
+            </div>
+
+            <div>
+              <label class="sr-only" [for]="'setting-' + setting.systemSettingId">
+                {{ formatSettingName(setting.settingKey) }}
+              </label>
+
+              <label *ngIf="isBooleanSetting(setting)"
+                     class="inline-flex items-center gap-3 text-sm app-body-text">
+                <input [id]="'setting-' + setting.systemSettingId"
+                       type="checkbox"
+                       class="app-checkbox"
+                       [disabled]="isDemoUser"
+                       [checked]="settingValues[setting.systemSettingId] === 'true'"
+                       (change)="setBooleanSetting(setting, $any($event.target).checked)" />
+                {{ settingValues[setting.systemSettingId] === 'true' ? 'Enabled' : 'Disabled' }}
+              </label>
+
+              <input *ngIf="!isBooleanSetting(setting)"
+                     [id]="'setting-' + setting.systemSettingId"
+                     [type]="setting.dataType === 'integer' || setting.dataType === 'decimal' ? 'number' : 'text'"
+                     [step]="setting.dataType === 'decimal' ? '0.01' : '1'"
+                     [disabled]="isDemoUser"
+                     [(ngModel)]="settingValues[setting.systemSettingId]"
+                     class="form-input" />
+            </div>
+
+            <div class="flex gap-2 xl:justify-end">
+              <button type="button"
+                      class="app-secondary-button px-4 py-2"
+                      [disabled]="isDemoUser || !isSettingDirty(setting) || isSavingSetting(setting)"
+                      (click)="resetSetting(setting)">
+                Reset
+              </button>
+
+              <button type="button"
+                      class="app-primary-button px-4 py-2"
+                      [disabled]="isDemoUser || !isSettingDirty(setting) || isSavingSetting(setting)"
+                      (click)="saveSetting(setting)">
+                {{ isSavingSetting(setting) ? 'Saving...' : 'Save' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

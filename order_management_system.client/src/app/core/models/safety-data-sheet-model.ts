@@ -7,18 +7,6 @@ export interface SafetyDataSheet {
   effectiveDate: string;
   uploadedAt: string;
   uploadedByUserId: number;
-  isActive: boolean;
-}
-
-export interface CreateSafetyDataSheetRequest {
-  fileName: string;
-  filePath: string;
-  version: string;
-  effectiveDate: string;
-  uploadedAt: string;
-  uploadedByUserId: number;
-}
-
-export interface UpdateSafetyDataSheetRequest extends CreateSafetyDataSheetRequest {
+  uploadedByUserName?: string | null;
   isActive: boolean;
 }

@@ -1,293 +1,87 @@
-﻿using Application.DTOs;
-using Domain.Entities;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Orders.Commands.ChangeOrderStatus;
+using Application.Features.Orders.Commands.CreateOrder;
+using Application.Features.Orders.Commands.DiscardDraftOrder;
+using Application.Features.Orders.Commands.UpdateOrder;
+using Application.Features.Orders.Queries.GetAllowedStatuses;
+using Application.Features.Orders.Queries.GetOrderById;
+using Application.Features.Orders.Queries.GetOrders;
+using Application.Features.Orders.Queries.GetOrderStatusHistory;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace Server.Controllers;
 
 [ApiController]
 [Route("api/orders")]
 [Authorize]
 public class OrdersController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public OrdersController(AppDbContext dbContext)
+    public OrdersController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
-    // =========================
-    // CREATE ORDER
-    // =========================
     [HttpPost]
-    public async Task<ActionResult<OrderDto>> Create([FromBody] CreateOrderDto dto)
+    [Authorize(Policy = "SalesOrAdmin")]
+    public async Task<IActionResult> Create(CreateOrderCommand command)
     {
-        if (dto.Items == null || dto.Items.Count == 0)
-            return BadRequest("Order must contain at least one item.");
-
-        var order = new Order
-        {
-            OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}",
-            CustomerId = dto.CustomerId,
-            DeliveryAddressId = dto.DeliveryAddressId,
-            BillingAddressId = dto.BillingAddressId,
-            CreatedByUserId = dto.CreatedByUserId,
-            WarehouseId = dto.WarehouseId,
-            CarrierId = dto.CarrierId,
-            OrderStatusId = 1,
-            RequestedDeliveryDate = dto.RequestedDeliveryDate,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Currency = "GBP",
-            IsPriorityOrder = dto.IsPriorityOrder
-        };
-
-        // =========================
-        // ADD ITEMS
-        // =========================
-        foreach (var item in dto.Items)
-        {
-            var gross = item.Quantity * item.UnitPrice;
-            var discountAmount = gross * (item.DiscountPercent / 100m);
-            var lineTotal = Math.Round(gross - discountAmount, 2);
-
-            order.OrderItems.Add(new OrderItem
-            {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice,
-                DiscountPercent = item.DiscountPercent,
-                LineTotal = lineTotal,
-                Notes = item.Notes
-            });
-        }
-
-        // =========================
-        // CALCULATE TOTALS
-        // =========================
-        order.Subtotal = order.OrderItems.Sum(x => x.Quantity * x.UnitPrice);
-
-        order.DiscountAmount = order.OrderItems.Sum(x =>
-            (x.Quantity * x.UnitPrice) * (x.DiscountPercent / 100m)
-        );
-
-        order.TaxAmount = Math.Round((order.Subtotal - order.DiscountAmount) * 0.2m, 2); // 20% VAT
-
-        order.TotalAmount = order.Subtotal - order.DiscountAmount + order.TaxAmount;
-
-        _dbContext.Orders.Add(order);
-        await _dbContext.SaveChangesAsync();
-
-        // =========================
-        // RETURN DTO
-        // =========================
-        var result = new OrderDto
-        {
-            OrderId = order.OrderId,
-            OrderNumber = order.OrderNumber,
-
-            CustomerId = order.CustomerId,
-            DeliveryAddressId = order.DeliveryAddressId,
-            BillingAddressId = order.BillingAddressId,
-
-            CreatedByUserId = order.CreatedByUserId,
-            AssignedToUserId = order.AssignedToUserId,
-
-            RequestedDeliveryDate = order.RequestedDeliveryDate,
-            SubmittedAt = order.SubmittedAt,
-
-            CreatedAt = order.CreatedAt,
-            UpdatedAt = order.UpdatedAt,
-
-            Currency = order.Currency,
-
-            Subtotal = order.Subtotal,
-            DiscountAmount = order.DiscountAmount,
-            TaxAmount = order.TaxAmount,
-            TotalAmount = order.TotalAmount,
-
-            PurchaseOrderReference = order.PurchaseOrderReference,
-            SpecialInstructions = order.SpecialInstructions,
-            InternalNotes = order.InternalNotes,
-            FailureReason = order.FailureReason,
-
-            IsPriorityOrder = order.IsPriorityOrder,
-
-            Items = order.OrderItems.Select(x => new OrderItemDto
-            {
-                OrderItemId = x.OrderItemId,
-                ProductId = x.ProductId,
-                Quantity = x.Quantity,
-                UnitPrice = x.UnitPrice,
-                DiscountPercent = x.DiscountPercent,
-                LineTotal = x.LineTotal,
-                Notes = x.Notes
-            }).ToList()
-        };
-
+        var result = await _mediator.Send(command);
         return Ok(result);
     }
 
-    // =========================
-    // GET ALL ORDERS
-    // =========================
-    [HttpGet]
-    public async Task<ActionResult<List<OrderDto>>> GetAll()
+    [HttpPut("{id}")]
+    [Authorize(Policy = "SalesOrAdmin")]
+    public async Task<IActionResult> Update(int id, UpdateOrderCommand command, CancellationToken ct)
     {
-        var orders = await _dbContext.Orders
-            .Include(o => o.Customer)
-            .Include(o => o.Warehouse)
-            .Include(o => o.Carrier)
-            .Include(o => o.Project)
-            .Include(o => o.OrderStatus)
-            .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-            .Where(o => o.DeletedAt == null)
-            .ToListAsync();
-
-        var result = orders.Select(order => new OrderDto
-        {
-            OrderId = order.OrderId,
-            OrderNumber = order.OrderNumber,
-
-            CustomerId = order.CustomerId,
-            CustomerName = order.Customer != null ? order.Customer.CompanyName : null,
-
-            DeliveryAddressId = order.DeliveryAddressId,
-            BillingAddressId = order.BillingAddressId,
-
-            WarehouseId = order.WarehouseId,
-            WarehouseName = order.Warehouse != null ? order.Warehouse.Name : null,
-
-            CarrierId = order.CarrierId,
-            CarrierName = order.Carrier != null ? order.Carrier.Name : null,
-
-            ProjectId = order.ProjectId,
-            ProjectName = order.Project != null ? order.Project.ProjectName : null,
-
-            OrderStatusId = order.OrderStatusId,
-            OrderStatusName = order.OrderStatus != null ? order.OrderStatus.Name : null,
-
-            CreatedByUserId = order.CreatedByUserId,
-            AssignedToUserId = order.AssignedToUserId,
-
-            RequestedDeliveryDate = order.RequestedDeliveryDate,
-            SubmittedAt = order.SubmittedAt,
-
-            CreatedAt = order.CreatedAt,
-            UpdatedAt = order.UpdatedAt,
-
-            Currency = order.Currency,
-
-            Subtotal = order.Subtotal,
-            DiscountAmount = order.DiscountAmount,
-            TaxAmount = order.TaxAmount,
-            TotalAmount = order.TotalAmount,
-
-            PurchaseOrderReference = order.PurchaseOrderReference,
-            SpecialInstructions = order.SpecialInstructions,
-            InternalNotes = order.InternalNotes,
-            FailureReason = order.FailureReason,
-
-            IsPriorityOrder = order.IsPriorityOrder,
-
-            Items = order.OrderItems.Select(x => new OrderItemDto
-            {
-                OrderItemId = x.OrderItemId,
-                ProductId = x.ProductId,
-                ProductName = x.Product != null ? x.Product.ProductName : null,
-                Quantity = x.Quantity,
-                UnitPrice = x.UnitPrice,
-                DiscountPercent = x.DiscountPercent,
-                LineTotal = x.LineTotal,
-                Notes = x.Notes
-            }).ToList()
-        }).ToList();
-
-        return Ok(result);
+        command.OrderId = id;
+        await _mediator.Send(command, ct);
+        return NoContent();
     }
 
-    // =========================
-    // GET ORDER BY ID
-    // =========================
+    [HttpDelete("{id}")]
+    [Authorize(Policy = "SalesOrAdmin")]
+    public async Task<IActionResult> DiscardDraft(int id, CancellationToken ct)
+    {
+        await _mediator.Send(new DiscardDraftOrderCommand { OrderId = id }, ct);
+        return NoContent();
+    }
+
     [HttpGet("{id}")]
-    public async Task<ActionResult<OrderDto>> GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var order = await _dbContext.Orders
-            .Include(o => o.Customer)
-            .Include(o => o.Warehouse)
-            .Include(o => o.Carrier)
-            .Include(o => o.Project)
-            .Include(o => o.OrderStatus)
-            .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-            .FirstOrDefaultAsync(o => o.OrderId == id && o.DeletedAt == null);
+        var result = await _mediator.Send(new GetOrderByIdQuery { OrderId = id });
+        return Ok(result);
+    }
 
-        if (order == null)
-            return NotFound();
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] GetOrdersQuery query, CancellationToken ct)
+    {
+        var result = await _mediator.Send(query, ct);
+        return Ok(result);
+    }
 
-        var result = new OrderDto
-        {
-            OrderId = order.OrderId,
-            OrderNumber = order.OrderNumber,
+    [HttpPost("{id}/status")]
+    [Authorize(Roles = "Sales,Operations,Admin")]
+    public async Task<IActionResult> ChangeStatus(int id, ChangeOrderStatusCommand command)
+    {
+        command.OrderId = id;
+        await _mediator.Send(command);
+        return NoContent();
+    }
 
-            CustomerId = order.CustomerId,
-            CustomerName = order.Customer != null ? order.Customer.CompanyName : null,
+    [HttpGet("{id}/history")]
+    public async Task<IActionResult> GetHistory(int id)
+    {
+        var result = await _mediator.Send(new GetOrderStatusHistoryQuery { OrderId = id });
+        return Ok(result);
+    }
 
-            DeliveryAddressId = order.DeliveryAddressId,
-            BillingAddressId = order.BillingAddressId,
-
-            WarehouseId = order.WarehouseId,
-            WarehouseName = order.Warehouse != null ? order.Warehouse.Name : null,
-
-            CarrierId = order.CarrierId,
-            CarrierName = order.Carrier != null ? order.Carrier.Name : null,
-
-            ProjectId = order.ProjectId,
-            ProjectName = order.Project != null ? order.Project.ProjectName : null,
-
-            OrderStatusId = order.OrderStatusId,
-            OrderStatusName = order.OrderStatus != null ? order.OrderStatus.Name : null,
-
-            CreatedByUserId = order.CreatedByUserId,
-            AssignedToUserId = order.AssignedToUserId,
-
-            RequestedDeliveryDate = order.RequestedDeliveryDate,
-            SubmittedAt = order.SubmittedAt,
-
-            CreatedAt = order.CreatedAt,
-            UpdatedAt = order.UpdatedAt,
-
-            Currency = order.Currency,
-
-            Subtotal = order.Subtotal,
-            DiscountAmount = order.DiscountAmount,
-            TaxAmount = order.TaxAmount,
-            TotalAmount = order.TotalAmount,
-
-            PurchaseOrderReference = order.PurchaseOrderReference,
-            SpecialInstructions = order.SpecialInstructions,
-            InternalNotes = order.InternalNotes,
-            FailureReason = order.FailureReason,
-
-            IsPriorityOrder = order.IsPriorityOrder,
-
-            Items = order.OrderItems.Select(x => new OrderItemDto
-            {
-                OrderItemId = x.OrderItemId,
-                ProductId = x.ProductId,
-                ProductName = x.Product != null ? x.Product.ProductName : null,
-                Quantity = x.Quantity,
-                UnitPrice = x.UnitPrice,
-                DiscountPercent = x.DiscountPercent,
-                LineTotal = x.LineTotal,
-                Notes = x.Notes
-            }).ToList()
-        };
-
+    [HttpGet("{id}/allowed-statuses")]
+    [Authorize(Roles = "Sales,Operations,Admin,Demo")]
+    public async Task<IActionResult> GetAllowedStatuses(int id)
+    {
+        var result = await _mediator.Send(new GetAllowedStatusesQuery { OrderId = id });
         return Ok(result);
     }
 }

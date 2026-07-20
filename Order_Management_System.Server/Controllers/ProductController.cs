@@ -1,9 +1,12 @@
-﻿using Application.DTOs;
-using Domain.Entities;
-using Infrastructure.Persistence.Context;
+using Application.Features.Products.Commands.CreateProduct;
+using Application.Features.Products.Commands.DeleteProduct;
+using Application.Features.Products.Commands.UpdateProduct;
+using Application.Features.Products.Queries.GetProductSummary;
+using Application.Features.Products.Queries.GetProductById;
+using Application.Features.Products.Queries.GetProducts;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -12,159 +15,61 @@ namespace Server.Controllers;
 [Authorize]
 public class ProductController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public ProductController(AppDbContext dbContext)
+    public ProductController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
-    // =========================
-    // GET ALL
-    // =========================
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductListDto>>> Get()
+    public async Task<IActionResult> Get([FromQuery] GetProductsQuery query, CancellationToken ct)
     {
-        var products = await _dbContext.Products
-            .Where(x => x.IsActive && x.DeletedAt == null)
-            .Select(x => new ProductListDto
-            {
-                ProductId = x.ProductId,
-                SKU = x.SKU,
-                ProductName = x.ProductName,
-                ProductCategoryName = x.ProductCategory.Name,
-                UnitOfMeasureName = x.UnitOfMeasure.Name,
-                HazardClassName = x.HazardClass.Name,
-                PackSize = x.PackSize,
-                BasePrice = x.BasePrice,
-                Currency = x.Currency,
-                IsRestricted = x.IsRestricted,
-                IsActive = x.IsActive
-            })
-            .ToListAsync();
-
-        return Ok(products);
+        var result = await _mediator.Send(query, ct);
+        return Ok(result);
     }
 
-    // =========================
-    // GET BY ID
-    // =========================
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetProductSummaryQuery(), ct);
+        return Ok(result);
+    }
+
     [HttpGet("{id}")]
-    public async Task<ActionResult<ProductDto>> GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var product = await _dbContext.Products
-            .Where(x => x.ProductId == id && x.DeletedAt == null)
-            .Select(x => new ProductDto
-            {
-                ProductId = x.ProductId,
-                SKU = x.SKU,
-                ProductName = x.ProductName,
-                Description = x.Description,
-                ProductCategoryId = x.ProductCategoryId,
-                UnitOfMeasureId = x.UnitOfMeasureId,
-                PackSize = x.PackSize,
-                BasePrice = x.BasePrice,
-                Currency = x.Currency,
-                HazardClassId = x.HazardClassId,
-                UNNumber = x.UNNumber,
-                StorageRequirement = x.StorageRequirement,
-                RequiresSds = x.RequiresSds,
-                IsRestricted = x.IsRestricted,
-                IsActive = x.IsActive
-            })
-            .FirstOrDefaultAsync();
+        var result = await _mediator.Send(new GetProductByIdQuery { Id = id });
 
-        if (product == null)
-            return NotFound();
-
-        return Ok(product);
+        return result == null ? NotFound() : Ok(result);
     }
 
-    // =========================
-    // CREATE
-    // =========================
     [HttpPost]
-    public async Task<ActionResult<ProductDto>> Create(CreateProductDto dto)
+    public async Task<IActionResult> Create(CreateProductCommand command)
     {
-        var product = new Product
-        {
-            SKU = dto.SKU,
-            ProductName = dto.ProductName,
-            Description = dto.Description,
-            ProductCategoryId = dto.ProductCategoryId,
-            UnitOfMeasureId = dto.UnitOfMeasureId,
-            PackSize = dto.PackSize,
-            BasePrice = dto.BasePrice,
-            Currency = dto.Currency,
-            HazardClassId = dto.HazardClassId,
-            UNNumber = dto.UNNumber,
-            StorageRequirement = dto.StorageRequirement,
-            RequiresSds = dto.RequiresSds,
-            IsRestricted = dto.IsRestricted,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            DeletedAt = null
-        };
-
-        _dbContext.Products.Add(product);
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(new ProductDto
-        {
-            ProductId = product.ProductId,
-            SKU = product.SKU,
-            ProductName = product.ProductName
-        });
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 
-    // =========================
-    // UPDATE
-    // =========================
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateProductDto dto)
+    public async Task<IActionResult> Update(int id, UpdateProductCommand command)
     {
-        var product = await _dbContext.Products
-            .FirstOrDefaultAsync(x => x.ProductId == id && x.DeletedAt == null);
-
-        if (product == null)
-            return NotFound();
-
-        product.SKU = dto.SKU;
-        product.ProductName = dto.ProductName;
-        product.Description = dto.Description;
-        product.ProductCategoryId = dto.ProductCategoryId;
-        product.UnitOfMeasureId = dto.UnitOfMeasureId;
-        product.PackSize = dto.PackSize;
-        product.BasePrice = dto.BasePrice;
-        product.Currency = dto.Currency;
-        product.HazardClassId = dto.HazardClassId;
-        product.UNNumber = dto.UNNumber;
-        product.StorageRequirement = dto.StorageRequirement;
-        product.RequiresSds = dto.RequiresSds;
-        product.IsRestricted = dto.IsRestricted;
-        product.IsActive = dto.IsActive;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(new UpdateProductRequest
+        {
+            ProductId = id,
+            Data = command
+        });
 
         return NoContent();
     }
 
-    // =========================
-    // SOFT DELETE
-    // =========================
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var product = await _dbContext.Products
-            .FirstOrDefaultAsync(x => x.ProductId == id && x.DeletedAt == null);
-
-        if (product == null)
-            return NotFound();
-
-        product.IsActive = false;
-        product.DeletedAt = DateTime.UtcNow;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(new DeleteProductCommand
+        {
+            ProductId = id
+        });
 
         return NoContent();
     }

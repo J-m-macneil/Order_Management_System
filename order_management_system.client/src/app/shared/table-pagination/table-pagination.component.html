@@ -1,0 +1,42 @@
+<div class="app-table-footer">
+  <div class="text-sm app-muted-text">
+    Showing page {{ totalCount === 0 ? 0 : pageNumber }} of {{ totalPages }}
+    <span *ngIf="totalCount">({{ totalCount }} {{ itemLabel }})</span>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <label class="flex items-center gap-2 text-sm app-muted-text">
+      Page size
+      <select [ngModel]="pageSize"
+              (ngModelChange)="pageSizeChange.emit($event)"
+              class="form-input form-input--compact">
+        <option *ngFor="let option of pageSizeOptions"
+                [ngValue]="option">
+          {{ option }}
+        </option>
+      </select>
+    </label>
+
+    <button type="button"
+            (click)="pageChange.emit(pageNumber - 1)"
+            [disabled]="!hasPreviousPage"
+            class="app-pagination-button"
+            aria-label="Previous page">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
+        <path d="M12 5L7 10L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M7.5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <button type="button"
+            (click)="pageChange.emit(pageNumber + 1)"
+            [disabled]="!hasNextPage"
+            class="app-pagination-button"
+            aria-label="Next page">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none">
+        <path d="M8 5L13 10L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M12.5 10H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+  </div>
+</div>

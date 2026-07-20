@@ -1,8 +1,8 @@
-﻿using Application.DTOs;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Products.DTOs;
+using Application.Features.Products.Queries.GetUnitOfMeasures;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -11,25 +11,17 @@ namespace Server.Controllers;
 [Authorize]
 public class UnitOfMeasuresController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public UnitOfMeasuresController(AppDbContext dbContext)
+    public UnitOfMeasuresController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UnitOfMeasureDto>>> Get()
     {
-        var units = await _dbContext.UnitsOfMeasure
-            .Select(x => new UnitOfMeasureDto
-            {
-                UnitOfMeasureId = x.UnitOfMeasureId,
-                Code = x.Code,
-                Name = x.Name
-            })
-            .ToListAsync();
-
-        return Ok(units);
+        var result = await _mediator.Send(new GetUnitOfMeasuresQuery());
+        return Ok(result);
     }
 }

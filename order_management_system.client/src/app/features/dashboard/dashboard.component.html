@@ -1,2 +1,191 @@
-<h1>Dashboard</h1>
-<p>Welcome to the Chemical Order Management System.</p>
+<!-- Page Header -->
+<div class="dashboard-header">
+  <h1 class="dashboard-welcome-heading" aria-label="Welcome Back.">
+    <span class="welcome-back">Welcome Back<span class="welcome-dot">.</span></span>
+  </h1>
+  <p>Your operational statistics are ready.</p>
+</div>
+
+<div *ngIf="isLoading()" class="app-sub-card">
+  Loading dashboard metrics...
+</div>
+
+<div *ngIf="errorMessage() && !isLoading()" class="app-alert app-alert--danger p-4">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
+</div>
+
+<div
+  *ngIf="!isLoading() && !errorMessage()"
+  class="dashboard-layout">
+  <!-- Metric Cards Grid -->
+  <div class="app-stat-grid app-stat-grid--featured app-stat-grid--flush">
+    <div
+      *ngFor="let metric of metrics()"
+      class="metric-card dashboard-metric-card">
+      <div class="dashboard-metric-header">
+        <span class="dashboard-metric-icon" aria-hidden="true">
+          <svg *ngIf="metric.type === 'orders'" lucideClipboardList [size]="20"></svg>
+          <svg *ngIf="metric.type === 'activeOrders'" lucideActivity [size]="20"></svg>
+          <svg *ngIf="metric.type === 'failedOrders'" lucideTriangleAlert [size]="20"></svg>
+          <svg *ngIf="metric.type === 'totalValue'" lucidePoundSterling [size]="20"></svg>
+        </span>
+        <p class="metric-card-label">{{ metric.label }}</p>
+      </div>
+
+      <strong class="metric-card-value">
+        {{ metric.type === 'totalValue' ? (metric.value | currency:'GBP':'symbol':'1.0-0':'en-GB') : (metric.value | number) }}
+      </strong>
+
+      <p class="dashboard-metric-description">{{ metric.description }}</p>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="dashboard-grid">
+    <div class="app-card app-overview-card dashboard-card">
+      <div class="app-overview-card-header flex items-start gap-3">
+        <span class="dashboard-metric-icon dashboard-section-icon shrink-0" aria-hidden="true">
+          <svg lucideClipboardList [size]="18"></svg>
+        </span>
+        <div>
+          <h2>Orders by Status</h2>
+          <p class="app-section-description">Current workload across the order lifecycle.</p>
+        </div>
+      </div>
+
+      <app-order-status-overview [statuses]="ordersByStatus()"></app-order-status-overview>
+    </div>
+
+    <div class="app-card app-overview-card dashboard-card">
+      <div class="app-overview-card-header flex items-start gap-3">
+        <span class="dashboard-metric-icon dashboard-section-icon shrink-0" aria-hidden="true">
+          <svg lucideUsers [size]="18"></svg>
+        </span>
+        <div>
+          <h2>Top Customers</h2>
+          <p class="app-section-description">Customers with the highest order volume.</p>
+        </div>
+      </div>
+
+      <div>
+        <div
+          *ngFor="let customer of topCustomers(); let rank = index"
+          class="customer-row">
+          <span class="customer-rank">{{ rank + 1 | number:'2.0-0' }}</span>
+          <div class="customer-summary">
+            <span>{{ customer.name }}</span>
+            <span class="customer-progress" aria-hidden="true">
+              <span [style.width.%]="customer.orderShare"></span>
+            </span>
+          </div>
+          <div class="customer-order-count">
+            <strong>{{ customer.orders }}</strong>
+            <span>orders</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-activity-grid">
+    <!-- Recent Failures -->
+    <section class="app-card app-overview-card dashboard-card activity-panel">
+      <div class="app-overview-card-header flex items-start gap-3">
+        <span class="dashboard-metric-icon dashboard-section-icon shrink-0" aria-hidden="true">
+          <svg lucideTriangleAlert [size]="18"></svg>
+        </span>
+        <div>
+          <h2>Recent Failures</h2>
+          <p class="app-section-description">Recent order failures that may require attention.</p>
+        </div>
+      </div>
+
+      <div *ngIf="recentFailures().length > 0; else noRecentFailures" class="activity-list">
+        <div *ngFor="let failure of recentFailures()" class="activity-row activity-row--failure">
+          <div class="activity-content">
+            <div class="flex items-center justify-between gap-3">
+              <a [routerLink]="['/orders', failure.orderId]" class="app-link-button">
+                {{ failure.orderNumber }}
+              </a>
+              <span
+                class="app-badge whitespace-nowrap"
+                [ngClass]="failure.requiresAction ? 'app-badge--danger' : 'app-badge--success'">
+                {{ failure.requiresAction ? 'Requires action' : 'Resolved' }}
+              </span>
+            </div>
+            <p class="activity-detail break-words" [title]="failure.reason">{{ failure.reason }}</p>
+            <div class="flex flex-wrap gap-1 mt-1 app-muted-text text-xs font-medium">
+              <span>{{ failure.customer }}</span>
+              <span aria-hidden="true">&middot;</span>
+              <time>
+                {{ failure.date ? (failure.date | date:'dd MMM yyyy':'':'en-GB') : 'Date not set' }}
+              </time>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noRecentFailures>
+        <div class="activity-empty">No recent order failures.</div>
+      </ng-template>
+
+      <div class="dashboard-card-footer">
+        <a
+          routerLink="/orders"
+          [queryParams]="{ status: failedOrderStatus }"
+          class="app-tertiary-button text-xs">
+          View all failed orders
+          &rarr;
+        </a>
+      </div>
+    </section>
+
+    <!-- Priority Orders -->
+    <section class="app-card app-overview-card dashboard-card activity-panel">
+      <div class="app-overview-card-header flex items-start gap-3">
+        <span class="dashboard-metric-icon dashboard-section-icon shrink-0" aria-hidden="true">
+          <svg lucideFlag [size]="18"></svg>
+        </span>
+        <div>
+          <h2>Priority Orders</h2>
+          <p class="app-section-description">Priority orders approaching their required date.</p>
+        </div>
+      </div>
+
+      <div *ngIf="priorityOrders().length > 0; else noPriorityOrders" class="activity-list">
+        <div *ngFor="let order of priorityOrders()" class="activity-row">
+          <span class="activity-icon app-alert-text--warning">
+            <svg lucideFlag [size]="17" aria-hidden="true"></svg>
+          </span>
+
+          <div class="activity-content">
+            <a [routerLink]="['/orders', order.orderId]" class="app-link-button">
+              {{ order.orderNumber }}
+            </a>
+            <span class="block mt-1 app-muted-text text-xs font-medium">{{ order.customer }}</span>
+          </div>
+
+          <div class="activity-aside">
+            <time class="activity-date">
+              Due {{ order.dueDate ? (order.dueDate | date:'dd MMM yyyy':'':'en-GB') : 'not set' }}
+            </time>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noPriorityOrders>
+        <div class="activity-empty">No priority orders due.</div>
+      </ng-template>
+
+      <div class="dashboard-card-footer">
+        <a
+          routerLink="/orders"
+          [queryParams]="{ priority: 'priority' }"
+          class="app-tertiary-button text-xs">
+          View all priority orders
+          &rarr;
+        </a>
+      </div>
+    </section>
+  </div>
+</div>

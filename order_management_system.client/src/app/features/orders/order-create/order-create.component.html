@@ -1,124 +1,285 @@
-<form [formGroup]="orderForm" (ngSubmit)="submit()">
-
+<!-- Page Header -->
+<div class="app-page-header">
   <div>
-    <label>Customer</label>
-    <select formControlName="customerId">
-      <option [ngValue]="null">Select customer</option>
-      <option *ngFor="let customer of customers" [ngValue]="customer.customerId">
-        {{ customer.companyName }}
-      </option>
-    </select>
+    <h1 class="brand-page-title">{{ isEditMode ? 'Edit Order' : 'Create Order' }}<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+    <p class="app-muted-text mt-2">
+      {{ isEditMode ? 'Update draft order ' + orderNumber : 'Fill in the form below to create a new order' }}
+    </p>
   </div>
+  <a [routerLink]="isEditMode && orderId ? ['/orders', orderId] : '/orders'"
+     class="app-tertiary-button app-back-link">
+    ← {{ isEditMode ? 'Back to Order' : 'Back to Orders' }}
+  </a>
+</div>
 
-  <div>
-    <label>Billing Address</label>
-    <select formControlName="billingAddressId">
-      <option [ngValue]="null">Select billing address</option>
-      <option *ngFor="let address of billingAddresses" [ngValue]="address.addressId">
-        {{ address.siteName }} - {{ address.line1 }}
-      </option>
-    </select>
-  </div>
+<div *ngIf="errorMessage"
+     class="mb-6 p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+</div>
 
-  <div>
-    <label>Delivery Address</label>
-    <select formControlName="deliveryAddressId">
-      <option [ngValue]="null">Select delivery address</option>
-      <option *ngFor="let address of deliveryAddresses" [ngValue]="address.addressId">
-        {{ address.siteName }} - {{ address.line1 }}
-      </option>
-    </select>
-  </div>
+<div *ngIf="isLoadingOrder" class="app-empty-state app-empty-state--loading">
+  <p>Loading order...</p>
+</div>
 
-  <div>
-    <label>Warehouse</label>
-    <select formControlName="warehouseId">
-      <option [ngValue]="null">Select warehouse</option>
-      <option *ngFor="let warehouse of warehouses" [ngValue]="warehouse.warehouseId">
-        {{ warehouse.name }}
-      </option>
-    </select>
-  </div>
+<!-- Order Creation Form -->
+<form *ngIf="!isLoadingOrder" [formGroup]="orderForm" (ngSubmit)="submit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Main Content (2 columns) -->
+  <div class="lg:col-span-2 space-y-6">
+    <!-- Customer Information -->
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Customer Information</h2>
+      <div class="space-y-4">
+        <!-- Customer Selection -->
+        <div>
+          <label class="form-label">
+            Customer <span class="app-required-marker">*</span>
+          </label>
+          <select
+            formControlName="customerId"
+            class="form-input"
+          >
+            <option [ngValue]="null">Select a customer</option>
+            <option *ngFor="let customer of customers" [ngValue]="customer.customerId">
+              {{ customer.companyName }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('customerId')?.hasError('required') && orderForm.get('customerId')?.touched" class="mt-1 app-validation-message">
+            Customer is required
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div>
-    <label>Carrier</label>
-    <select formControlName="carrierId">
-      <option [ngValue]="null">Select carrier</option>
-      <option *ngFor="let carrier of carriers" [ngValue]="carrier.carrierId">
-        {{ carrier.name }}
-      </option>
-    </select>
-  </div>
+    <!-- Delivery Information -->
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Delivery Information</h2>
+      <div class="space-y-4">
+        <!-- Billing Address -->
+        <div>
+          <label class="form-label">
+            Billing Address <span class="app-required-marker">*</span>
+          </label>
+          <select
+            formControlName="billingAddressId"
+            class="form-input"
+          >
+            <option [ngValue]="null">Select billing address</option>
+            <option *ngFor="let address of billingAddresses" [ngValue]="address.addressId">
+              {{ address.siteName }} - {{ address.line1 }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('billingAddressId')?.hasError('required') && orderForm.get('billingAddressId')?.touched" class="mt-1 app-validation-message">
+            Billing address is required
+          </div>
+        </div>
 
-  <div>
-    <label>Project</label>
-    <select formControlName="projectId">
-      <option [ngValue]="null">Select project</option>
-      <option *ngFor="let project of projects" [ngValue]="project.projectId">
-        {{ project.projectCode }} - {{ project.projectName }}
-      </option>
-    </select>
-  </div>
+        <!-- Delivery Address -->
+        <div>
+          <label class="form-label">
+            Delivery Address <span class="app-required-marker">*</span>
+          </label>
+          <select
+            formControlName="deliveryAddressId"
+            class="form-input"
+          >
+            <option [ngValue]="null">Select delivery address</option>
+            <option *ngFor="let address of deliveryAddresses" [ngValue]="address.addressId">
+              {{ address.siteName }} - {{ address.line1 }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('deliveryAddressId')?.hasError('required') && orderForm.get('deliveryAddressId')?.touched" class="mt-1 app-validation-message">
+            Delivery address is required
+          </div>
+        </div>
 
-  <div>
-    <label>Requested Delivery Date</label>
-    <input type="date" formControlName="requestedDeliveryDate" />
-  </div>
+        <!-- Warehouse -->
+        <div>
+          <label class="form-label">
+            Warehouse <span class="app-required-marker">*</span>
+          </label>
+          <select
+            formControlName="warehouseId"
+            class="form-input"
+          >
+            <option [ngValue]="null">Select warehouse</option>
+            <option *ngFor="let warehouse of warehouses" [ngValue]="warehouse.warehouseId">
+              {{ warehouse.name }}
+            </option>
+          </select>
+          <div *ngIf="orderForm.get('warehouseId')?.hasError('required') && orderForm.get('warehouseId')?.touched" class="mt-1 app-validation-message">
+            Warehouse is required
+          </div>
+        </div>
 
-  <div>
-    <label>PO Reference</label>
-    <input type="text" formControlName="purchaseOrderReference" />
-  </div>
+        <!-- Carrier -->
+        <div>
+          <label class="form-label">
+            Carrier
+          </label>
+          <select
+            formControlName="carrierId"
+            class="form-input"
+          >
+            <option [ngValue]="null">Select carrier (optional)</option>
+            <option *ngFor="let carrier of carriers" [ngValue]="carrier.carrierId">
+              {{ carrier.name }}
+            </option>
+          </select>
+        </div>
 
-  <div>
-    <label>Special Instructions</label>
-    <textarea formControlName="specialInstructions"></textarea>
-  </div>
+        <!-- Requested Delivery Date -->
+        <div>
+          <label class="form-label">
+            Requested Delivery Date <span class="app-required-marker">*</span>
+          </label>
+          <input
+            type="date"
+            formControlName="requestedDeliveryDate"
+            class="form-input"
+          />
+          <div *ngIf="orderForm.get('requestedDeliveryDate')?.hasError('required') && orderForm.get('requestedDeliveryDate')?.touched" class="mt-1 app-validation-message">
+            Delivery date is required
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div>
-    <label>Internal Notes</label>
-    <textarea formControlName="internalNotes"></textarea>
-  </div>
+    <app-order-items-editor class="block"
+                            [items]="items"
+                            [products]="products"
+                            (itemAdded)="addItem()"
+                            (itemRemoved)="removeItem($event)"
+                            (productChanged)="onProductChange($event)">
+    </app-order-items-editor>
 
-  <div>
-    <label>
-      <input type="checkbox" formControlName="isPriorityOrder" />
-      Priority Order
-    </label>
-  </div>
+    <!-- Additional Information -->
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Additional Information</h2>
+      <div class="space-y-4">
+        <!-- PO Reference -->
+        <div>
+          <label class="form-label">
+            PO Reference
+          </label>
+          <input
+            type="text"
+            formControlName="purchaseOrderReference"
+            maxlength="40"
+            class="form-input"
+            placeholder="Enter PO reference number"
+          />
+          <p *ngIf="orderForm.get('purchaseOrderReference')?.hasError('maxlength') && orderForm.get('purchaseOrderReference')?.touched" class="mt-1 app-validation-message">
+            PO reference must be 40 characters or fewer.
+          </p>
+        </div>
 
-  <hr />
+        <!-- Project -->
+        <div>
+          <label class="form-label">
+            Project
+          </label>
+          <select
+            formControlName="projectId"
+            class="form-input"
+          >
+            <option [ngValue]="null">Select project (optional)</option>
+            <option *ngFor="let project of projects" [ngValue]="project.projectId">
+              {{ project.projectCode }} - {{ project.name }}
+            </option>
+          </select>
+        </div>
 
-  <div formArrayName="items">
-    <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
-      <label>Product</label>
-      <select formControlName="productId">
-        <option [ngValue]="null">Select product</option>
-        <option *ngFor="let product of products" [ngValue]="product.productId">
-          {{ product.productName }}
-        </option>
-      </select>
+        <!-- Special Instructions -->
+        <div>
+          <label class="form-label">
+            Special Instructions
+          </label>
+          <textarea
+            formControlName="specialInstructions"
+            rows="3"
+            maxlength="255"
+            class="form-input resize-none"
+            placeholder="Enter any special instructions for this order..."
+          ></textarea>
+          <p *ngIf="orderForm.get('specialInstructions')?.hasError('maxlength') && orderForm.get('specialInstructions')?.touched" class="mt-1 app-validation-message">
+            Special instructions must be 255 characters or fewer.
+          </p>
+        </div>
 
-      <label>Quantity</label>
-      <input type="number" formControlName="quantity" min="1" />
+        <!-- Internal Notes -->
+        <div>
+          <label class="form-label">
+            Internal Notes
+          </label>
+          <textarea
+            formControlName="internalNotes"
+            rows="3"
+            maxlength="255"
+            class="form-input resize-none"
+            placeholder="Internal notes (not visible to customer)..."
+          ></textarea>
+          <p *ngIf="orderForm.get('internalNotes')?.hasError('maxlength') && orderForm.get('internalNotes')?.touched" class="mt-1 app-validation-message">
+            Internal notes must be 255 characters or fewer.
+          </p>
+        </div>
 
-      <label>Unit Price</label>
-      <input type="number" formControlName="unitPrice" min="0" step="0.01" />
-
-      <label>Discount %</label>
-      <input type="number" formControlName="discountPercent" min="0" step="0.01" />
-
-      <label>Item Notes</label>
-      <input type="text" formControlName="notes" />
-
-      <button type="button" (click)="removeItem(i)">Remove</button>
+        <!-- Priority Checkbox -->
+        <div class="flex items-center gap-2 pt-2">
+          <input
+            type="checkbox"
+            id="priorityOrder"
+            formControlName="isPriorityOrder"
+            class="app-checkbox"
+          />
+          <label for="priorityOrder" class="form-label cursor-pointer">
+            Mark as priority order
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
-  <button type="button" (click)="addItem()">Add Item</button>
+  <!-- Sidebar (1 column) -->
+  <div class="space-y-6">
+    <!-- Order Summary -->
+    <div class="form-card sticky top-24">
+      <h2 class="app-section-title mb-6">Order Summary</h2>
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Items</span>
+          <span class="app-strong-text">{{ items.length }}</span>
+        </div>
+        <div class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Status</span>
+          <span class="app-badge app-badge--neutral">
+            Draft
+          </span>
+        </div>
+        <div *ngIf="orderForm.get('isPriorityOrder')?.value" class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Priority</span>
+          <span class="app-badge app-badge--warning">
+            Yes
+          </span>
+        </div>
+      </div>
 
-  <hr />
-
-  <button type="submit">Create Order</button>
-
+      <!-- Form Actions -->
+      <div class="mt-8 space-y-3">
+        <button
+          type="submit"
+          appDemoWrite
+          [disabled]="orderForm.invalid || orderForm.disabled || isSaving"
+          class="app-primary-button w-full px-4 py-2"
+        >
+          {{ isSaving ? 'Saving...' : (isEditMode ? 'Save Order' : 'Create Order') }}
+        </button>
+        <a
+          [routerLink]="isEditMode && orderId ? ['/orders', orderId] : '/orders'"
+          class="app-secondary-button w-full px-4 py-2"
+        >
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
 </form>

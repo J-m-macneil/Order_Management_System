@@ -1,30 +1,236 @@
-<div class="page-header">
-  <h1>Products</h1>
-  <a routerLink="/products/create">Create Product</a>
+<div class="app-page-header">
+  <div>
+    <h1 class="brand-page-title">Products<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+    <p class="app-muted-text mt-2">Manage your chemical products and pricing</p>
+  </div>
+  <a routerLink="/products/create"
+     class="app-primary-button app-page-header-action px-4 py-3">
+    <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+    <span>New Product</span>
+  </a>
 </div>
 
-<table *ngIf="products.length > 0" class="customers-table">
-  <thead>
-    <tr>
-      <th>SKU</th>
-      <th>Name</th>
-      <th>Pack</th>
-      <th>Price</th>
-      <th>Restricted</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let p of products">
-      <td>{{ p.sku }}</td>
-      <td>{{ p.productName }}</td>
-      <td>{{ p.packSize }}</td>
-      <td>{{ p.basePrice | currency:'GBP' }}</td>
-      <td>{{ p.isRestricted ? 'Yes' : 'No' }}</td>
-      <td>
-        <a [routerLink]="['/products/edit', p.productId]">Edit</a>
-        <button (click)="deleteProduct(p.productId)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div class="app-stat-grid app-stat-grid--4">
+  <div *ngFor="let stat of stats()" class="metric-card">
+    <div class="metric-card-header">
+      <span class="metric-card-icon" aria-hidden="true">
+        <svg *ngIf="stat.type === 'total'" lucidePackage [size]="20"></svg>
+        <svg *ngIf="stat.type === 'active'" lucidePackageCheck [size]="20"></svg>
+        <svg *ngIf="stat.type === 'restricted'" lucideShieldAlert [size]="20"></svg>
+        <svg *ngIf="stat.type === 'hazardous'" lucideTriangleAlert [size]="20"></svg>
+      </span>
+      <p class="metric-card-label">{{ stat.label }}</p>
+    </div>
+    <p class="metric-card-value">
+      {{ stat.value }}
+    </p>
+    <p class="app-section-description">{{ stat.description }}</p>
+  </div>
+</div>
+
+<div class="app-filter-section">
+  <div class="app-responsive-action-row">
+    <a routerLink="/products/create"
+       class="app-primary-button px-4 py-3">
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>New Product</span>
+    </a>
+  </div>
+
+  <div class="app-search-row">
+
+    <app-search-input [(value)]="searchTerm"
+                      placeholder="Search by SKU, product name, pack size, category, unit, or hazard class..."
+                      (search)="applyFilters()">
+    </app-search-input>
+
+    <app-filter-button [activeFilterCount]="activeFilterCount"
+                       (toggle)="toggleFilters()">
+    </app-filter-button>
+  </div>
+
+  <div *ngIf="filtersVisible"
+       class="app-filter-panel app-filter-panel--3">
+
+    <div>
+      <label class="form-label">Status</label>
+      <select [(ngModel)]="activeFilter"
+              (change)="applyFilters()"
+              class="form-input">
+        <option value="">All products</option>
+        <option value="active">Active Products</option>
+        <option value="inactive">Inactive Products</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Restricted</label>
+      <select [(ngModel)]="restrictedFilter"
+              (change)="applyFilters()"
+              class="form-input">
+        <option value="">All</option>
+        <option value="restricted">Restricted</option>
+        <option value="unrestricted">Unrestricted</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Category</label>
+      <select [(ngModel)]="categoryFilter"
+              (change)="applyFilters()"
+              class="form-input">
+        <option [ngValue]="null">All categories</option>
+        <option *ngFor="let category of categories()" [ngValue]="category.productCategoryId">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Hazard Class</label>
+      <select [(ngModel)]="hazardClassFilter"
+              (change)="applyFilters()"
+              class="form-input">
+        <option [ngValue]="null">All hazard classes</option>
+        <option *ngFor="let hazardClass of hazardClasses()" [ngValue]="hazardClass.hazardClassId">
+          {{ hazardClass.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="app-filter-actions app-filter-actions--full">
+      <button type="button"
+              (click)="clearFilters()"
+              class="app-secondary-button px-4 py-2 whitespace-nowrap">
+        Clear Filters
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
+  <p>Loading products...</p>
+</div>
+
+<div *ngIf="errorMessage() && !isLoading()" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
+</div>
+
+<div *ngIf="!isLoading() && !errorMessage()" class="app-table-card">
+  <div class="app-table-scroll">
+    <table class="app-data-table">
+      <thead class="app-table-head">
+        <tr>
+          <th class="app-table-heading">
+            Product
+          </th>
+          <th class="app-table-heading">
+            Category
+          </th>
+          <th class="app-table-heading">
+            Hazard Class
+          </th>
+          <th class="app-table-heading app-table-heading--right">
+            Base Price
+          </th>
+          <th class="app-table-heading app-table-heading--center">
+            Compliance
+          </th>
+          <th class="app-table-heading app-table-heading--center">
+            Status
+          </th>
+          <th class="app-table-heading app-table-heading--center">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="app-table-body">
+        <tr *ngFor="let product of products()">
+          <td class="px-6 py-4">
+            <a [routerLink]="['/products/edit', product.productId]"
+               class="app-link-button">
+              {{ product.productName }}
+            </a>
+            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs app-muted-text">
+              <span class="font-mono">{{ product.sku }}</span>
+              <span *ngIf="product.packSize">{{ product.packSize }}</span>
+              <span *ngIf="product.unitOfMeasureName">{{ product.unitOfMeasureName }}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 app-body-text">
+            {{ product.productCategoryName || '&mdash;' }}
+          </td>
+          <td class="px-6 py-4">
+            <span *ngIf="product.hazardClassName; else noHazardClass"
+                  [class]="getHazardClassBadge(product.hazardClassName)">
+              {{ product.hazardClassName }}
+            </span>
+            <ng-template #noHazardClass>
+              <span class="app-muted-text text-xs">&mdash;</span>
+            </ng-template>
+          </td>
+          <td class="px-6 py-4 text-right app-strong-text">
+            {{ product.basePrice | currency:'GBP':'symbol':'1.2-2':'en-GB' }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <span *ngIf="product.isRestricted"
+                    class="app-badge app-badge--danger">
+                Restricted
+              </span>
+              <span *ngIf="!product.isRestricted"
+                    class="app-badge app-badge--success">
+                Standard
+              </span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <span [class]="product.isActive ? 'app-badge app-badge--success' : 'app-badge app-badge--neutral'">
+              {{ product.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <a [routerLink]="['/products/edit', product.productId]"
+                 class="app-link-button text-xs">
+                Edit
+              </a>
+              <button type="button"
+                      appDemoWrite
+                      (click)="openDeleteProductModal(product)"
+                      class="app-danger-link text-xs">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="products().length === 0" class="app-empty-state">
+    <p>No products found.</p>
+  </div>
+
+  <app-table-pagination [pageNumber]="pageNumber()"
+                        [pageSize]="pageSize()"
+                        [totalCount]="totalCount()"
+                        [totalPages]="totalPages()"
+                        [hasPreviousPage]="hasPreviousPage()"
+                        [hasNextPage]="hasNextPage()"
+                        itemLabel="products"
+                        (pageSizeChange)="onPageSizeChange($event)"
+                        (pageChange)="onPageChange($event)">
+  </app-table-pagination>
+</div>
+
+<app-confirmation-modal *ngIf="productPendingDelete() as product"
+                        title="Delete Product"
+                        [message]="'Delete product ' + product.productName + '? This action cannot be undone.'"
+                        confirmText="Delete Product"
+                        variant="danger"
+                        (confirm)="confirmDeleteProduct()"
+                        (cancel)="cancelDeleteProduct()">
+</app-confirmation-modal>
+

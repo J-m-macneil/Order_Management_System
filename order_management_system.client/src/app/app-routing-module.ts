@@ -2,46 +2,51 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { CustomersComponent } from './features/customers/customers.component';
-import { CustomerFormComponent } from './features/customers/customer-form/customer-form.component';
-import { ProductsComponent } from './features/products/products.component';
-import { ProductFormComponent } from './features/products/product-form/product-form.component';
-import { OrdersComponent } from './features/orders/orders.component';
-import { AdminComponent } from './features/admin/admin.component';
 import { LoginComponent } from './features/auth/login/login.component';
-import { OrderCreateComponent } from './features/orders/order-create/order-create.component';
-import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
+import { LoginGuard } from './core/guards/login.guard';
 
 const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: '', component: LoginComponent, canActivate: [LoginGuard], title: 'Login | Back.', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent, canActivate: [LoginGuard], title: 'Login | Back.' },
   {
     path: '',
     component: MainLayoutComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
+      {
+        path: 'dashboard',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule)
+      },
 
-      { path: 'customers', component: CustomersComponent, canActivate: [AuthGuard] },
-      { path: 'customers/new', component: CustomerFormComponent, canActivate: [AuthGuard] },
-      { path: 'customers/edit/:id', component: CustomerFormComponent, canActivate: [AuthGuard] },
+      {
+        path: 'customers',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('./features/customers/customers.module').then(m => m.CustomersModule)
+      },
 
-      { path: 'products', component: ProductsComponent, canActivate: [AuthGuard] },
-      { path: 'products/create', component: ProductFormComponent, canActivate: [AuthGuard] },
-      { path: 'products/edit/:id', component: ProductFormComponent, canActivate: [AuthGuard] },
+      {
+        path: 'products',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('./features/products/products.module').then(m => m.ProductsModule)
+      },
 
-      { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
-      { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] },
+      {
+        path: 'orders',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('./features/orders/orders.module').then(m => m.OrdersModule)
+      },
 
-      { path: 'orders', component: OrdersComponent },
-      { path: 'orders/create', component: OrderCreateComponent },
-      { path: 'orders/:id', component: OrderDetailComponent }
+      {
+        path: 'admin',
+        canActivate: [AdminGuard],
+        loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminModule)
+      }
     ]
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'login' }
 ];
 
 @NgModule({

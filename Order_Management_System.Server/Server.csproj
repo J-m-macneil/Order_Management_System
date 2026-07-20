@@ -7,7 +7,8 @@
 		<SpaRoot>..\order_management_system.client</SpaRoot>
 		<SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
 		<SpaProxyServerUrl>https://localhost:53923</SpaProxyServerUrl>
-	</PropertyGroup>
+	  <UserSecretsId>9145e3b9-457a-41ce-8277-e8470bd62e14</UserSecretsId>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
@@ -18,13 +19,20 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Application\Application.csproj" />
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-		<ProjectReference Include="..\order_management_system.client\order_management_system.client.esproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\order_management_system.client\public\login-logo-light.svg"
+				 Link="Assets\login-logo-light.svg"
+				 CopyToOutputDirectory="PreserveNewest"
+				 CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<ItemGroup>

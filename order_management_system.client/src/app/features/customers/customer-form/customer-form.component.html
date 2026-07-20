@@ -1,263 +1,344 @@
-<div class="page-header">
-  <h1>{{ isEditMode ? 'Edit Customer' : 'Create Customer' }}</h1>
+<!-- Page Header -->
+<div class="app-page-header">
+  <div>
+    <h1 class="brand-page-title">
+      {{ isEditMode ? 'Edit Customer' : 'Create Customer' }}<span class="brand-page-dot" aria-hidden="true">.</span>
+    </h1>
+    <p class="app-muted-text mt-2">
+      {{ isEditMode ? 'Update customer details' : 'Create a new customer account' }}
+    </p>
+  </div>
+  <a routerLink="/customers" class="app-tertiary-button app-back-link">
+    ← Back to Customers
+  </a>
 </div>
 
-<div *ngIf="isLoading">Loading...</div>
-<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<!-- Loading -->
+<div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
+  <p>Loading...</p>
+</div>
 
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="customer-form">
-  <label>
-    Account Number
-    <input type="text" formControlName="accountNumber" />
-  </label>
+<!-- Error -->
+<div *ngIf="errorMessage && !isLoading"
+     class="p-4 app-alert app-alert--danger mb-6">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+</div>
 
-  <label>
-    Company Name
-    <input type="text" formControlName="companyName" />
-  </label>
+<!-- Success -->
+<!-- Form -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-  <label>
-    Industry Type
-    <input type="text" formControlName="industryType" />
-  </label>
+  <!-- Main -->
+  <div class="lg:col-span-2 space-y-6">
 
-  <label>
-    Main Contact Name
-    <input type="text" formControlName="mainContactName" />
-  </label>
+    <!-- Customer Details -->
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Customer Details</h2>
 
-  <label>
-    Main Contact Email
-    <input type="email" formControlName="mainContactEmail" />
-  </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-  <label>
-    Main Contact Phone
-    <input type="text" formControlName="mainContactPhone" />
-  </label>
+        <div>
+          <label class="form-label">Account Number</label>
+          <input type="text" formControlName="accountNumber" class="form-input" />
+          <p *ngIf="validationMessage(form.get('accountNumber'), 'Account number') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-  <label>
-    Billing Address Id
-    <input type="number" formControlName="billingAddressId" />
-  </label>
+        <div>
+          <label class="form-label">Company Name</label>
+          <input type="text" formControlName="companyName" class="form-input" />
+          <p *ngIf="validationMessage(form.get('companyName'), 'Company name') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-  <label>
-    Default Delivery Address Id
-    <input type="number" formControlName="defaultDeliveryAddressId" />
-  </label>
+        <div>
+          <label class="form-label">Industry</label>
+          <input type="text" formControlName="industryType" class="form-input" />
+          <p *ngIf="validationMessage(form.get('industryType'), 'Industry') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-  <label>
-    Pricing Tier Id
-    <input type="number" formControlName="pricingTierId" />
-  </label>
+        <div>
+          <label class="form-label">Pricing Tier</label>
+          <select formControlName="pricingTierId"
+                  class="form-input">
 
-  <label>
-    Payment Terms Days
-    <input type="number" formControlName="paymentTermsDays" />
-  </label>
+            <option value="" disabled>Select pricing tier</option>
 
-  <label>
-    Credit Limit
-    <input type="number" step="0.01" formControlName="creditLimit" />
-  </label>
+            <option *ngFor="let tier of pricingTiers"
+                    [value]="tier.pricingTierId">
+              {{ tier.name }} ({{ tier.discountPercent }}% discount)
+              {{ tier.priorityProcessing ? ' - Priority' : '' }}
+            </option>
 
-  <label class="checkbox-label">
-    <input type="checkbox" formControlName="isActive" />
-    Active
-  </label>
+          </select>
+          <p *ngIf="validationMessage(form.get('pricingTierId'), 'Pricing tier') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-  <div class="actions">
-    <button type="submit" [disabled]="isLoading">
-      {{ isEditMode ? 'Update Customer' : 'Create Customer' }}
-    </button>
+        <div>
+          <label class="form-label">Payment Terms (Days)</label>
+          <input type="number" min="0" step="1" inputmode="numeric" formControlName="paymentTermsDays" class="form-input" />
+          <p *ngIf="validationMessage(form.get('paymentTermsDays'), 'Payment terms') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <a routerLink="/customers">Cancel</a>
-  </div>
-</form>
+        <div>
+          <label class="form-label">Credit Limit</label>
+          <input type="number" min="0" step="0.01" inputmode="decimal" formControlName="creditLimit" class="form-input" />
+          <p *ngIf="validationMessage(form.get('creditLimit'), 'Credit limit') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-<div *ngIf="isEditMode" class="addresses-section">
-  <div class="section-header">
-    <h2>Customer Addresses</h2>
-    <p class="section-subtitle">Manage billing, head office, and delivery sites for this customer.</p>
-  </div>
-
-  <div class="addresses-list-card">
-    <h3>Existing Addresses</h3>
-
-    <table *ngIf="addresses.length > 0" class="customers-table">
-      <thead>
-        <tr>
-          <th>Site</th>
-          <th>Type</th>
-          <th>Line 1</th>
-          <th>City</th>
-          <th>Postcode</th>
-          <th>Primary</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let address of addresses">
-          <td>{{ address.siteName }}</td>
-          <td>{{ address.addressType }}</td>
-          <td>{{ address.line1 }}</td>
-          <td>{{ address.city }}</td>
-          <td>{{ address.postcode }}</td>
-          <td>{{ address.isPrimary ? 'Yes' : 'No' }}</td>
-          <td>
-            <button type="button" (click)="deleteAddress(address.addressId)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div *ngIf="addresses.length === 0" class="empty-state">
-      No addresses found for this customer yet.
+      </div>
     </div>
-  </div>
 
-  <div class="address-form-card">
-    <h3>Add New Address</h3>
+    <!-- Primary Contact -->
+    <div *ngIf="!isEditMode" class="form-card">
+      <h2 class="app-section-title mb-6">Primary Contact</h2>
 
-    <form [formGroup]="addressForm" (ngSubmit)="createAddress()" class="customer-form">
-      <label>
-        Address Type
-        <input type="text" formControlName="addressType" />
-      </label>
+      <div [formGroup]="contactForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-      <label>
-        Site Name
-        <input type="text" formControlName="siteName" />
-      </label>
+        <div>
+          <label class="form-label">Name</label>
+          <input type="text" formControlName="name" class="form-input" />
+          <p *ngIf="validationMessage(contactForm.get('name'), 'Name') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-      <label>
-        Line 1
-        <input type="text" formControlName="line1" />
-      </label>
+        <div>
+          <label class="form-label">Job Title</label>
+          <input type="text" formControlName="jobTitle" class="form-input" />
+        </div>
 
-      <label>
-        Line 2
-        <input type="text" formControlName="line2" />
-      </label>
+        <div>
+          <label class="form-label">Email</label>
+          <input type="email" autocomplete="email" formControlName="email" class="form-input" />
+          <p *ngIf="validationMessage(contactForm.get('email'), 'Email') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-      <label>
-        City
-        <input type="text" formControlName="city" />
-      </label>
+        <div>
+          <label class="form-label">Phone</label>
+          <input type="tel" inputmode="tel" autocomplete="tel" formControlName="phone" class="form-input" />
+          <p *ngIf="validationMessage(contactForm.get('phone'), 'Phone number') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-      <label>
-        County
-        <input type="text" formControlName="county" />
-      </label>
-
-      <label>
-        Postcode
-        <input type="text" formControlName="postcode" />
-      </label>
-
-      <label>
-        Country
-        <input type="text" formControlName="country" />
-      </label>
-
-      <label>
-        Contact Name
-        <input type="text" formControlName="contactName" />
-      </label>
-
-      <label>
-        Contact Phone
-        <input type="text" formControlName="contactPhone" />
-      </label>
-
-      <label>
-        Delivery Instructions
-        <input type="text" formControlName="deliveryInstructions" />
-      </label>
-
-      <label class="checkbox-label">
-        <input type="checkbox" formControlName="isPrimary" />
-        Primary address
-      </label>
-
-      <div class="actions">
-        <button type="submit">Add Address</button>
       </div>
-    </form>
+    </div>
 
-    <div *ngIf="isEditMode" class="contacts-section">
-      <div class="section-header">
-        <h2>Customer Contacts</h2>
-        <p class="section-subtitle">Manage the customer’s key contacts.</p>
+    <div *ngIf="!isEditMode" class="form-card">
+      <h2 class="app-section-title mb-6">Billing Address</h2>
+
+      <div [formGroup]="billingAddressForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Site Name</label>
+          <input type="text" formControlName="siteName" class="form-input" />
+          <p *ngIf="validationMessage(billingAddressForm.get('siteName'), 'Site name') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">Contact Name</label>
+          <input type="text" formControlName="contactName" class="form-input" />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 1</label>
+          <input type="text" formControlName="line1" class="form-input" />
+          <p *ngIf="validationMessage(billingAddressForm.get('line1'), 'Address line 1') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 2</label>
+          <input type="text" formControlName="line2" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">City</label>
+          <input type="text" formControlName="city" class="form-input" />
+          <p *ngIf="validationMessage(billingAddressForm.get('city'), 'City') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">County</label>
+          <input type="text" formControlName="county" class="form-input" />
+        </div>
+
+        <div>
+          <label class="form-label">Postcode</label>
+          <input type="text" formControlName="postcode" class="form-input" />
+          <p *ngIf="validationMessage(billingAddressForm.get('postcode'), 'Postcode') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">Country</label>
+          <input type="text" formControlName="country" class="form-input" />
+          <p *ngIf="validationMessage(billingAddressForm.get('country'), 'Country') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">Contact Phone</label>
+          <input type="tel" inputmode="tel" autocomplete="tel" formControlName="contactPhone" class="form-input" />
+          <p *ngIf="validationMessage(billingAddressForm.get('contactPhone'), 'Contact phone') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
       </div>
+    </div>
 
-      <div class="contacts-list-card">
-        <h3>Existing Contacts</h3>
+    <div *ngIf="!isEditMode" class="form-card">
+      <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
+        <h2 class="app-section-title">Delivery Address</h2>
 
-        <table *ngIf="contacts.length > 0" class="customers-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Job Title</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Primary</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let contact of contacts">
-              <td>{{ contact.name }}</td>
-              <td>{{ contact.jobTitle }}</td>
-              <td>{{ contact.email }}</td>
-              <td>{{ contact.phone }}</td>
-              <td>{{ contact.isPrimary ? 'Yes' : 'No' }}</td>
-              <td>
-                <button type="button" (click)="deleteContact(contact.customerContactId)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" formControlName="deliverySameAsBilling" class="app-checkbox" />
+            <span class="text-sm app-body-text">Same as billing</span>
+          </label>
 
-        <div *ngIf="contacts.length === 0" class="empty-state">
-          No contacts found for this customer yet.
         </div>
       </div>
 
-      <div class="contact-form-card">
-        <h3>Add New Contact</h3>
+      <div *ngIf="!form.get('deliverySameAsBilling')?.value"
+           [formGroup]="deliveryAddressForm"
+           class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Site Name</label>
+          <input type="text" formControlName="siteName" class="form-input" />
+          <p *ngIf="validationMessage(deliveryAddressForm.get('siteName'), 'Site name') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-        <form [formGroup]="contactForm" (ngSubmit)="createContact()" class="customer-form">
-          <label>
-            Name
-            <input type="text" formControlName="name" />
-          </label>
+        <div>
+          <label class="form-label">Contact Name</label>
+          <input type="text" formControlName="contactName" class="form-input" />
+        </div>
 
-          <label>
-            Job Title
-            <input type="text" formControlName="jobTitle" />
-          </label>
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 1</label>
+          <input type="text" formControlName="line1" class="form-input" />
+          <p *ngIf="validationMessage(deliveryAddressForm.get('line1'), 'Address line 1') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-          <label>
-            Email
-            <input type="email" formControlName="email" />
-          </label>
+        <div class="sm:col-span-2">
+          <label class="form-label">Address Line 2</label>
+          <input type="text" formControlName="line2" class="form-input" />
+        </div>
 
-          <label>
-            Phone
-            <input type="text" formControlName="phone" />
-          </label>
+        <div>
+          <label class="form-label">City</label>
+          <input type="text" formControlName="city" class="form-input" />
+          <p *ngIf="validationMessage(deliveryAddressForm.get('city'), 'City') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="isPrimary" />
-            Primary contact
-          </label>
+        <div>
+          <label class="form-label">County</label>
+          <input type="text" formControlName="county" class="form-input" />
+        </div>
 
-          <div class="actions">
-            <button type="submit">Add Contact</button>
-          </div>
-        </form>
+        <div>
+          <label class="form-label">Postcode</label>
+          <input type="text" formControlName="postcode" class="form-input" />
+          <p *ngIf="validationMessage(deliveryAddressForm.get('postcode'), 'Postcode') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">Country</label>
+          <input type="text" formControlName="country" class="form-input" />
+          <p *ngIf="validationMessage(deliveryAddressForm.get('country'), 'Country') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">Contact Phone</label>
+          <input type="tel" inputmode="tel" autocomplete="tel" formControlName="contactPhone" class="form-input" />
+          <p *ngIf="validationMessage(deliveryAddressForm.get('contactPhone'), 'Contact phone') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Delivery Instructions</label>
+          <textarea formControlName="deliveryInstructions" rows="3" class="form-input resize-none"></textarea>
+        </div>
       </div>
     </div>
+
+    <app-customer-addresses-section *ngIf="isEditMode"
+                                    [addresses]="addresses"
+                                    [addressForm]="addressForm"
+                                    [isAddressFormOpen]="isAddressFormOpen"
+                                    [editingAddressId]="editingAddressId"
+                                    [billingAddressId]="form.get('billingAddressId')?.value"
+                                    [defaultDeliveryAddressId]="form.get('defaultDeliveryAddressId')?.value"
+                                    [isLoading]="isLoading"
+                                    (addAddress)="openAddressForm()"
+                                    (editAddress)="editAddress($event)"
+                                    (saveAddress)="saveAddressRecord()"
+                                    (cancelAddress)="cancelAddressEdit()"
+                                    (deleteAddress)="openDeleteAddressModal($event)"
+                                    (setBillingAddress)="setBillingAddress($event)"
+                                    (setDefaultDeliveryAddress)="setDefaultDeliveryAddress($event)">
+    </app-customer-addresses-section>
+
+    <app-customer-contacts-section *ngIf="isEditMode"
+                                   [contacts]="contacts"
+                                   [contactForm]="contactForm"
+                                   [isContactFormOpen]="isContactFormOpen"
+                                   [editingContactId]="editingContactId"
+                                   (addContact)="openContactForm()"
+                                   (editContact)="editContact($event)"
+                                   (saveContact)="createContact()"
+                                   (cancelContact)="cancelContactEdit()"
+                                   (deleteContact)="openDeleteContactModal($event)"
+                                   (setPrimaryContact)="setPrimaryContact($event)">
+    </app-customer-contacts-section>
+
   </div>
-</div>
+
+  <!-- Sidebar -->
+  <div class="space-y-6 lg:sticky lg:top-24 self-start">
+
+    <!-- Status -->
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Customer Status</h2>
+
+      <div class="flex justify-between text-sm pb-3 mb-4 border-b app-divider">
+        <span class="app-muted-text">Status</span>
+        <span [ngClass]="form.get('isActive')?.value
+                ? 'app-badge app-badge--success'
+                : 'app-badge app-badge--neutral'">
+          {{ form.get('isActive')?.value ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" formControlName="isActive" class="app-checkbox" />
+        <span class="text-sm app-body-text">Active Customer</span>
+      </label>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Customer Actions</h2>
+
+      <button type="submit"
+              appDemoWrite
+              [disabled]="isLoading"
+              class="app-primary-button w-full px-4 py-2">
+        {{ isEditMode ? 'Save Customer' : 'Create Customer' }}
+      </button>
+
+      <a routerLink="/customers"
+         *ngIf="!isEditMode"
+         class="app-secondary-button mt-3 w-full px-4 py-2">
+        Cancel
+      </a>
+    </div>
+
+  </div>
+</form>
+
+<app-confirmation-modal *ngIf="addressPendingDelete"
+                        title="Delete Address"
+                        [message]="'Delete address ' + addressPendingDelete.siteName + '? This action cannot be undone.'"
+                        confirmText="Delete Address"
+                        variant="danger"
+                        (confirm)="confirmDeleteAddress()"
+                        (cancel)="cancelDeleteAddress()">
+</app-confirmation-modal>
+
+<app-confirmation-modal *ngIf="contactPendingDelete"
+                        title="Delete Contact"
+                        [message]="'Delete contact ' + contactPendingDelete.name + '? This action cannot be undone.'"
+                        confirmText="Delete Contact"
+                        variant="danger"
+                        (confirm)="confirmDeleteContact()"
+                        (cancel)="cancelDeleteContact()">
+</app-confirmation-modal>

@@ -1,0 +1,92 @@
+<div class="form-card">
+  <div class="app-section-header--divided flex items-center justify-between mb-6">
+    <h2 class="app-section-title">Order Items</h2>
+    <button type="button"
+            appDemoWrite
+            class="app-secondary-button px-4 py-2 text-sm"
+            (click)="itemAdded.emit()">
+      + Add Item
+    </button>
+  </div>
+
+  <div class="divide-y app-divider">
+    <div *ngFor="let item of items.controls; let i = index"
+         [formGroup]="item"
+         class="py-5 first:pt-0 last:pb-0">
+      <div class="flex items-start justify-between mb-4">
+        <h3 class="text-sm app-strong-text">Item {{ i + 1 }}</h3>
+        <button type="button"
+                appDemoWrite
+                *ngIf="items.length > 1"
+                class="app-danger-link text-sm"
+                (click)="itemRemoved.emit(i)">
+          Remove
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div class="sm:col-span-2">
+          <label class="form-label">
+            Product <span class="app-required-marker">*</span>
+          </label>
+          <select formControlName="productId"
+                  class="form-input"
+                  (change)="productChanged.emit(i)">
+            <option [ngValue]="null">Select product</option>
+            <option *ngFor="let product of products" [ngValue]="product.productId">
+              {{ product.productName }}
+            </option>
+          </select>
+          <p *ngIf="validationMessage(item.get('productId'), 'Product') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">
+            Quantity <span class="app-required-marker">*</span>
+          </label>
+          <input type="number"
+                 formControlName="quantity"
+                 min="1"
+                 step="0.01"
+                 inputmode="decimal"
+                 class="form-input" />
+          <p *ngIf="validationMessage(item.get('quantity'), 'Quantity') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">
+            Unit Price <span class="app-required-marker">*</span>
+          </label>
+          <input type="number"
+                 formControlName="unitPrice"
+                 min="0"
+                 step="0.01"
+                 inputmode="decimal"
+                 class="form-input" />
+          <p *ngIf="validationMessage(item.get('unitPrice'), 'Unit price') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div>
+          <label class="form-label">Discount %</label>
+          <input type="number"
+                 formControlName="discountPercent"
+                 min="0"
+                 max="100"
+                 step="0.01"
+                 inputmode="decimal"
+                 class="form-input" />
+          <p *ngIf="validationMessage(item.get('discountPercent'), 'Discount') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Notes</label>
+          <textarea formControlName="notes"
+                    rows="2"
+                    class="form-input resize-none"
+                    placeholder="Add any notes for this item..."></textarea>
+          <p *ngIf="validationMessage(item.get('notes'), 'Item notes') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

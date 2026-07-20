@@ -1,0 +1,13 @@
+.audit-json {
+  max-height: 20rem;
+  overflow: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  padding: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--app-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

@@ -1,8 +1,9 @@
-﻿using Domain.Entities;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Warehouses.DTOs;
+using Application.Features.Warehouses.Queries.GetWarehouseById;
+using Application.Features.Warehouses.Queries.GetWarehouses;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -11,33 +12,31 @@ namespace Server.Controllers;
 [Authorize]
 public class WarehousesController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public WarehousesController(AppDbContext dbContext)
+    public WarehousesController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Warehouse>>> GetAll()
+    public async Task<ActionResult<IEnumerable<WarehouseDto>>> GetAll()
     {
-        var warehouses = await _dbContext.Warehouses
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.Name)
-            .ToListAsync();
-
-        return Ok(warehouses);
+        var result = await _mediator.Send(new GetWarehousesQuery());
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Warehouse>> GetById(int id)
+    public async Task<ActionResult<WarehouseDto>> GetById(int id)
     {
-        var warehouse = await _dbContext.Warehouses
-            .FirstOrDefaultAsync(x => x.WarehouseId == id && x.IsActive);
+        var result = await _mediator.Send(new GetWarehouseByIdQuery
+        {
+            WarehouseId = id
+        });
 
-        if (warehouse == null)
+        if (result == null)
             return NotFound();
 
-        return Ok(warehouse);
+        return Ok(result);
     }
 }

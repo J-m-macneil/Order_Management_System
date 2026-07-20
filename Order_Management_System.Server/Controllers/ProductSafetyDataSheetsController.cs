@@ -1,9 +1,13 @@
-﻿using Application.DTOs;
-using Domain.Entities;
-using Infrastructure.Persistence.Context;
+using Application.Features.Products.Commands.CreateSafetyDataSheet;
+using Application.Features.Products.Commands.DeleteSafetyDataSheet;
+using Application.Features.Products.Commands.GenerateSafetyDataSheet;
+using Application.Features.Products.Commands.UpdateSafetyDataSheet;
+using Application.Features.Products.DTOs;
+using Application.Features.Products.Queries.GetSafetyDataSheetFile;
+using Application.Features.Products.Queries.GetSafetyDataSheets;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -12,119 +16,85 @@ namespace Server.Controllers;
 [Authorize]
 public class ProductSafetyDataSheetsController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public ProductSafetyDataSheetsController(AppDbContext dbContext)
+    public ProductSafetyDataSheetsController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SafetyDataSheetDto>>> Get(int productId)
     {
-        var items = await _dbContext.SafetyDataSheets
-            .Where(x => x.ProductId == productId && x.IsActive && x.DeletedAt == null)
-            .Select(x => new SafetyDataSheetDto
-            {
-                SafetyDataSheetId = x.SafetyDataSheetId,
-                ProductId = x.ProductId,
-                FileName = x.FileName,
-                FilePath = x.FilePath,
-                Version = x.Version,
-                EffectiveDate = x.EffectiveDate,
-                UploadedAt = x.UploadedAt,
-                UploadedByUserId = x.UploadedByUserId
-            })
-            .ToListAsync();
+        var result = await _mediator.Send(new GetSafetyDataSheetsQuery
+        {
+            ProductId = productId
+        });
 
-        return Ok(items);
+        return Ok(result);
     }
 
     [HttpPost]
-    public async Task<ActionResult<SafetyDataSheetDto>> Create(int productId, [FromBody] CreateSafetyDataSheetDto dto)
+    public async Task<ActionResult<SafetyDataSheetDto>> Create(
+        int productId,
+        [FromBody] CreateSafetyDataSheetCommand command)
     {
-        var productExists = await _dbContext.Products
-            .AnyAsync(x => x.ProductId == productId && x.DeletedAt == null);
+        command.ProductId = productId;
 
-        if (!productExists)
-            return NotFound("Product not found.");
+        var result = await _mediator.Send(command);
 
-        var userExists = await _dbContext.Users
-            .AnyAsync(x => x.UserId == dto.UploadedByUserId);
+        return Ok(result);
+    }
 
-        if (!userExists)
-            return BadRequest("UploadedByUserId is invalid.");
+    [HttpPost("generate")]
+    [Authorize(Policy = "OperationsOrAdmin")]
+    public async Task<ActionResult<SafetyDataSheetDto>> Generate(int productId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GenerateSafetyDataSheetCommand
+        {
+            ProductId = productId
+        }, cancellationToken);
 
-        var item = new SafetyDataSheet
+        return Ok(result);
+    }
+
+    [HttpGet("{sdsId}/view")]
+    public async Task<IActionResult> View(int productId, int sdsId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetSafetyDataSheetFileQuery
         {
             ProductId = productId,
-            FileName = dto.FileName,
-            FilePath = dto.FilePath,
-            Version = dto.Version,
-            EffectiveDate = dto.EffectiveDate,
-            UploadedAt = dto.UploadedAt,
-            UploadedByUserId = dto.UploadedByUserId,
-            IsActive = true,
-            DeletedAt = null
-        };
+            SafetyDataSheetId = sdsId
+        }, cancellationToken);
 
-        _dbContext.SafetyDataSheets.Add(item);
-        await _dbContext.SaveChangesAsync();
+        Response.Headers.ContentDisposition = $"inline; filename=\"{result.FileName}\"";
 
-        return Ok(new SafetyDataSheetDto
-        {
-            SafetyDataSheetId = item.SafetyDataSheetId,
-            ProductId = item.ProductId,
-            FileName = item.FileName,
-            FilePath = item.FilePath,
-            Version = item.Version,
-            EffectiveDate = item.EffectiveDate,
-            UploadedAt = item.UploadedAt,
-            UploadedByUserId = item.UploadedByUserId
-        });
+        return File(result.Content, result.ContentType);
     }
 
     [HttpPut("{sdsId}")]
-    public async Task<IActionResult> Update(int productId, int sdsId, [FromBody] UpdateSafetyDataSheetDto dto)
+    public async Task<IActionResult> Update(
+        int productId,
+        int sdsId,
+        [FromBody] UpdateSafetyDataSheetCommand command)
     {
-        var item = await _dbContext.SafetyDataSheets
-            .FirstOrDefaultAsync(x => x.SafetyDataSheetId == sdsId && x.ProductId == productId && x.DeletedAt == null);
+        command.ProductId = productId;
+        command.SafetyDataSheetId = sdsId;
 
-        if (item == null)
-            return NotFound();
-
-        var userExists = await _dbContext.Users
-            .AnyAsync(x => x.UserId == dto.UploadedByUserId);
-
-        if (!userExists)
-            return BadRequest("UploadedByUserId is invalid.");
-
-        item.FileName = dto.FileName;
-        item.FilePath = dto.FilePath;
-        item.Version = dto.Version;
-        item.EffectiveDate = dto.EffectiveDate;
-        item.UploadedAt = dto.UploadedAt;
-        item.UploadedByUserId = dto.UploadedByUserId;
-        item.IsActive = dto.IsActive;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(command);
 
         return NoContent();
     }
 
     [HttpDelete("{sdsId}")]
+    [Authorize(Policy = "OperationsOrAdmin")]
     public async Task<IActionResult> Delete(int productId, int sdsId)
     {
-        var item = await _dbContext.SafetyDataSheets
-            .FirstOrDefaultAsync(x => x.SafetyDataSheetId == sdsId && x.ProductId == productId && x.DeletedAt == null);
-
-        if (item == null)
-            return NotFound();
-
-        item.IsActive = false;
-        item.DeletedAt = DateTime.UtcNow;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(new DeleteSafetyDataSheetCommand
+        {
+            ProductId = productId,
+            SafetyDataSheetId = sdsId
+        });
 
         return NoContent();
     }

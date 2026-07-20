@@ -1,0 +1,68 @@
+services:
+  back-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: back-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}"
+    volumes:
+      - back-db-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  back-api:
+    build:
+      context: .
+      dockerfile: Order_Management_System.Server/Dockerfile
+    image: back-api
+    container_name: back-api
+    depends_on:
+      back-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      Jwt__Issuer: "${JWT_ISSUER:-Back}"
+      Jwt__Audience: "${JWT_AUDIENCE:-Back.Client}"
+      Jwt__SecretKey: "${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}"
+      AllowedHosts: "${APP_DOMAIN:-localhost}"
+      Demo__ReadOnlyMode: "${DEMO_READ_ONLY_MODE:-true}"
+      ConnectionStrings__DefaultConnection: "Server=back-db,1433;Database=order_management_system;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True"
+    expose:
+      - "8080"
+
+  back-client:
+    build:
+      context: ./order_management_system.client
+      dockerfile: Dockerfile
+    image: back-client
+    container_name: back-client
+    depends_on:
+      - back-api
+    environment:
+      API_BASE_URL: "/api"
+    expose:
+      - "80"
+
+  back-proxy:
+    image: caddy:2-alpine
+    container_name: back-proxy
+    depends_on:
+      - back-client
+    environment:
+      APP_DOMAIN: "${APP_DOMAIN:-localhost}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - back-caddy-data:/data
+      - back-caddy-config:/config
+
+volumes:
+  back-db-data:
+  back-caddy-data:
+  back-caddy-config:

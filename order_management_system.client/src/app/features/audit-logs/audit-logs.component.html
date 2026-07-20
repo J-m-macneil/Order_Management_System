@@ -1,0 +1,200 @@
+<div class="app-page-header">
+  <div>
+    <h1 class="brand-page-title">Audit Logs<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+    <p class="app-muted-text mt-2">Investigate system activity, user changes, and workflow events</p>
+  </div>
+</div>
+
+<div class="app-filter-section">
+  <div class="app-search-row">
+    <app-search-input [(value)]="searchTerm"
+                      placeholder="Search audit logs by event, user, notes, or record type..."
+                      (search)="applyFilters()">
+    </app-search-input>
+
+    <app-filter-button [activeFilterCount]="activeFilterCount"
+                       (toggle)="toggleFilters()">
+    </app-filter-button>
+  </div>
+
+  <div *ngIf="filtersVisible"
+       class="app-filter-panel app-filter-panel--6">
+    <div>
+      <label class="form-label">Entity</label>
+      <select [(ngModel)]="entityType"
+              (change)="applyFilters()"
+              class="form-input">
+        <option value="">All entities</option>
+        <option *ngFor="let type of entityTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Action Type</label>
+      <select [(ngModel)]="action"
+              (change)="applyFilters()"
+              class="form-input">
+        <option value="">All actions</option>
+        <option *ngFor="let type of actionTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Entity ID</label>
+      <input type="number"
+             [(ngModel)]="entityId"
+             (change)="applyFilters()"
+             class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">From</label>
+      <input type="date"
+             [(ngModel)]="from"
+             (change)="applyFilters()"
+             class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">To</label>
+      <input type="date"
+             [(ngModel)]="to"
+             (change)="applyFilters()"
+             class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">User ID</label>
+      <input type="number"
+             [(ngModel)]="performedByUserId"
+             (change)="applyFilters()"
+             class="form-input" />
+    </div>
+
+    <div class="app-filter-actions app-filter-actions--full">
+      <button type="button"
+              (click)="clearFilters()"
+              class="app-secondary-button px-4 py-2 whitespace-nowrap">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
+  <p>Loading audit logs...</p>
+</div>
+
+<div *ngIf="errorMessage() && !isLoading()" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
+</div>
+
+<div *ngIf="!isLoading() && !errorMessage()" class="app-table-card">
+  <div class="app-table-scroll">
+    <table class="app-data-table">
+      <thead class="app-table-head">
+        <tr>
+          <th class="app-table-heading">Event</th>
+          <th class="app-table-heading">Record</th>
+          <th class="app-table-heading">Actor</th>
+          <th class="app-table-heading">Time</th>
+          <th class="app-table-heading app-table-heading--center">Details</th>
+        </tr>
+      </thead>
+
+      <tbody class="app-table-body">
+        <ng-container *ngFor="let log of logs()">
+          <tr>
+            <td class="px-6 py-4">
+              <div class="flex flex-wrap items-center gap-2">
+                <span [class]="getActionClass(log)">
+                  {{ log.action }}
+                </span>
+                <span class="app-strong-text">{{ getEventLabel(log) }}</span>
+              </div>
+              <div class="text-xs app-muted-text mt-1 max-w-2xl">
+                {{ getAuditDescription(log) }}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span [class]="getEntityClass(log.entityType)">
+                {{ log.entityType }} #{{ log.entityId }}
+              </span>
+            </td>
+            <td class="px-6 py-4 app-body-text">
+              {{ getActorLabel(log) }}
+            </td>
+            <td class="px-6 py-4 app-body-text whitespace-nowrap">
+              {{ log.performedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button type="button"
+                      (click)="selectLog(log)"
+                      class="app-link-button text-xs">
+                {{ selectedLog()?.auditLogId === log.auditLogId ? 'Hide' : 'View' }}
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="selectedLog()?.auditLogId === log.auditLogId" class="app-table-expanded-row">
+            <td colspan="5" class="px-6 py-5">
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+                <div>
+                  <p class="form-label mb-2">Entity</p>
+                  <div class="app-sub-card app-sub-card--surface">
+                    <p class="text-sm app-body-text">{{ log.entityType }} #{{ log.entityId }}</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="form-label mb-2">Actor</p>
+                  <div class="app-sub-card app-sub-card--surface">
+                    <p class="text-sm app-body-text">{{ getActorLabel(log) }}</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="form-label mb-2">Recorded</p>
+                  <div class="app-sub-card app-sub-card--surface">
+                    <p class="text-sm app-body-text">{{ log.performedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="app-section-title mb-2">Changes</h3>
+                <div class="app-sub-card app-sub-card--surface mb-4">
+                  <p class="text-sm app-body-text">{{ getAuditDescription(log) }}</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div>
+                    <p class="form-label mb-2">Previous values</p>
+                    <pre class="audit-json">{{ formatJson(log.oldValuesJson) }}</pre>
+                  </div>
+                  <div>
+                    <p class="form-label mb-2">New values</p>
+                    <pre class="audit-json">{{ formatJson(log.newValuesJson) }}</pre>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="logs().length === 0" class="app-empty-state">
+    <p>No audit logs found.</p>
+  </div>
+
+  <app-table-pagination [pageNumber]="pageNumber()"
+                        [pageSize]="pageSize()"
+                        [totalCount]="totalCount()"
+                        [totalPages]="totalPages()"
+                        [hasPreviousPage]="hasPreviousPage()"
+                        [hasNextPage]="hasNextPage()"
+                        itemLabel="logs"
+                        (pageSizeChange)="onPageSizeChange($event)"
+                        (pageChange)="onPageChange($event)">
+  </app-table-pagination>
+</div>

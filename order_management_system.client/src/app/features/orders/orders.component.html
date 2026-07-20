@@ -1,66 +1,177 @@
-<h1>Orders</h1>
-
-<a routerLink="/orders/create">Create Order</a>
-
-<div>
-  <input type="text"
-         [(ngModel)]="searchTerm"
-         (input)="applyFilters()"
-         placeholder="Search by order number, customer or PO reference" />
-
-  <select [(ngModel)]="priorityFilter" (change)="applyFilters()">
-    <option value="">All priorities</option>
-    <option value="priority">Priority</option>
-    <option value="standard">Standard</option>
-  </select>
-
-  <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-    <option value="">All statuses</option>
-    <option value="1">Draft</option>
-    <option value="2">Submitted</option>
-    <option value="3">Pending Review</option>
-    <option value="4">Approved</option>
-    <option value="5">In Processing</option>
-    <option value="6">Awaiting Dispatch</option>
-    <option value="7">Completed</option>
-    <option value="8">Failed</option>
-    <option value="9">Cancelled</option>
-  </select>
+<div class="app-page-header">
+  <div>
+    <h1 class="brand-page-title">Orders<span class="brand-page-dot" aria-hidden="true">.</span></h1>
+    <p class="app-muted-text mt-2">Manage and track your chemical orders</p>
+  </div>
+  <a routerLink="/orders/create"
+     class="app-primary-button app-page-header-action px-4 py-3">
+    <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+    <span>New Order</span>
+  </a>
 </div>
 
-<div *ngIf="isLoading">
+<div class="app-filter-section">
+  <div class="app-responsive-action-row">
+    <a routerLink="/orders/create"
+       class="app-primary-button px-4 py-3">
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>New Order</span>
+    </a>
+  </div>
+
+  <div class="app-search-row">
+    <app-search-input [(value)]="searchTerm"
+                      placeholder="Search by order number, customer, or reference..."
+                      (search)="applyFilters()">
+    </app-search-input>
+
+    <app-filter-button [activeFilterCount]="activeFilterCount"
+                       (toggle)="toggleFilters()">
+    </app-filter-button>
+  </div>
+
+  <div *ngIf="filtersVisible"
+       class="app-filter-panel app-filter-panel--3">
+    <div>
+      <label class="form-label">Status</label>
+      <select [(ngModel)]="statusFilter"
+              (change)="onStatusFilterChange()"
+              class="form-input">
+        <option value="">All statuses</option>
+        <option *ngFor="let status of orderStatuses" [value]="status.id">
+          {{ status.name }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Priority</label>
+      <select [(ngModel)]="priorityFilter"
+              (change)="onPriorityFilterChange()"
+              class="form-input">
+        <option value="">All priorities</option>
+        <option value="priority">Priority Orders</option>
+        <option value="standard">Standard Orders</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label">Delivery From</label>
+      <input type="date"
+             [(ngModel)]="requestedDeliveryFrom"
+             (change)="applyFilters()"
+             class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">Delivery To</label>
+      <input type="date"
+             [(ngModel)]="requestedDeliveryTo"
+             (change)="applyFilters()"
+             class="form-input" />
+    </div>
+
+    <div class="app-filter-actions app-filter-actions--full">
+      <button type="button"
+              (click)="clearFilters()"
+              class="app-secondary-button px-4 py-2 whitespace-nowrap">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading()" class="app-empty-state app-empty-state--loading">
   <p>Loading orders...</p>
 </div>
 
-<div *ngIf="errorMessage && !isLoading">
-  <p>{{ errorMessage }}</p>
+<div *ngIf="errorMessage() && !isLoading()" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage() }}</p>
 </div>
 
-<table *ngIf="!isLoading && !errorMessage">
-  <thead>
-    <tr>
-      <th>Order</th>
-      <th>Customer</th>
-      <th>Delivery Date</th>
-      <th>Total</th>
-      <th>Priority</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let order of filteredOrders">
-      <td>{{ order.orderNumber }}</td>
-      <td>{{ order.customerName || order.customerId }}</td>
-      <td>{{ order.requestedDeliveryDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ order.totalAmount | currency:'GBP' }}</td>
-      <td>{{ order.isPriorityOrder ? 'Yes' : 'No' }}</td>
-      <td>
-        <a [routerLink]="['/orders', order.orderId]">View</a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div *ngIf="!isLoading() && !errorMessage()" class="app-table-card">
+  <div class="app-table-scroll">
+    <table class="app-data-table">
+      <thead class="app-table-head">
+        <tr>
+          <th class="app-table-heading">
+            Order #
+          </th>
+          <th class="app-table-heading">
+            Customer
+          </th>
+          <th class="app-table-heading">
+            Status
+          </th>
+          <th class="app-table-heading">
+            Priority
+          </th>
+          <th class="app-table-heading">
+            Delivery Date
+          </th>
+          <th class="app-table-heading app-table-heading--right">
+            Total
+          </th>
+          <th class="app-table-heading app-table-heading--center">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="app-table-body">
+        <tr *ngFor="let order of orders()">
+          <td class="px-6 py-4">
+            <a [routerLink]="['/orders', order.orderId]"
+               class="app-link-button">
+              {{ order.orderNumber }}
+            </a>
+          </td>
+          <td class="px-6 py-4 app-body-text">{{ order.customerName }}</td>
+          <td class="px-6 py-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span [class]="getStatusColor(order.orderStatusId)">
+                {{ getStatusLabel(order.orderStatusId) }}
+              </span>
+              <span *ngIf="order.failedProcessingJobCount > 0"
+                    class="app-badge app-badge--danger">
+                {{ order.failedProcessingJobCount }} failed job{{ order.failedProcessingJobCount === 1 ? '' : 's' }}
+              </span>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span [class]="getPriorityBadgeClass(order.isPriorityOrder)">
+              {{ getPriorityLabel(order.isPriorityOrder) }}
+            </span>
+          </td>
+          <td class="px-6 py-4 app-body-text">
+            {{ order.requestedDeliveryDate | date:'dd MMM yyyy':'':'en-GB' }}
+          </td>
+          <td class="px-6 py-4 text-right app-strong-text">
+            {{ order.totalAmount | currency:'GBP':'symbol':'1.2-2':'en-GB' }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <a [routerLink]="['/orders', order.orderId]"
+               class="app-link-button text-xs">
+              View
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<div *ngIf="!isLoading && !errorMessage && filteredOrders.length === 0">
-  <p>No orders found.</p>
+  <div *ngIf="orders().length === 0" class="app-empty-state">
+    <p>No orders found.</p>
+  </div>
+
+  <app-table-pagination [pageNumber]="pageNumber()"
+                        [pageSize]="pageSize()"
+                        [totalCount]="totalCount()"
+                        [totalPages]="totalPages()"
+                        [hasPreviousPage]="hasPreviousPage()"
+                        [hasNextPage]="hasNextPage()"
+                        itemLabel="orders"
+                        (pageSizeChange)="onPageSizeChange($event)"
+                        (pageChange)="onPageChange($event)">
+  </app-table-pagination>
+
 </div>

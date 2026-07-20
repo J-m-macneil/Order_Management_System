@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.Features.Pricing.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +15,13 @@ public class PricingController : ControllerBase
     public PricingController(IPricingService pricingService)
     {
         _pricingService = pricingService;
+    }
+
+    [HttpGet("tiers")]
+    public async Task<ActionResult<List<PricingTierDto>>> GetTiers()
+    {
+        var tiers = await _pricingService.GetTiersAsync();
+        return Ok(tiers);
     }
 
     [HttpGet("calculate")]

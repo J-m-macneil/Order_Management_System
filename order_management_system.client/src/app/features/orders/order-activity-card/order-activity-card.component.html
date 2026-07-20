@@ -1,0 +1,17 @@
+<div class="detail-card">
+  <h2 class="app-section-title mb-6">Activity</h2>
+  <div class="space-y-4 text-sm">
+    <div>
+      <p class="form-label">Created</p>
+      <p class="app-body-text mt-1">{{ order.createdAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
+    </div>
+    <div>
+      <p class="form-label">Last Updated</p>
+      <p class="app-body-text mt-1">{{ order.updatedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
+    </div>
+    <div *ngIf="order.submittedAt">
+      <p class="form-label">Submitted</p>
+      <p class="app-body-text mt-1">{{ order.submittedAt | date:'dd MMM yyyy, HH:mm':'':'en-GB' }}</p>
+    </div>
+  </div>
+</div>

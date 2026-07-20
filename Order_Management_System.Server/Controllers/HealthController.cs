@@ -1,5 +1,7 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Server.DTOs;
 
 namespace Server.Controllers;
 
@@ -15,12 +17,13 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Get()
     {
-        return Ok(new
+        return Ok(new HealthCheckDto
         {
-            message = "API is running",
-            service = _productService.GetStatus()
+            Message = "API is running",
+            Service = _productService.GetStatus()
         });
     }
 }

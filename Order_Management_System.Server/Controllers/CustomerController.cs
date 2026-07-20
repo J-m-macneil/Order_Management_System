@@ -1,164 +1,97 @@
-﻿using Application.DTOs;
-using Domain.Entities;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.Customers.Commands.CreateCustomer;
+using Application.Features.Customers.Commands.UpdateCustomer;
+using Application.Features.Customers.DTOs;
+using Application.Features.Customers.Queries.GetCustomers;
+using Application.Features.Customers.Queries.GetCustomerById;
+using Application.Features.Customers.Queries.GetCustomerIndustryTypes;
+using Application.Features.Customers.Queries.GetCustomerSummary;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Application.Features.Customers.Commands.DeleteCustomer;
 
 namespace Server.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/customers")]
 [Authorize]
 public class CustomersController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public CustomersController(AppDbContext dbContext)
+    public CustomersController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
+    // GET ALL
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] GetCustomersQuery query, CancellationToken ct)
     {
-        var customers = await _dbContext.Customers
-            .Where(x => x.IsActive && x.DeletedAt == null)
-            .Select(x => new CustomerDto
-            {
-                CustomerId = x.CustomerId,
-                AccountNumber = x.AccountNumber,
-                CompanyName = x.CompanyName,
-                IndustryType = x.IndustryType,
-                MainContactName = x.MainContactName,
-                MainContactEmail = x.MainContactEmail,
-                MainContactPhone = x.MainContactPhone,
-                BillingAddressId = x.BillingAddressId,
-                DefaultDeliveryAddressId = x.DefaultDeliveryAddressId,
-                PricingTierId = x.PricingTierId,
-                PaymentTermsDays = x.PaymentTermsDays,
-                CreditLimit = x.CreditLimit,
-                IsActive = x.IsActive,
-                CreatedAt = x.CreatedAt
-            })
-            .ToListAsync();
-
-        return Ok(customers);
+        var result = await _mediator.Send(query, ct);
+        return Ok(result);
     }
 
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetCustomerSummaryQuery(), ct);
+        return Ok(result);
+    }
+
+    [HttpGet("industries")]
+    public async Task<IActionResult> GetIndustryTypes(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetCustomerIndustryTypesQuery(), ct);
+        return Ok(result);
+    }
+
+    // GET BY ID
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetById(int id)
     {
-        var customer = await _dbContext.Customers
-            .Where(x => x.CustomerId == id && x.IsActive && x.DeletedAt == null)
-            .Select(x => new CustomerDto
-            {
-                CustomerId = x.CustomerId,
-                AccountNumber = x.AccountNumber,
-                CompanyName = x.CompanyName,
-                IndustryType = x.IndustryType,
-                MainContactName = x.MainContactName,
-                MainContactEmail = x.MainContactEmail,
-                MainContactPhone = x.MainContactPhone,
-                BillingAddressId = x.BillingAddressId,
-                DefaultDeliveryAddressId = x.DefaultDeliveryAddressId,
-                PricingTierId = x.PricingTierId,
-                PaymentTermsDays = x.PaymentTermsDays,
-                CreditLimit = x.CreditLimit,
-                IsActive = x.IsActive,
-                CreatedAt = x.CreatedAt
-            })
-            .FirstOrDefaultAsync();
+        var result = await _mediator.Send(new GetCustomerByIdQuery
+        {
+            CustomerId = id
+        });
 
-        if (customer == null)
+        if (result == null)
             return NotFound();
 
-        return Ok(customer);
+        return Ok(result);
     }
 
+    // CREATE
     [HttpPost]
-    public async Task<ActionResult<CustomerDto>> Create([FromBody] CreateCustomerDto dto)
+    public async Task<ActionResult<CustomerDto>> Create([FromBody] CreateCustomerCommand command)
     {
-        var customer = new Customer
-        {
-            AccountNumber = dto.AccountNumber,
-            CompanyName = dto.CompanyName,
-            IndustryType = dto.IndustryType,
-            MainContactName = dto.MainContactName,
-            MainContactEmail = dto.MainContactEmail,
-            MainContactPhone = dto.MainContactPhone,
-            BillingAddressId = dto.BillingAddressId,
-            DefaultDeliveryAddressId = dto.DefaultDeliveryAddressId,
-            PricingTierId = dto.PricingTierId,
-            PaymentTermsDays = dto.PaymentTermsDays,
-            CreditLimit = dto.CreditLimit,
-            IsActive = dto.IsActive,
-            CreatedAt = DateTime.UtcNow,
-            DeletedAt = null
-        };
+        var result = await _mediator.Send(command);
 
-        _dbContext.Customers.Add(customer);
-        await _dbContext.SaveChangesAsync();
-
-        var result = new CustomerDto
-        {
-            CustomerId = customer.CustomerId,
-            AccountNumber = customer.AccountNumber,
-            CompanyName = customer.CompanyName,
-            IndustryType = customer.IndustryType,
-            MainContactName = customer.MainContactName,
-            MainContactEmail = customer.MainContactEmail,
-            MainContactPhone = customer.MainContactPhone,
-            BillingAddressId = customer.BillingAddressId,
-            DefaultDeliveryAddressId = customer.DefaultDeliveryAddressId,
-            PricingTierId = customer.PricingTierId,
-            PaymentTermsDays = customer.PaymentTermsDays,
-            CreditLimit = customer.CreditLimit,
-            IsActive = customer.IsActive,
-            CreatedAt = customer.CreatedAt
-        };
-
-        return CreatedAtAction(nameof(GetById), new { id = customer.CustomerId }, result);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = result.CustomerId },
+            result);
     }
 
+    // UPDATE
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateCustomerDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateCustomerCommand command)
     {
-        var customer = await _dbContext.Customers.FindAsync(id);
+        command.CustomerId = id;
 
-        if (customer == null || !customer.IsActive || customer.DeletedAt != null)
-            return NotFound();
-
-        customer.AccountNumber = dto.AccountNumber;
-        customer.CompanyName = dto.CompanyName;
-        customer.IndustryType = dto.IndustryType;
-        customer.MainContactName = dto.MainContactName;
-        customer.MainContactEmail = dto.MainContactEmail;
-        customer.MainContactPhone = dto.MainContactPhone;
-        customer.BillingAddressId = dto.BillingAddressId;
-        customer.DefaultDeliveryAddressId = dto.DefaultDeliveryAddressId;
-        customer.PricingTierId = dto.PricingTierId;
-        customer.PaymentTermsDays = dto.PaymentTermsDays;
-        customer.CreditLimit = dto.CreditLimit;
-        customer.IsActive = dto.IsActive;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(command);
 
         return NoContent();
     }
 
+    // DELETE
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var customer = await _dbContext.Customers.FindAsync(id);
-
-        if (customer == null || customer.DeletedAt != null)
-            return NotFound();
-
-        customer.IsActive = false;
-        customer.DeletedAt = DateTime.UtcNow;
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(new DeleteCustomerCommand
+        {
+            CustomerId = id
+        });
 
         return NoContent();
     }

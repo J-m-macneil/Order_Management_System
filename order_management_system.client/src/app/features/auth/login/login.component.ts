@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { getValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +14,8 @@ import { AuthService } from '../../../core/auth/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+  readonly validationMessage = getValidationMessage;
+
   isLoading = false;
   errorMessage = '';
 
@@ -18,9 +23,9 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {
     this.loginForm = this.fb.group({
       usernameOrEmail: ['', [Validators.required]],
@@ -37,18 +42,35 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.http.post<any>('https://localhost:7233/api/auth/login', this.loginForm.value).subscribe({
-      next: (response) => {
-        this.authService.setToken(response.token);
+    this.authService.login(this.loginForm.value)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+      }))
+      .subscribe({
+      next: () => {
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
-        this.errorMessage = 'Invalid username/email or password.';
-        this.isLoading = false;
-      },
-      complete: () => {
-        this.isLoading = false;
+      error: (err) => {
+        this.errorMessage = getApiErrorMessage(err, 'Invalid username/email or password.');
       }
     });
+  }
+
+  loginDemo(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.loginDemo()
+      .pipe(finalize(() => {
+        this.isLoading = false;
+      }))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: () => {
+          this.errorMessage = 'Demo access is temporarily unavailable.';
+        }
+      });
   }
 }

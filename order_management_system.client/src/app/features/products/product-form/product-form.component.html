@@ -1,186 +1,200 @@
-<div class="page-header">
-  <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
+<!-- Page Header -->
+<div class="app-page-header">
+  <div>
+    <h1 class="brand-page-title">
+      {{ isEditMode ? 'Edit Product' : 'Create Product' }}<span class="brand-page-dot" aria-hidden="true">.</span>
+    </h1>
+    <p class="app-muted-text mt-2">
+      {{ isEditMode ? 'Update product details and safety information' : 'Create a new chemical product' }}
+    </p>
+  </div>
+  <a routerLink="/products" class="app-tertiary-button app-back-link">
+    ← Back to Products
+  </a>
 </div>
 
-<div *ngIf="isLoading">Loading...</div>
-<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<!-- Loading -->
+<div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
+  <p>Loading...</p>
+</div>
 
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="product-form">
+<!-- Error -->
+<div *ngIf="errorMessage && !isLoading"
+     class="p-4 app-alert app-alert--danger mb-6">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
+</div>
 
-  <div class="form-grid">
+<!-- Success -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-6">
 
-    <label>
-      SKU
-      <input type="text" formControlName="sku" />
-    </label>
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Product Details</h2>
 
-    <label>
-      Product Name
-      <input type="text" formControlName="productName" />
-    </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">SKU</label>
+          <input type="text" autocomplete="off" formControlName="sku" class="form-input" />
+          <p *ngIf="validationMessage(form.get('sku'), 'SKU') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <label class="full-width">
-      Description
-      <textarea formControlName="description"></textarea>
-    </label>
+        <div>
+          <label class="form-label">Product Name</label>
+          <input type="text" formControlName="productName" class="form-input" />
+          <p *ngIf="validationMessage(form.get('productName'), 'Product name') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <label>
-      Category
-      <select formControlName="productCategoryId">
-        <option *ngFor="let category of productCategories" [value]="category.productCategoryId">
-          {{ category.name }}
-        </option>
-      </select>
-    </label>
+        <div class="sm:col-span-2">
+          <label class="form-label">Description</label>
+          <textarea formControlName="description" rows="3" class="form-input resize-none"></textarea>
+        </div>
 
-    <label>
-      Unit Of Measure
-      <select formControlName="unitOfMeasureId">
-        <option *ngFor="let unit of unitsOfMeasure" [value]="unit.unitOfMeasureId">
-          {{ unit.name }} ({{ unit.code }})
-        </option>
-      </select>
-    </label>
+        <div>
+          <label class="form-label">Category</label>
+          <select formControlName="productCategoryId" class="form-input">
+            <option [ngValue]="null" disabled>Select category</option>
+            <option *ngFor="let category of productCategories" [value]="category.productCategoryId">
+              {{ category.name }}
+            </option>
+          </select>
+          <p *ngIf="validationMessage(form.get('productCategoryId'), 'Category') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <label>
-      Pack Size
-      <input type="text" formControlName="packSize" />
-    </label>
+        <div>
+          <label class="form-label">Unit Of Measure</label>
+          <select formControlName="unitOfMeasureId" class="form-input">
+            <option [ngValue]="null" disabled>Select unit of measure</option>
+            <option *ngFor="let unit of unitsOfMeasure" [value]="unit.unitOfMeasureId">
+              {{ unit.name }} ({{ unit.code }})
+            </option>
+          </select>
+          <p *ngIf="validationMessage(form.get('unitOfMeasureId'), 'Unit of measure') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <label>
-      Base Price
-      <input type="number" formControlName="basePrice" />
-    </label>
+        <div>
+          <label class="form-label">Pack Size</label>
+          <input type="text" formControlName="packSize" class="form-input" />
+          <p *ngIf="validationMessage(form.get('packSize'), 'Pack size') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <label>
-      Currency
-      <input type="text" formControlName="currency" />
-    </label>
+        <div>
+          <label class="form-label">Base Price</label>
+          <input type="number" min="0" step="0.01" inputmode="decimal" formControlName="basePrice" class="form-input" />
+          <p *ngIf="validationMessage(form.get('basePrice'), 'Base price') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
 
-    <label>
-      Hazard Class
-      <select formControlName="hazardClassId">
-        <option *ngFor="let hazard of hazardClasses" [value]="hazard.hazardClassId">
-          {{ hazard.name }}
-        </option>
-      </select>
-    </label>
-
-    <label>
-      UN Number
-      <input type="text" formControlName="unNumber" />
-    </label>
-
-    <label class="full-width">
-      Storage Requirement
-      <input type="text" formControlName="storageRequirement" />
-    </label>
-
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="requiresSds" />
-      Requires SDS
-    </label>
-
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="isRestricted" />
-      Restricted
-    </label>
-
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="isActive" />
-      Active
-    </label>
-
-  </div>
-
-  <div class="actions">
-    <button type="submit">
-      {{ isEditMode ? 'Update Product' : 'Create Product' }}
-    </button>
-
-    <a routerLink="/products">Cancel</a>
-  </div>
-
-  <div *ngIf="isEditMode" class="sds-section">
-    <div class="section-header">
-      <h2>Safety Data Sheets</h2>
-      <p class="section-subtitle">Manage SDS records linked to this product.</p>
-    </div>
-
-    <div class="sds-list-card">
-      <h3>Existing SDS Records</h3>
-
-      <table *ngIf="safetyDataSheets.length > 0" class="customers-table">
-        <thead>
-          <tr>
-            <th>File Name</th>
-            <th>Version</th>
-            <th>Effective Date</th>
-            <th>Uploaded At</th>
-            <th>Uploaded By</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sds of safetyDataSheets">
-            <td>{{ sds.fileName }}</td>
-            <td>{{ sds.version }}</td>
-            <td>{{ sds.effectiveDate | date:'dd/MM/yyyy' }}</td>
-            <td>{{ sds.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ sds.uploadedByUserId }}</td>
-            <td>
-              <button type="button" (click)="deleteSafetyDataSheet(sds.safetyDataSheetId)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div *ngIf="safetyDataSheets.length === 0" class="empty-state">
-        No SDS records found for this product.
+        <div>
+          <label class="form-label">Currency</label>
+          <input type="text" maxlength="3" autocomplete="off" formControlName="currency" class="form-input" />
+          <p *ngIf="validationMessage(form.get('currency'), 'Currency code') as message" class="mt-1 app-validation-message">{{ message }}</p>
+        </div>
       </div>
     </div>
 
-    <div class="sds-form-card">
-      <h3>Add SDS Record</h3>
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Safety & Storage</h2>
 
-      <form [formGroup]="sdsForm" (ngSubmit)="createSafetyDataSheet()" class="product-form">
-        <div class="form-grid">
-          <label>
-            File Name
-            <input type="text" formControlName="fileName" />
-          </label>
-
-          <label>
-            File Path
-            <input type="text" formControlName="filePath" />
-          </label>
-
-          <label>
-            Version
-            <input type="text" formControlName="version" />
-          </label>
-
-          <label>
-            Effective Date
-            <input type="date" formControlName="effectiveDate" />
-          </label>
-
-          <label>
-            Uploaded At
-            <input type="datetime-local" formControlName="uploadedAt" />
-          </label>
-
-          <label>
-            Uploaded By User Id
-            <input type="number" formControlName="uploadedByUserId" />
-          </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Hazard Class</label>
+          <select formControlName="hazardClassId" class="form-input">
+            <option [ngValue]="null" disabled>Select hazard class</option>
+            <option *ngFor="let hazard of hazardClasses" [value]="hazard.hazardClassId">
+              {{ hazard.name }}
+            </option>
+          </select>
+          <p *ngIf="validationMessage(form.get('hazardClassId'), 'Hazard class') as message" class="mt-1 app-validation-message">{{ message }}</p>
         </div>
 
-        <div class="actions">
-          <button type="submit">Add SDS</button>
+        <div>
+          <label class="form-label">UN Number</label>
+          <input type="text" formControlName="unNumber" class="form-input" />
         </div>
-      </form>
+
+        <div class="sm:col-span-2">
+          <label class="form-label">Storage Requirement</label>
+          <input type="text" formControlName="storageRequirement" class="form-input" />
+        </div>
+
+        <label class="flex items-center gap-2 pt-2">
+          <input type="checkbox" formControlName="requiresSds" class="app-checkbox" />
+          <span class="form-label">Requires SDS</span>
+        </label>
+
+        <label class="flex items-center gap-2 pt-2">
+          <input type="checkbox" formControlName="isRestricted" class="app-checkbox" />
+          <span class="form-label">Restricted</span>
+        </label>
+      </div>
     </div>
+
+    <ng-container *ngIf="productId !== null">
+      <app-product-sds-panel class="block"
+                             [productId]="productId!"
+                             [requiresSds]="savedRequiresSds"
+                             (sdsChanged)="onSdsChanged()">
+      </app-product-sds-panel>
+
+      <app-product-audit-panel class="block"
+                               [productId]="productId!">
+      </app-product-audit-panel>
+    </ng-container>
+
   </div>
 
+  <div class="space-y-6 lg:sticky lg:top-24 self-start">
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Product Status</h2>
+
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Status</span>
+          <span [ngClass]="form.get('isActive')?.value
+                  ? 'app-badge app-badge--success'
+                  : 'app-badge app-badge--neutral'">
+            {{ form.get('isActive')?.value ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+
+        <div *ngIf="form.get('isRestricted')?.value" class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">Restricted</span>
+          <span class="app-badge app-badge--danger">
+            Yes
+          </span>
+        </div>
+
+        <div *ngIf="form.get('requiresSds')?.value" class="flex justify-between text-sm pb-3 border-b app-divider">
+          <span class="app-muted-text">SDS Required</span>
+          <span class="app-badge app-badge--warning">
+            Yes
+          </span>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 mt-6">
+        <input type="checkbox" formControlName="isActive" class="app-checkbox" />
+        <span class="form-label">Active Product</span>
+      </label>
+
+    </div>
+
+    <div class="form-card">
+      <h2 class="app-section-title mb-6">Product Actions</h2>
+
+      <div class="space-y-3">
+        <button type="submit"
+                appDemoWrite
+                [disabled]="isLoading"
+                class="app-primary-button w-full px-4 py-2">
+          {{ isEditMode ? 'Save Product' : 'Create Product' }}
+        </button>
+
+        <a *ngIf="!isEditMode"
+           routerLink="/products"
+           class="app-secondary-button w-full px-4 py-2">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
 </form>

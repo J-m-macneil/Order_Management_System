@@ -1,37 +1,42 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HazardClass } from '../../../core/models/hazard-class.model';
 import { ProductCategory } from '../../../core/models/product-category.model';
 import { Product } from '../../../core/models/product.model';
-import { SafetyDataSheet, CreateSafetyDataSheetRequest } from '../../../core/models/safety-data-sheet-model';
 import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
 import { ProductsService } from '../../../core/services/products.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { getValidationMessage } from '../../../core/utils/form-validation';
+import { ProductAuditPanelComponent } from '../product-audit-panel/product-audit-panel.component';
 
 @Component({
   selector: 'app-product-form',
   templateUrl: './product-form.component.html',
-  styleUrls: ['./product-form.component.css'],
   standalone: false
 })
 export class ProductFormComponent implements OnInit {
+  readonly validationMessage = getValidationMessage;
+
+  @ViewChild(ProductAuditPanelComponent) private auditPanel?: ProductAuditPanelComponent;
+
   form!: FormGroup;
 
   isEditMode = false;
   productId: number | null = null;
   isLoading = false;
   errorMessage = '';
+  savedRequiresSds = false;
 
   productCategories: ProductCategory[] = [];
   unitsOfMeasure: UnitOfMeasure[] = [];
   hazardClasses: HazardClass[] = [];
 
-  sdsForm!: FormGroup;
-  safetyDataSheets: SafetyDataSheet[] = [];
-
   constructor(
     private fb: FormBuilder,
     private productsService: ProductsService,
+    private toastService: ToastService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -46,22 +51,13 @@ export class ProductFormComponent implements OnInit {
       unitOfMeasureId: [null, Validators.required],
       packSize: ['', Validators.required],
       basePrice: [0, [Validators.required, Validators.min(0)]],
-      currency: ['GBP', Validators.required],
+      currency: ['GBP', [Validators.required, Validators.pattern(/^[A-Z]{3}$/)]],
       hazardClassId: [null, Validators.required],
       unNumber: [''],
       storageRequirement: [''],
       requiresSds: [false],
       isRestricted: [false],
       isActive: [true]
-    });
-
-    this.sdsForm = this.fb.group({
-      fileName: ['', Validators.required],
-      filePath: ['', Validators.required],
-      version: ['', Validators.required],
-      effectiveDate: ['', Validators.required],
-      uploadedAt: ['', Validators.required],
-      uploadedByUserId: [1, Validators.required]
     });
 
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -73,46 +69,42 @@ export class ProductFormComponent implements OnInit {
       this.isEditMode = true;
       this.productId = id;
       this.loadProduct(id);
-      this.loadSafetyDataSheets(id);
     }
   }
 
-  loadLookups(): void {
+  private loadLookups(): void {
     this.productsService.getProductCategories().subscribe({
       next: (data) => {
         this.productCategories = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load categories', err);
-        this.cdr.detectChanges();
       }
     });
 
     this.productsService.getUnitsOfMeasure().subscribe({
       next: (data) => {
         this.unitsOfMeasure = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load units', err);
-        this.cdr.detectChanges();
       }
     });
 
     this.productsService.getHazardClasses().subscribe({
       next: (data) => {
         this.hazardClasses = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load hazard classes', err);
-        this.cdr.detectChanges();
       }
     });
   }
 
-  loadProduct(id: number): void {
+  private loadProduct(id: number): void {
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -135,91 +127,15 @@ export class ProductFormComponent implements OnInit {
           isActive: product.isActive
         });
 
+        this.savedRequiresSds = product.requiresSds;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load product', err);
         this.errorMessage = 'Failed to load product.';
         this.isLoading = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  loadSafetyDataSheets(productId: number): void {
-    this.productsService.getSafetyDataSheets(productId).subscribe({
-      next: (data) => {
-        this.safetyDataSheets = data;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to load SDS records', err);
-        this.errorMessage = 'Failed to load SDS records.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  createSafetyDataSheet(): void {
-    if (!this.productId) {
-      return;
-    }
-
-    if (this.sdsForm.invalid) {
-      this.sdsForm.markAllAsTouched();
-      return;
-    }
-
-    const request: CreateSafetyDataSheetRequest = {
-      fileName: this.sdsForm.value.fileName,
-      filePath: this.sdsForm.value.filePath,
-      version: this.sdsForm.value.version,
-      effectiveDate: this.sdsForm.value.effectiveDate,
-      uploadedAt: this.sdsForm.value.uploadedAt,
-      uploadedByUserId: this.sdsForm.value.uploadedByUserId
-    };
-
-    this.productsService.createSafetyDataSheet(this.productId, request).subscribe({
-      next: () => {
-        this.sdsForm.reset({
-          fileName: '',
-          filePath: '',
-          version: '',
-          effectiveDate: '',
-          uploadedAt: '',
-          uploadedByUserId: 1
-        });
-
-        this.loadSafetyDataSheets(this.productId!);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to create SDS', err);
-        this.errorMessage = 'Failed to create SDS.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  deleteSafetyDataSheet(sdsId: number): void {
-    if (!this.productId) {
-      return;
-    }
-
-    if (!confirm('Delete this SDS record?')) {
-      return;
-    }
-
-    this.productsService.deleteSafetyDataSheet(this.productId, sdsId).subscribe({
-      next: () => {
-        this.loadSafetyDataSheets(this.productId!);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Failed to delete SDS', err);
-        this.errorMessage = 'Failed to delete SDS.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -232,30 +148,42 @@ export class ProductFormComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
-    this.cdr.detectChanges();
 
     const formValue = this.form.value;
 
     if (this.isEditMode && this.productId !== null) {
       this.productsService.update(this.productId, formValue).subscribe({
-        next: () => this.router.navigate(['/products']),
-        error: (err) => {
-          console.error('Failed to update product', err);
-          this.errorMessage = 'Failed to update product.';
+        next: () => {
+          this.toastService.success('Product updated', 'The product details were saved.');
+          this.savedRequiresSds = Boolean(this.form.get('requiresSds')?.value);
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.auditPanel?.reload();
+          this.cdr.markForCheck();
+        },
+      error: (err: ApiErrorResponse) => {
+        console.error('Failed to update product', err);
+        this.toastService.error('Product update failed', getApiErrorMessage(err, 'The product could not be saved.'));
+          this.isLoading = false;
+          this.cdr.markForCheck();
         }
       });
     } else {
       this.productsService.create(formValue).subscribe({
-        next: () => this.router.navigate(['/products']),
-        error: (err) => {
-          console.error('Failed to create product', err);
-          this.errorMessage = 'Failed to create product.';
+        next: () => {
+          this.toastService.success('Product created', 'The product was added successfully.');
+          this.router.navigate(['/products']);
+        },
+      error: (err: ApiErrorResponse) => {
+        console.error('Failed to create product', err);
+        this.toastService.error('Product creation failed', getApiErrorMessage(err, 'The product could not be created.'));
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
     }
+  }
+
+  onSdsChanged(): void {
+    this.auditPanel?.reload();
   }
 }

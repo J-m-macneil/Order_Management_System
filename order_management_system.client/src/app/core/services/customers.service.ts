@@ -1,4 +1,5 @@
-import { HttpClient } from '@angular/common/http';
+import { apiBaseUrl } from '../config/api-url';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CreateCustomerRequest } from '../models/create-customer.model';
@@ -6,17 +7,53 @@ import { Customer } from '../models/customer.model';
 import { UpdateCustomerRequest } from '../models/update-customer.model';
 import { Address, CreateAddressRequest, UpdateAddressRequest } from '../models/address.model';
 import { CreateCustomerContactRequest, CustomerContact, UpdateCustomerContactRequest } from '../models/customer-contact.model';
+import { PagedResult } from '../models/paged-result.model';
+import { PaginationQuery } from '../models/pagination-query.model';
+import { CustomerSummary } from '../models/customer-summary.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomersService {
-  private readonly baseUrl = 'https://localhost:7233/api/customers';
+  private readonly baseUrl = `${apiBaseUrl}/customers`;
 
   constructor(private http: HttpClient) { }
 
-  getAll(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(this.baseUrl);
+  getAll(query: PaginationQuery & {
+    searchTerm?: string;
+    industryType?: string;
+    paymentTermsDays?: number | null;
+    isActive?: boolean | null;
+  }): Observable<PagedResult<Customer>> {
+    let params = new HttpParams()
+      .set('pageNumber', query.pageNumber)
+      .set('pageSize', query.pageSize);
+
+    if (query.searchTerm) {
+      params = params.set('searchTerm', query.searchTerm);
+    }
+
+    if (query.industryType) {
+      params = params.set('industryType', query.industryType);
+    }
+
+    if (query.paymentTermsDays) {
+      params = params.set('paymentTermsDays', query.paymentTermsDays);
+    }
+
+    if (query.isActive !== undefined && query.isActive !== null) {
+      params = params.set('isActive', query.isActive);
+    }
+
+    return this.http.get<PagedResult<Customer>>(this.baseUrl, { params });
+  }
+
+  getSummary(): Observable<CustomerSummary> {
+    return this.http.get<CustomerSummary>(`${this.baseUrl}/summary`);
+  }
+
+  getIndustryTypes(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/industries`);
   }
 
   getById(id: number): Observable<Customer> {

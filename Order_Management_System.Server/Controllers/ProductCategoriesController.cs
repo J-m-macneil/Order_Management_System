@@ -1,8 +1,8 @@
-﻿using Application.DTOs;
-using Infrastructure.Persistence.Context;
+﻿using Application.Features.ProductCategories.Queries.GetProductCategories;
+using Application.Features.Products.DTOs;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Server.Controllers;
 
@@ -11,24 +11,17 @@ namespace Server.Controllers;
 [Authorize]
 public class ProductCategoriesController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public ProductCategoriesController(AppDbContext dbContext)
+    public ProductCategoriesController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProductCategoryDto>>> Get()
     {
-        var categories = await _dbContext.ProductCategories
-            .Select(x => new ProductCategoryDto
-            {
-                ProductCategoryId = x.ProductCategoryId,
-                Name = x.Name
-            })
-            .ToListAsync();
-
-        return Ok(categories);
+        var result = await _mediator.Send(new GetProductCategoriesQuery());
+        return Ok(result);
     }
 }

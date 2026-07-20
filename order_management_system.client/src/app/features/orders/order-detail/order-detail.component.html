@@ -1,77 +1,116 @@
-<div *ngIf="isLoading">
+<!-- Loading State -->
+<div *ngIf="isLoading" class="app-empty-state app-empty-state--loading">
   <p>Loading order details...</p>
 </div>
 
-<div *ngIf="errorMessage && !isLoading">
-  <p>{{ errorMessage }}</p>
+<!-- Error State -->
+<div *ngIf="errorMessage && !isLoading" class="p-4 app-alert app-alert--danger">
+  <p class="app-alert-text--danger">{{ errorMessage }}</p>
 </div>
 
-<div *ngIf="order as currentOrder">
-  <h1>Order {{ currentOrder.orderNumber }}</h1>
+<!-- Order Detail Content -->
+<div *ngIf="order as currentOrder" class="space-y-6">
+  <!-- Page Header -->
+  <div class="app-page-header">
+    <div>
+      <h1 class="brand-page-title order-detail-title">
+        {{ currentOrder.orderNumber }}<span class="brand-page-dot" aria-hidden="true">.</span>
+      </h1>
+      <p class="app-muted-text mt-1">{{ currentOrder.customerName || 'Customer #' + currentOrder.customerId }}</p>
+    </div>
+    <a routerLink="/orders" class="app-tertiary-button app-back-link">
+      &larr; Back to Orders
+    </a>
+  </div>
 
-  <a routerLink="/orders">Back to Orders</a>
+  <app-order-status-strip [order]="currentOrder"
+                          [isDiscardingDraft]="isDiscardingDraft"
+                          (discardDraft)="requestDiscardDraft()">
+  </app-order-status-strip>
 
-  <section>
-    <h2>Summary</h2>
-    <p><strong>Customer:</strong> {{ currentOrder.customerName || currentOrder.customerId }}</p>
-    <p><strong>Status:</strong> {{ currentOrder.orderStatusName || currentOrder.orderStatusId }}</p>
-    <p><strong>Priority:</strong> {{ currentOrder.isPriorityOrder ? 'Yes' : 'No' }}</p>
-    <p><strong>Requested Delivery Date:</strong> {{ currentOrder.requestedDeliveryDate | date:'dd/MM/yyyy' }}</p>
-    <p><strong>PO Reference:</strong> {{ currentOrder.purchaseOrderReference || '-' }}</p>
-    <p><strong>Project:</strong> {{ currentOrder.projectName || currentOrder.projectId || '-' }}</p>
-  </section>
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-  <section>
-    <h2>Logistics</h2>
-    <p><strong>Billing Address Id:</strong> {{ currentOrder.billingAddressId }}</p>
-    <p><strong>Delivery Address Id:</strong> {{ currentOrder.deliveryAddressId }}</p>
-    <p><strong>Warehouse:</strong> {{ currentOrder.warehouseName || currentOrder.warehouseId }}</p>
-    <p><strong>Carrier:</strong> {{ currentOrder.carrierName || currentOrder.carrierId || '-' }}</p>
-  </section>
+    <!-- Main Content (2 columns) -->
+    <div class="lg:col-span-2 space-y-6">
+      <app-order-information-card [order]="currentOrder"></app-order-information-card>
+      <app-order-items-table [items]="currentOrder.items"
+                             [currency]="currentOrder.currency"
+                             class="block mt-6">
+      </app-order-items-table>
 
-  <section>
-    <h2>Financial Summary</h2>
-    <p><strong>Subtotal:</strong> {{ currentOrder.subtotal | currency:'GBP' }}</p>
-    <p><strong>Discount:</strong> {{ currentOrder.discountAmount | currency:'GBP' }}</p>
-    <p><strong>Tax:</strong> {{ currentOrder.taxAmount | currency:'GBP' }}</p>
-    <p><strong>Total:</strong> {{ currentOrder.totalAmount | currency:'GBP' }}</p>
-  </section>
+      <app-order-notes-card [order]="currentOrder"></app-order-notes-card>
+    </div>
 
-  <section>
-    <h2>Items</h2>
+    <!-- Sidebar (1 column) -->
+    <div class="space-y-6">
 
-    <table *ngIf="currentOrder.items && currentOrder.items.length > 0">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Quantity</th>
-          <th>Unit Price</th>
-          <th>Discount %</th>
-          <th>Line Total</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of currentOrder.items">
-          <td>{{ item.productName || item.productId }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>{{ item.unitPrice | currency:'GBP' }}</td>
-          <td>{{ item.discountPercent }}</td>
-          <td>{{ item.lineTotal | currency:'GBP' }}</td>
-          <td>{{ item.notes || '-' }}</td>
-        </tr>
-      </tbody>
-    </table>
+      <app-order-status-actions [allowedStatuses]="allowedStatuses"
+                                [currentStatusId]="currentOrder.orderStatusId"
+                                [isChangingStatus]="isChangingStatus"
+                                (statusChange)="requestStatusChange($event)">
+      </app-order-status-actions>
 
-    <p *ngIf="!currentOrder.items || currentOrder.items.length === 0">
-      No order items found.
-    </p>
-  </section>
+      <div *ngIf="currentOrder.hasRestrictedItems" class="detail-card">
+        <h2 class="app-section-title mb-4">Review Required</h2>
+        <p class="app-body-text mb-4">
+          This order contains restricted products and must be reviewed before approval.
+        </p>
 
-  <section>
-    <h2>Notes</h2>
-    <p><strong>Special Instructions:</strong> {{ currentOrder.specialInstructions || '-' }}</p>
-    <p><strong>Internal Notes:</strong> {{ currentOrder.internalNotes || '-' }}</p>
-    <p><strong>Failure Reason:</strong> {{ currentOrder.failureReason || '-' }}</p>
-  </section>
+        <div class="space-y-3">
+          <div *ngFor="let reason of currentOrder.reviewReasons"
+               class="app-badge app-badge--warning">
+            {{ reason }}
+          </div>
+
+          <div class="divide-y app-divider">
+            <div *ngFor="let item of restrictedItems"
+                 class="py-3 first:pt-0 last:pb-0">
+            <div class="app-strong-text">
+              {{ item.productName || 'Product #' + item.productId }}
+            </div>
+            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs app-muted-text">
+              <span *ngIf="item.productSku" class="font-mono">{{ item.productSku }}</span>
+              <span *ngIf="item.unNumber">{{ item.unNumber }}</span>
+              <span class="app-badge app-badge--danger">Restricted</span>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-order-summary-card [order]="currentOrder"></app-order-summary-card>
+
+      <!-- Documents -->
+      <div class="mt-6">
+        <app-order-documents-panel [orderId]="currentOrder.orderId">
+        </app-order-documents-panel>
+      </div>
+
+      <app-order-logistics-card [order]="currentOrder"></app-order-logistics-card>
+      <app-order-activity-card [order]="currentOrder"></app-order-activity-card>
+      <app-order-status-history [history]="history"></app-order-status-history>
+
+      <!-- Processing Jobs -->
+      <div class="mt-6">
+        <app-processing-jobs-panel [orderId]="currentOrder.orderId"
+          [orderStatusId]="currentOrder.orderStatusId"
+          [requiresSdsBundle]="currentOrder.requiresSdsBundle"
+          (jobsChanged)="refresh()">
+        </app-processing-jobs-panel>
+      </div>
+
+    </div>
+  </div>
 </div>
+
+<app-confirmation-modal *ngIf="confirmationModal.isOpen"
+                        [title]="confirmationModal.title"
+                        [message]="confirmationModal.message"
+                        [confirmText]="confirmationModal.confirmText"
+                        [variant]="confirmationModal.variant"
+                        [requireReason]="confirmationModal.requireReason"
+                        [reasonPlaceholder]="confirmationModal.reasonPlaceholder"
+                        (confirm)="onConfirmationConfirm($event)"
+                        (cancel)="onConfirmationCancel()">
+</app-confirmation-modal>

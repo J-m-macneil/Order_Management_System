@@ -1,0 +1,154 @@
+<div class="form-card">
+  <div class="app-section-header--divided flex items-center justify-between gap-4 mb-5">
+    <div>
+      <h2 class="app-section-title">Addresses</h2>
+      <p class="text-xs app-muted-text mt-1">{{ addresses.length }} total</p>
+    </div>
+
+    <button type="button"
+            appDemoWrite
+            (click)="addAddress.emit()"
+            class="app-primary-button px-4 py-2">
+      <svg lucidePlus [size]="17" aria-hidden="true"></svg>
+      <span>Add Address</span>
+    </button>
+  </div>
+
+  <div *ngIf="addresses.length === 0" class="app-empty-state">
+    No addresses recorded.
+  </div>
+
+  <div *ngIf="addresses.length > 0" class="divide-y app-divider mb-6">
+    <div *ngFor="let address of addresses"
+         class="py-4 first:pt-0 last:pb-0">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="app-strong-text truncate">{{ address.siteName }}</p>
+            <span *ngIf="address.addressId === billingAddressId" class="app-badge app-badge--success">Billing</span>
+            <span *ngIf="address.addressId === defaultDeliveryAddressId" class="app-badge app-badge--info">Delivery</span>
+          </div>
+          <p class="text-xs app-muted-text mt-1">{{ address.addressType }}</p>
+          <p class="mt-3 text-sm app-body-text">
+            {{ address.line1 }}<span *ngIf="address.line2">, {{ address.line2 }}</span>, {{ address.city }}, {{ address.postcode }}
+          </p>
+          <p class="text-xs app-muted-text mt-1">
+            {{ address.contactName || 'No site contact' }}<span *ngIf="address.contactPhone"> - {{ address.contactPhone }}</span>
+          </p>
+        </div>
+
+        <div class="app-inline-actions shrink-0">
+          <button type="button"
+                  appDemoWrite
+                  (click)="editAddress.emit(address)"
+                  class="app-link-button text-xs">
+            Edit
+          </button>
+          <button type="button"
+                  appDemoWrite
+                  (click)="setBillingAddress.emit(address)"
+                  class="app-success-link text-xs">
+            Set Billing
+          </button>
+          <button type="button"
+                  appDemoWrite
+                  (click)="setDefaultDeliveryAddress.emit(address)"
+                  class="app-link-button text-xs">
+            Set Delivery
+          </button>
+          <button type="button"
+                  appDemoWrite
+                  (click)="deleteAddress.emit(address)"
+                  class="app-danger-link text-xs">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isAddressFormOpen" [formGroup]="addressForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t app-divider pt-6">
+    <div>
+      <label class="form-label">Address Type</label>
+      <select formControlName="addressType" class="form-input">
+        <option value="" disabled>Select address type</option>
+        <option value="Billing">Billing</option>
+        <option value="DeliverySite">Delivery site</option>
+        <option value="WarehousePartner">Warehouse partner</option>
+      </select>
+      <p *ngIf="validationMessage(addressForm.get('addressType'), 'Address type') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div>
+      <label class="form-label">Site Name</label>
+      <input type="text" formControlName="siteName" class="form-input" />
+      <p *ngIf="validationMessage(addressForm.get('siteName'), 'Site name') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="form-label">Address Line 1</label>
+      <input type="text" formControlName="line1" class="form-input" />
+      <p *ngIf="validationMessage(addressForm.get('line1'), 'Address line 1') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="form-label">Address Line 2</label>
+      <input type="text" formControlName="line2" class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">City</label>
+      <input type="text" formControlName="city" class="form-input" />
+      <p *ngIf="validationMessage(addressForm.get('city'), 'City') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div>
+      <label class="form-label">County</label>
+      <input type="text" formControlName="county" class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">Postcode</label>
+      <input type="text" formControlName="postcode" class="form-input" />
+      <p *ngIf="validationMessage(addressForm.get('postcode'), 'Postcode') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div>
+      <label class="form-label">Country</label>
+      <input type="text" formControlName="country" class="form-input" />
+      <p *ngIf="validationMessage(addressForm.get('country'), 'Country') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div>
+      <label class="form-label">Contact Name</label>
+      <input type="text" formControlName="contactName" class="form-input" />
+    </div>
+
+    <div>
+      <label class="form-label">Contact Phone</label>
+      <input type="tel" inputmode="tel" autocomplete="tel" formControlName="contactPhone" class="form-input" />
+      <p *ngIf="validationMessage(addressForm.get('contactPhone'), 'Contact phone') as message" class="mt-1 app-validation-message">{{ message }}</p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="form-label">Delivery Instructions</label>
+      <textarea formControlName="deliveryInstructions" rows="3" class="form-input resize-none"></textarea>
+    </div>
+
+    <div class="sm:col-span-2 flex gap-2">
+      <button type="button"
+              appDemoWrite
+              (click)="saveAddress.emit()"
+              [disabled]="isLoading"
+              class="app-primary-button px-4 py-2 disabled:opacity-60">
+        {{ editingAddressId ? 'Save Address' : 'Add Address' }}
+      </button>
+
+      <button type="button"
+              (click)="cancelAddress.emit()"
+              class="app-secondary-button px-4 py-2">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
