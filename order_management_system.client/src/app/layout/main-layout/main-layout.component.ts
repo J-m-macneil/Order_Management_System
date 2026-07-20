@@ -21,8 +21,8 @@ export class MainLayoutComponent {
     this.isNavOpen = false;
   }
 
-  @HostListener('window:orientationchange')
-  onOrientationChange() {
+  @HostListener('window:resize')
+  onViewportResize(): void {
     this.closeNav();
   }
 
