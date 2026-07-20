@@ -8,7 +8,7 @@ namespace Server.Controllers;
 
 [ApiController]
 [Route("api/audit-logs")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Roles = "Admin,Demo")]
 public class AuditLogsController : ControllerBase
 {
     private readonly IMediator _mediator;

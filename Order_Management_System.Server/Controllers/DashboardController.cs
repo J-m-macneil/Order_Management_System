@@ -7,7 +7,7 @@ namespace Server.Controllers;
 
 [ApiController]
 [Route("api/dashboard")]
-[Authorize(Roles = "Admin,Operations,Sales")]
+[Authorize(Roles = "Admin,Operations,Sales,Demo")]
 public class DashboardController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -93,8 +93,7 @@
 
       <!-- Processing Jobs -->
       <div class="mt-6">
-        <app-processing-jobs-panel
-          [orderId]="currentOrder.orderId"
+        <app-processing-jobs-panel [orderId]="currentOrder.orderId"
           [orderStatusId]="currentOrder.orderStatusId"
           [requiresSdsBundle]="currentOrder.requiresSdsBundle"
           (jobsChanged)="refresh()">

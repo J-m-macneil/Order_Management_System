@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 import { SystemSetting } from '../../../core/models/system-setting.model';
+import { AuthService } from '../../../core/auth/auth.service';
 import { SystemSettingsService } from '../../../core/services/system-settings.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
@@ -18,12 +19,16 @@ export class SystemSettingsComponent implements OnInit {
 
   isLoading = false;
   errorMessage = '';
+  readonly isDemoUser: boolean;
 
   constructor(
     private systemSettingsService: SystemSettingsService,
     private toastService: ToastService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    authService: AuthService
+  ) {
+    this.isDemoUser = authService.isDemoUser();
+  }
 
   ngOnInit(): void {
     this.loadSystemSettings();

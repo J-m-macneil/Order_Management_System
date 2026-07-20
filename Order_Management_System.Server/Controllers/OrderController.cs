@@ -78,7 +78,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id}/allowed-statuses")]
-    [Authorize(Roles = "Sales,Operations,Admin")]
+    [Authorize(Roles = "Sales,Operations,Admin,Demo")]
     public async Task<IActionResult> GetAllowedStatuses(int id)
     {
         var result = await _mediator.Send(new GetAllowedStatusesQuery { OrderId = id });

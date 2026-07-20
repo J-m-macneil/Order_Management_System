@@ -5,7 +5,8 @@
 
   <div class="app-filter-section">
     <div class="app-responsive-action-row">
-      <button type="button"
+      <button *ngIf="!isDemoUser"
+              type="button"
               class="app-primary-button px-4 py-3"
               (click)="openCreateForm()">
         <svg lucidePlus [size]="17" aria-hidden="true"></svg>
@@ -102,7 +103,8 @@
               </span>
             </td>
             <td class="px-6 py-4 text-center">
-              <button type="button"
+              <button *ngIf="!isDemoUser"
+                      type="button"
                       class="app-link-button text-xs"
                       (click)="openEditForm(user)">
                 Edit

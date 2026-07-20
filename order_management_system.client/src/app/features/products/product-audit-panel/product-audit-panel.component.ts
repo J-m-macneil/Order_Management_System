@@ -28,7 +28,7 @@ export class ProductAuditPanelComponent implements OnInit {
   }
 
   reload(): void {
-    if (!this.authService.hasRole('Admin')) {
+    if (!this.authService.hasRole('Admin', 'Demo')) {
       this.auditLogs = [];
       this.auditUnavailable = true;
       this.isLoading = false;

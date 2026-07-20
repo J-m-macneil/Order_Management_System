@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Server.Services;
+using Server.Middleware;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -205,6 +206,7 @@ public static class Program
         app.UseHttpsRedirection();
 
         app.UseAuthentication();
+        app.UseMiddleware<DemoReadOnlyMiddleware>();
         app.UseAuthorization();
 
         app.MapControllers();

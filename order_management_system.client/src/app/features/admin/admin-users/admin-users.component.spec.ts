@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 
 import { PagedResult } from '../../../core/models/paged-result.model';
 import { User } from '../../../core/models/user-management.model';
+import { AuthService } from '../../../core/auth/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AdminUsersComponent } from './admin-users.component';
@@ -26,7 +27,8 @@ describe('AdminUsersComponent', () => {
       }
     } as unknown as UsersService;
     const toastService = { success: () => undefined } as unknown as ToastService;
-    const component = new AdminUsersComponent(service, new FormBuilder(), toastService);
+    const authService = { isDemoUser: () => false } as unknown as AuthService;
+    const component = new AdminUsersComponent(service, new FormBuilder(), toastService, authService);
 
     component.searchTerm = 'alex';
     component.roleFilter = 2;

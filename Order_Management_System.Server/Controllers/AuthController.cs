@@ -45,6 +45,24 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("demo-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginDemo(CancellationToken cancellationToken)
+    {
+        var result = await _authService.LoginDemoAsync(cancellationToken);
+
+        if (result is null)
+        {
+            return Problem(
+                title: "Demo access is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        AppendSessionCookies(result);
+
+        return Ok(result);
+    }
+
     [HttpPost("refresh")]
     [AllowAnonymous]
     public async Task<IActionResult> Refresh(CancellationToken cancellationToken)

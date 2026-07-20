@@ -60,4 +60,25 @@ describe('AuthService', () => {
     httpTesting.expectNone(`${apiBaseUrl}/auth/me`);
     expect(result).toBe(true);
   });
+
+  it('uses the dedicated endpoint to start a demo session', () => {
+    let user: AuthUser | undefined;
+
+    service.loginDemo().subscribe(result => user = result);
+
+    const request = httpTesting.expectOne(`${apiBaseUrl}/auth/demo-login`);
+    expect(request.request.method).toBe('POST');
+    request.flush({
+      expiresAtUtc: '2026-07-20T12:00:00Z',
+      user: {
+        userId: 15,
+        username: 'demo',
+        fullName: 'Demo User',
+        role: 'Demo'
+      }
+    });
+
+    expect(user?.role).toBe('Demo');
+    expect(service.isDemoUser()).toBe(true);
+  });
 });

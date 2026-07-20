@@ -23,6 +23,7 @@
 
       <button *ngIf="requiresSds && canManageSds"
               type="button"
+              appDemoWrite
               class="app-primary-button px-4 py-2"
               [disabled]="isGenerating"
               (click)="generateSafetyDataSheet()">
@@ -67,6 +68,7 @@
 
             <button *ngIf="canManageSds"
                     type="button"
+                    appDemoWrite
                     class="app-danger-link text-xs"
                     (click)="openDeleteModal(sds)">
               Delete

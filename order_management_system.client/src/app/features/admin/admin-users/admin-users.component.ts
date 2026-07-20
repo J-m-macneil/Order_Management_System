@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
 import { Department, Role, User, UserSaveRequest } from '../../../core/models/user-management.model';
+import { AuthService } from '../../../core/auth/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiErrorResponse, getApiErrorMessage } from '../../../core/utils/api-error-message';
@@ -42,12 +43,15 @@ export class AdminUsersComponent implements OnInit {
   readonly userLoadFailed = signal(false);
   readonly isSaving = signal(false);
   readonly errorMessage = signal('');
+  readonly isDemoUser: boolean;
 
   constructor(
     private usersService: UsersService,
     private fb: FormBuilder,
-    private toastService: ToastService
+    private toastService: ToastService,
+    authService: AuthService
   ) {
+    this.isDemoUser = authService.isDemoUser();
     this.userForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.maxLength(80)]],
       lastName: ['', [Validators.required, Validators.maxLength(80)]],

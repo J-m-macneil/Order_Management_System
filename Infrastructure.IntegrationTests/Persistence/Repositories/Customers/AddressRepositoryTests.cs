@@ -139,7 +139,6 @@ public class AddressRepositoryTests
             City = "Liverpool",
             Postcode = "L1 1AA",
             Country = "United Kingdom",
-            IsPrimary = true,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };

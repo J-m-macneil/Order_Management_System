@@ -55,4 +55,22 @@ export class LoginComponent {
       }
     });
   }
+
+  loginDemo(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.loginDemo()
+      .pipe(finalize(() => {
+        this.isLoading = false;
+      }))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: () => {
+          this.errorMessage = 'Demo access is temporarily unavailable.';
+        }
+      });
+  }
 }

@@ -156,7 +156,7 @@
               <a [routerLink]="['/customers/edit', customer.customerId]" class="app-link-button text-xs">
                 Edit
               </a>
-              <button type="button" (click)="openDeleteCustomerModal(customer)" class="app-danger-link text-xs">
+              <button type="button" appDemoWrite (click)="openDeleteCustomerModal(customer)" class="app-danger-link text-xs">
                 Delete
               </button>
             </div>

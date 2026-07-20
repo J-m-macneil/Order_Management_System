@@ -38,11 +38,11 @@ export class NavbarComponent {
   }
 
   canViewAdmin(): boolean {
-    return this.authService.hasRole('Admin');
+    return this.authService.hasRole('Admin', 'Demo');
   }
 
   canViewAudit(): boolean {
-    return this.authService.hasRole('Admin');
+    return this.authService.hasRole('Admin', 'Demo');
   }
 
   logout(): void {

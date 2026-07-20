@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 
 @Component({
@@ -12,6 +13,12 @@ export class AdminComponent {
 
   activeSection: 'users' | 'settings' = 'users';
   isUserFormOpen = false;
+
+  constructor(private authService: AuthService) { }
+
+  get isDemoUser(): boolean {
+    return this.authService.isDemoUser();
+  }
 
   showUsersSection(): void {
     this.activeSection = 'users';

@@ -7,13 +7,15 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
 import { FilterButtonComponent } from './filter-button/filter-button.component';
 import { SearchInputComponent } from './search-input/search-input.component';
 import { TablePaginationComponent } from './table-pagination/table-pagination.component';
+import { DemoWriteDirective } from './demo-write/demo-write.directive';
 
 @NgModule({
   declarations: [
     ConfirmationModalComponent,
     SearchInputComponent,
     FilterButtonComponent,
-    TablePaginationComponent
+    TablePaginationComponent,
+    DemoWriteDirective
   ],
   imports: [
     CommonModule,
@@ -25,6 +27,7 @@ import { TablePaginationComponent } from './table-pagination/table-pagination.co
     SearchInputComponent,
     FilterButtonComponent,
     TablePaginationComponent,
+    DemoWriteDirective,
     LucidePlus
   ]
 })

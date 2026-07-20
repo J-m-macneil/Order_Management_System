@@ -8,7 +8,7 @@ namespace Server.Controllers;
 
 [ApiController]
 [Route("api/system-settings")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize]
 public class SystemSettingsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -19,6 +19,7 @@ public class SystemSettingsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Demo")]
     public async Task<IActionResult> Get(CancellationToken ct)
     {
         var result = await _mediator.Send(new GetSystemSettingsQuery(), ct);
@@ -26,6 +27,7 @@ public class SystemSettingsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Update(int id, UpdateSystemSettingCommand command, CancellationToken ct)
     {
         await _mediator.Send(new UpdateSystemSettingRequest

@@ -12,7 +12,7 @@ namespace Server.Controllers;
 
 [ApiController]
 [Route("api/users")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -23,6 +23,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Demo")]
     public async Task<IActionResult> Get([FromQuery] GetUsersQuery query, CancellationToken ct)
     {
         var result = await _mediator.Send(query, ct);
@@ -30,6 +31,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = "Admin,Demo")]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetUserByIdQuery { UserId = id }, ct);
@@ -37,6 +39,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("roles")]
+    [Authorize(Roles = "Admin,Demo")]
     public async Task<IActionResult> GetRoles(CancellationToken ct)
     {
         var result = await _mediator.Send(new GetRolesQuery(), ct);
@@ -44,6 +47,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("departments")]
+    [Authorize(Roles = "Admin,Demo")]
     public async Task<IActionResult> GetDepartments(CancellationToken ct)
     {
         var result = await _mediator.Send(new GetDepartmentsQuery(), ct);
@@ -51,6 +55,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Create(CreateUserCommand command, CancellationToken ct)
     {
         var result = await _mediator.Send(command, ct);
@@ -58,6 +63,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Update(int id, UpdateUserCommand command, CancellationToken ct)
     {
         await _mediator.Send(new UpdateUserRequest

@@ -57,10 +57,17 @@
           class="app-primary-button w-full mt-6 px-4 py-2.5">
           {{ isLoading ? 'Signing in...' : 'Sign in' }}
         </button>
+
+        <button type="button"
+                [disabled]="isLoading"
+                (click)="loginDemo()"
+                class="app-secondary-button w-full px-4 py-2.5">
+          Explore Demo
+        </button>
       </form>
 
       <p class="text-center text-xs app-muted-text mt-6">
-        Protected with industry-standard security
+        Demo access is read-only
       </p>
     </div>
   </div>

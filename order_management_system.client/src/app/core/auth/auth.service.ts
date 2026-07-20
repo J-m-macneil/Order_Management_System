@@ -33,6 +33,13 @@ export class AuthService {
     );
   }
 
+  loginDemo(): Observable<AuthUser> {
+    return this.http.post<LoginResponse>(`${apiBaseUrl}/auth/demo-login`, {}).pipe(
+      tap(response => this.setCurrentUser(response.user)),
+      map(response => response.user)
+    );
+  }
+
   logout(): Observable<void> {
     return this.http.post<void>(`${apiBaseUrl}/auth/logout`, {}).pipe(
       catchError(() => of(void 0)),
@@ -88,6 +95,10 @@ export class AuthService {
     return !!userRole && roles.some(role =>
       role.toLowerCase() === userRole.toLowerCase()
     );
+  }
+
+  isDemoUser(): boolean {
+    return this.hasRole('Demo');
   }
 
   clearSession(): void {

@@ -75,6 +75,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             {
                 RoleId = 3,
                 Name = "Operations"
+            },
+            new Role
+            {
+                RoleId = 4,
+                Name = "Demo"
             }
         );
 
@@ -389,6 +394,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 JobTitle = "Former Systems Analyst",
                 IsActive = false,
                 CreatedAt = new DateTime(2024, 6, 21, 9, 0, 0),
+                LastLoginAt = null
+            },
+            new User
+            {
+                UserId = 15,
+                FirstName = "Demo",
+                LastName = "User",
+                FullName = "Demo User",
+                Email = "demo@back.software",
+                Username = "demo",
+                PasswordHash = "AQAAAAIAAYagAAAAEAxPHh/D5dKq1ysW0WfcNd1UoSgMITFPlUGStQOPuEraeGeQXO+sxp+PNvm2QILaWQ==",
+                RoleId = 4,
+                DepartmentId = 1,
+                JobTitle = "Read-only Demonstration Account",
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 7, 20, 0, 0, 0),
                 LastLoginAt = null
             }
         );

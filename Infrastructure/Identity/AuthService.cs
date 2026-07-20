@@ -12,10 +12,12 @@ namespace Infrastructure.Identity;
 
 public class AuthService : IAuthService
 {
+    private const string DemoRole = "Demo";
     private readonly AppDbContext _dbContext;
     private readonly IPasswordService _passwordService;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly int _refreshTokenExpiryDays;
+    private readonly bool _demoReadOnlyMode;
 
     public AuthService(
         AppDbContext dbContext,
@@ -27,6 +29,8 @@ public class AuthService : IAuthService
         _passwordService = passwordService;
         _jwtTokenService = jwtTokenService;
         _refreshTokenExpiryDays = GetRefreshTokenExpiryDays(configuration);
+        _demoReadOnlyMode = bool.TryParse(configuration["Demo:ReadOnlyMode"], out var demoReadOnlyMode)
+            && demoReadOnlyMode;
     }
 
     public async Task<LoginResponseDto?> LoginAsync(
@@ -42,7 +46,10 @@ public class AuthService : IAuthService
                 x.Email == normalizedInput,
                 cancellationToken);
 
-        if (user is null || !user.IsActive)
+        if (_demoReadOnlyMode ||
+            user is null ||
+            !user.IsActive ||
+            user.Role?.Name == DemoRole)
         {
             return null;
         }
@@ -52,6 +59,25 @@ public class AuthService : IAuthService
             request.Password);
 
         if (!passwordValid)
+        {
+            return null;
+        }
+
+        user.LastLoginAt = DateTime.UtcNow;
+        var result = CreateSession(user);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<LoginResponseDto?> LoginDemoAsync(CancellationToken cancellationToken)
+    {
+        var user = await _dbContext.Users
+            .Include(x => x.Role)
+            .SingleOrDefaultAsync(x => x.IsActive && x.Role!.Name == DemoRole, cancellationToken);
+
+        if (user is null)
         {
             return null;
         }

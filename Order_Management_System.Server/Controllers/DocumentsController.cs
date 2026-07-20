@@ -7,7 +7,7 @@ namespace Server.Controllers;
 
 [ApiController]
 [Route("api/documents")]
-[Authorize(Roles = "Operations,Admin,Sales")]
+[Authorize(Roles = "Operations,Admin,Sales,Demo")]
 public class DocumentsController : ControllerBase
 {
     private readonly IDocumentRepository _repo;

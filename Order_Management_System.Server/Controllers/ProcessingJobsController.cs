@@ -24,7 +24,7 @@ public class ProcessingJobsController : ControllerBase
     }
 
     [HttpGet("failed")]
-    [Authorize(Roles = "Operations,Admin")]
+    [Authorize(Roles = "Operations,Admin,Demo")]
     public async Task<IActionResult> GetFailedJobs(CancellationToken ct)
     {
         var jobs = await _repo.GetFailedJobsAsync(ct);

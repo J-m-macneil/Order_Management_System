@@ -52,6 +52,57 @@ public class AuthServiceTests
     }
 
     [Fact]
+    public async Task LoginDemoAsync_CreatesSessionForReadOnlyDemoUser()
+    {
+        // Arrange
+        await using var context = await CreateContextAsync();
+        var service = CreateService(context);
+
+        // Act
+        var result = await service.LoginDemoAsync(CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.User.Role.Should().Be("Demo");
+        result.User.Username.Should().Be("demo");
+        (await context.RefreshTokens.CountAsync()).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task LoginAsync_DoesNotAuthenticateDemoUserWithPassword()
+    {
+        // Arrange
+        await using var context = await CreateContextAsync();
+        var service = CreateService(context);
+
+        // Act
+        var result = await service.LoginAsync(new LoginCommand
+        {
+            UsernameOrEmail = "demo",
+            Password = "Password123!"
+        }, CancellationToken.None);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task LoginAsync_WhenDemoReadOnlyModeIsEnabled_ReturnsNull()
+    {
+        // Arrange
+        await using var context = await CreateContextAsync();
+        var service = CreateService(context, demoReadOnlyMode: true);
+        var user = await AddUserAsync(context, isActive: true);
+
+        // Act
+        var result = await service.LoginAsync(CreateLogin(user), CancellationToken.None);
+
+        // Assert
+        result.Should().BeNull();
+        (await context.RefreshTokens.AnyAsync()).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task RefreshAsync_WithValidToken_RotatesTokenAndRejectsReuse()
     {
         // Arrange
@@ -78,7 +129,7 @@ public class AuthServiceTests
         storedTokens[1].RevokedAtUtc.Should().BeNull();
     }
 
-    private static AuthService CreateService(AppDbContext context)
+    private static AuthService CreateService(AppDbContext context, bool demoReadOnlyMode = false)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -87,7 +138,8 @@ public class AuthServiceTests
                 ["Jwt:Audience"] = "Back.Tests.Client",
                 ["Jwt:SecretKey"] = new string('s', 64),
                 ["Jwt:ExpiryMinutes"] = "15",
-                ["Jwt:RefreshTokenExpiryDays"] = "7"
+                ["Jwt:RefreshTokenExpiryDays"] = "7",
+                ["Demo:ReadOnlyMode"] = demoReadOnlyMode.ToString()
             })
             .Build();
 

@@ -2,6 +2,7 @@
   <div class="app-section-header--divided flex items-center justify-between mb-6">
     <h2 class="app-section-title">Order Items</h2>
     <button type="button"
+            appDemoWrite
             class="app-secondary-button px-4 py-2 text-sm"
             (click)="itemAdded.emit()">
       + Add Item
@@ -15,6 +16,7 @@
       <div class="flex items-start justify-between mb-4">
         <h3 class="text-sm app-strong-text">Item {{ i + 1 }}</h3>
         <button type="button"
+                appDemoWrite
                 *ngIf="items.length > 1"
                 class="app-danger-link text-sm"
                 (click)="itemRemoved.emit(i)">

@@ -1011,6 +1011,12 @@ select.form-input--compact {
   opacity: 0.5;
 }
 
+.app-demo-write-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 .app-link-button {
   color: var(--app-link-text);
   font-weight: 600;

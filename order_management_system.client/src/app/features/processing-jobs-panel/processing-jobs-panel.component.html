@@ -81,6 +81,7 @@
 
       <button *ngIf="canRetryJob(job)"
               type="button"
+              appDemoWrite
               [disabled]="isRetryingJobId === job.processingJobId"
               (click)="retryJob(job)"
               class="app-danger-button mt-4 w-full px-4 py-2">
