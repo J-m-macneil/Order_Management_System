@@ -154,7 +154,20 @@
 
     <!-- Additional Information -->
     <div class="form-card">
-      <h2 class="app-section-title mb-6">Additional Information</h2>
+      <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
+        <h2 class="app-section-title">Additional Information</h2>
+
+        <label for="priorityOrder" class="app-checkbox-label">
+          <input
+            type="checkbox"
+            id="priorityOrder"
+            formControlName="isPriorityOrder"
+            class="app-checkbox"
+          />
+          <span>Mark as priority order</span>
+        </label>
+      </div>
+
       <div class="space-y-4">
         <!-- PO Reference -->
         <div>
@@ -223,16 +236,6 @@
           </p>
         </div>
 
-        <!-- Priority Checkbox -->
-        <label for="priorityOrder" class="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="priorityOrder"
-            formControlName="isPriorityOrder"
-            class="app-checkbox"
-          />
-          <span class="text-sm app-body-text">Mark as priority order</span>
-        </label>
       </div>
     </div>
   </div>

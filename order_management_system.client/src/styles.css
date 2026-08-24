@@ -678,6 +678,14 @@ select.form-input--compact {
   accent-color: var(--app-primary-bg);
 }
 
+.app-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--app-text);
+  font-size: 0.875rem;
+}
+
 .app-checkbox:focus-visible {
   outline: 2px solid var(--app-field-focus-border);
   outline-offset: 2px;
@@ -754,6 +762,10 @@ select.form-input--compact {
   background: var(--app-surface);
   padding: 1.5rem;
   box-shadow: var(--app-panel-shadow);
+}
+
+.app-filter-panel > * {
+  min-inline-size: 0;
 }
 
 @media (min-width: 640px) {

@@ -84,9 +84,9 @@
       <p *ngIf="validationMessage(contactForm.get('phone'), 'Phone number') as message" class="mt-1 app-validation-message">{{ message }}</p>
     </div>
 
-    <label class="flex items-center gap-2">
+    <label class="app-checkbox-label">
       <input type="checkbox" formControlName="isPrimary" class="app-checkbox" />
-      <span class="text-sm app-body-text">Primary contact</span>
+      <span>Primary contact</span>
     </label>
 
     <div class="flex gap-2 sm:col-span-2">

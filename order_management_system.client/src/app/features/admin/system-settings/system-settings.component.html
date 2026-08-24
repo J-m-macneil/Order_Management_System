@@ -30,14 +30,14 @@
               </label>
 
               <label *ngIf="isBooleanSetting(setting)"
-                     class="inline-flex items-center gap-3 text-sm app-body-text">
+                     class="app-checkbox-label">
                 <input [id]="'setting-' + setting.systemSettingId"
                        type="checkbox"
                        class="app-checkbox"
                        [disabled]="isDemoUser"
                        [checked]="settingValues[setting.systemSettingId] === 'true'"
                        (change)="setBooleanSetting(setting, $any($event.target).checked)" />
-                {{ settingValues[setting.systemSettingId] === 'true' ? 'Enabled' : 'Disabled' }}
+                <span>{{ settingValues[setting.systemSettingId] === 'true' ? 'Enabled' : 'Disabled' }}</span>
               </label>
 
               <input *ngIf="!isBooleanSetting(setting)"
