@@ -55,4 +55,20 @@ public class DocumentsController : ControllerBase
 
         return File(fileBytes, "application/pdf", document.FileName);
     }
+
+    [HttpGet("{documentId:int}/view")]
+    public async Task<IActionResult> ViewDocument(int documentId, CancellationToken ct)
+    {
+        var document = await _repo.GetByIdAsync(documentId, ct);
+
+        if (document == null)
+            return NotFound();
+
+        if (!_fileStorage.FileExists(document.FilePath))
+            return NotFound("Document file was not found on disk.");
+
+        var fileBytes = await _fileStorage.GetFileAsync(document.FilePath, ct);
+
+        return File(fileBytes, "application/pdf");
+    }
 }

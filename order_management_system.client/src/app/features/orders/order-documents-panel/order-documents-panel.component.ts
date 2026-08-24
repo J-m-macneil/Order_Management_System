@@ -65,16 +65,7 @@ export class OrderDocumentsPanelComponent implements OnChanges {
     });
   }
 
-  viewDocument(document: OrderDocument): void {
-    this.documentsService.downloadDocument(document.documentId).subscribe({
-      next: (blob) => {
-        const fileURL = URL.createObjectURL(blob);
-        window.open(fileURL);
-      },
-      error: () => {
-        this.toastService.error('Document open failed', 'The document could not be opened.');
-        this.cdr.markForCheck();
-      }
-    });
+  getDocumentViewUrl(document: OrderDocument): string {
+    return this.documentsService.getDocumentViewUrl(document.documentId);
   }
 }
