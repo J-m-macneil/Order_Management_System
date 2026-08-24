@@ -31,11 +31,12 @@
       </p>
 
       <div class="flex gap-2 mt-3">
-        <button type="button"
-                (click)="viewDocument(document)"
-                class="app-secondary-button px-3 py-2 text-sm">
+        <a [href]="getDocumentViewUrl(document)"
+           target="_blank"
+           rel="noopener"
+           class="app-secondary-button px-3 py-2 text-sm">
           View
-        </button>
+        </a>
 
         <button type="button"
                 (click)="downloadDocument(document)"

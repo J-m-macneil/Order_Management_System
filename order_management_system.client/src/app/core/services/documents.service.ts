@@ -20,4 +20,8 @@ export class DocumentsService {
       responseType: 'blob'
     });
   }
+
+  getDocumentViewUrl(documentId: number): string {
+    return `${this.apiUrl}/${documentId}/view`;
+  }
 }

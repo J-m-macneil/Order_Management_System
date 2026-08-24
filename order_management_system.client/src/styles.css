@@ -37,7 +37,6 @@
     );
   --app-page-bg: var(--app-page-gradient);
   --app-shell-bg: #f7fbff;
-  --app-shell-border: rgb(5 7 11 / 0.18);
   --app-shell-shadow: 0 28px 80px rgb(5 7 11 / 0.24);
   --app-mobile-backdrop-bg: rgb(0 0 0 / 0.4);
 
@@ -197,7 +196,6 @@ html.dark {
     ),
     var(--app-page-gradient);
   --app-shell-bg: #111722;
-  --app-shell-border: rgb(148 163 184 / 0.22);
   --app-shell-shadow: 0 28px 80px rgb(0 0 0 / 0.32);
 
   /* Navigation */
@@ -550,6 +548,7 @@ label.inline-flex .form-label {
 
 .form-input,
 .app-search-input {
+  box-sizing: border-box;
   width: 100%;
   border: 1px solid var(--app-field-border);
   border-radius: var(--app-field-radius);
