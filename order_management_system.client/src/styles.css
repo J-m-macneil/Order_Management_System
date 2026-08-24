@@ -549,6 +549,7 @@ label.inline-flex .form-label {
 .form-input,
 .app-search-input {
   box-sizing: border-box;
+  min-width: 0;
   width: 100%;
   border: 1px solid var(--app-field-border);
   border-radius: var(--app-field-radius);
