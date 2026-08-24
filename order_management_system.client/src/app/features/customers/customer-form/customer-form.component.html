@@ -180,10 +180,12 @@
       <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
         <h2 class="app-section-title">Delivery Address</h2>
 
-        <label class="app-checkbox-label">
-          <input type="checkbox" formControlName="deliverySameAsBilling" class="app-checkbox" />
-          <span>Same as billing</span>
-        </label>
+        <div class="flex items-center gap-4">
+          <label class="app-checkbox-label">
+            <input type="checkbox" formControlName="deliverySameAsBilling" class="app-checkbox" />
+            <span>Same as billing</span>
+          </label>
+        </div>
       </div>
 
       <div *ngIf="!form.get('deliverySameAsBilling')?.value"

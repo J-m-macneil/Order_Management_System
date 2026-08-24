@@ -154,20 +154,7 @@
 
     <!-- Additional Information -->
     <div class="form-card">
-      <div class="app-section-header--divided flex items-center justify-between gap-4 mb-6">
-        <h2 class="app-section-title">Additional Information</h2>
-
-        <label for="priorityOrder" class="app-checkbox-label">
-          <input
-            type="checkbox"
-            id="priorityOrder"
-            formControlName="isPriorityOrder"
-            class="app-checkbox"
-          />
-          <span>Mark as priority order</span>
-        </label>
-      </div>
-
+      <h2 class="app-section-title mb-6">Additional Information</h2>
       <div class="space-y-4">
         <!-- PO Reference -->
         <div>
@@ -234,6 +221,18 @@
           <p *ngIf="orderForm.get('internalNotes')?.hasError('maxlength') && orderForm.get('internalNotes')?.touched" class="mt-1 app-validation-message">
             Internal notes must be 255 characters or fewer.
           </p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <label for="priorityOrder" class="app-checkbox-label">
+            <input
+              type="checkbox"
+              id="priorityOrder"
+              formControlName="isPriorityOrder"
+              class="app-checkbox"
+            />
+            <span>Mark as priority order</span>
+          </label>
         </div>
 
       </div>

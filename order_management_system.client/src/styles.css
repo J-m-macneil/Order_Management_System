@@ -551,6 +551,7 @@ label.inline-flex .form-label {
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
   border: 1px solid var(--app-field-border);
   border-radius: var(--app-field-radius);
   background-color: var(--app-field-bg);
@@ -766,6 +767,19 @@ select.form-input--compact {
 
 .app-filter-panel > * {
   min-inline-size: 0;
+}
+
+input.form-input[type="date"],
+input.form-input[type="time"],
+input.form-input[type="datetime-local"] {
+  -webkit-min-logical-width: 0;
+  max-inline-size: 100%;
+}
+
+@media (max-width: 639px) {
+  .app-filter-panel {
+    padding: 1rem;
+  }
 }
 
 @media (min-width: 640px) {
