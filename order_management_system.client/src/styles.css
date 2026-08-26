@@ -769,22 +769,21 @@ select.form-input--compact {
   min-inline-size: 0;
 }
 
-input.form-input[type="date"],
-input.form-input[type="time"],
-input.form-input[type="datetime-local"] {
-  -webkit-min-logical-width: 0;
-  max-inline-size: 100%;
-}
-
 @media (max-width: 639px) {
   .app-filter-panel {
     padding: 0.7rem;
   }
+}
 
-  input.form-input[type="date"],
-  input.form-input[type="time"],
-  input.form-input[type="datetime-local"] {
-    padding-inline: 0.5rem;
+/* Keep Safari's native date/time controls inside narrow filter panels. */
+@media (max-width: 900px) {
+  .app-filter-panel input.form-input[type="date"],
+  .app-filter-panel input.form-input[type="time"],
+  .app-filter-panel input.form-input[type="datetime-local"] {
+    min-inline-size: 0;
+    inline-size: calc(100% - 0.75rem);
+    max-inline-size: calc(100% - 0.75rem);
+    -webkit-min-logical-width: 0;
   }
 }
 
