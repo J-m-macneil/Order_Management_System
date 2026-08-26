@@ -778,7 +778,7 @@ input.form-input[type="datetime-local"] {
 
 @media (max-width: 639px) {
   .app-filter-panel {
-    padding: 1rem;
+    padding: 0.7rem;
   }
 
   input.form-input[type="date"],
