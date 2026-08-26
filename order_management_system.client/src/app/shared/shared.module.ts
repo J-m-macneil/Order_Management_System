@@ -8,6 +8,7 @@ import { FilterButtonComponent } from './filter-button/filter-button.component';
 import { SearchInputComponent } from './search-input/search-input.component';
 import { TablePaginationComponent } from './table-pagination/table-pagination.component';
 import { DemoWriteDirective } from './demo-write/demo-write.directive';
+import { DatePickerComponent } from './date-picker/date-picker.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { DemoWriteDirective } from './demo-write/demo-write.directive';
     SearchInputComponent,
     FilterButtonComponent,
     TablePaginationComponent,
+    DatePickerComponent,
     DemoWriteDirective
   ],
   imports: [
@@ -27,6 +29,7 @@ import { DemoWriteDirective } from './demo-write/demo-write.directive';
     SearchInputComponent,
     FilterButtonComponent,
     TablePaginationComponent,
+    DatePickerComponent,
     DemoWriteDirective,
     LucidePlus
   ]

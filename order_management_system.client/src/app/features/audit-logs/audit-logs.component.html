@@ -49,18 +49,18 @@
 
     <div>
       <label class="form-label">From</label>
-      <input type="date"
-             [(ngModel)]="from"
-             (change)="applyFilters()"
-             class="form-input" />
+      <app-date-picker [(ngModel)]="from"
+                       ariaLabel="From date"
+                       (dateChange)="applyFilters()">
+      </app-date-picker>
     </div>
 
     <div>
       <label class="form-label">To</label>
-      <input type="date"
-             [(ngModel)]="to"
-             (change)="applyFilters()"
-             class="form-input" />
+      <app-date-picker [(ngModel)]="to"
+                       ariaLabel="To date"
+                       (dateChange)="applyFilters()">
+      </app-date-picker>
     </div>
 
     <div>

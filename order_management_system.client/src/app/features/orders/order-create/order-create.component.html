@@ -132,11 +132,9 @@
           <label class="form-label">
             Requested Delivery Date <span class="app-required-marker">*</span>
           </label>
-          <input
-            type="date"
-            formControlName="requestedDeliveryDate"
-            class="form-input"
-          />
+          <app-date-picker formControlName="requestedDeliveryDate"
+                           ariaLabel="Requested delivery date">
+          </app-date-picker>
           <div *ngIf="orderForm.get('requestedDeliveryDate')?.hasError('required') && orderForm.get('requestedDeliveryDate')?.touched" class="mt-1 app-validation-message">
             Delivery date is required
           </div>

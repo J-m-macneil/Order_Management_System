@@ -57,18 +57,18 @@
 
     <div>
       <label class="form-label">Delivery From</label>
-      <input type="date"
-             [(ngModel)]="requestedDeliveryFrom"
-             (change)="applyFilters()"
-             class="form-input" />
+      <app-date-picker [(ngModel)]="requestedDeliveryFrom"
+                       ariaLabel="Delivery from"
+                       (dateChange)="applyFilters()">
+      </app-date-picker>
     </div>
 
     <div>
       <label class="form-label">Delivery To</label>
-      <input type="date"
-             [(ngModel)]="requestedDeliveryTo"
-             (change)="applyFilters()"
-             class="form-input" />
+      <app-date-picker [(ngModel)]="requestedDeliveryTo"
+                       ariaLabel="Delivery to"
+                       (dateChange)="applyFilters()">
+      </app-date-picker>
     </div>
 
     <div class="app-filter-actions app-filter-actions--full">
