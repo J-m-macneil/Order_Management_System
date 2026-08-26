@@ -780,6 +780,12 @@ input.form-input[type="datetime-local"] {
   .app-filter-panel {
     padding: 1rem;
   }
+
+  input.form-input[type="date"],
+  input.form-input[type="time"],
+  input.form-input[type="datetime-local"] {
+    padding-inline: 0.5rem;
+  }
 }
 
 @media (min-width: 640px) {
